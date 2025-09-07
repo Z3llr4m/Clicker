@@ -13,10 +13,10 @@ html, body { margin:0; padding:0; background:var(--bg); color:#fff; height:100%;
 .wrap { display:grid; grid-template-columns:1fr 400px; gap:16px; max-width:1200px; margin:0 auto; padding:16px; }
 .panel { background:var(--panel); border-radius:12px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,0.5); }
 .left { display:flex; flex-direction:column; align-items:center; }
-.cookie { width:300px; height:300px; border-radius:50%; background:linear-gradient(145deg,#f6e2b3,#f0c66a); display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow:0 12px 30px rgba(0,0,0,0.5),inset -8px -8px 18px rgba(255,255,255,0.15); position:relative; cursor:pointer; user-select:none; transition:transform .08s ease; }
+.cookie { width:80vw; max-width:300px; height:80vw; max-height:300px; border-radius:50%; background:linear-gradient(145deg,#f6e2b3,#f0c66a); display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow:0 12px 30px rgba(0,0,0,0.5),inset -8px -8px 18px rgba(255,255,255,0.15); position:relative; cursor:pointer; user-select:none; transition:transform .08s ease; }
 .cookie:active { transform:scale(.98); }
 .crumb { position:absolute; border-radius:50%; background:rgba(255,255,255,0.2); opacity:0.8; filter:blur(.5px); }
-.stats { display:flex; gap:12px; width:100%; justify-content:space-between; margin-top:10px; }
+.stats { display:flex; gap:12px; width:100%; justify-content:space-between; margin-top:10px; flex-wrap:wrap; }
 .stat { background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px; color:var(--muted); font-size:14px; }
 .right { display:flex; flex-direction:column; gap:12px; }
 .store { display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; }
@@ -37,7 +37,7 @@ html, body { margin:0; padding:0; background:var(--bg); color:#fff; height:100%;
 footer { margin-top:16px; color:var(--muted); font-size:13px; text-align:center; }
 @media (max-width:900px) {
   .wrap { grid-template-columns:1fr; padding:12px; }
-  .cookie { width:220px; height:220px; font-size:40px; }
+  .cookie { width:70vw; height:70vw; font-size:40px; }
 }
 </style>
 </head>
@@ -81,9 +81,7 @@ footer { margin-top:16px; color:var(--muted); font-size:13px; text-align:center;
     </div>
   </div>
 </div>
-</body>
-</html>
-<script>
+  <script>
 // ======== Настройки и состояние ========
 const SAVE_KEY = 'ultra_cookie_clicker';
 let state = {
@@ -141,10 +139,10 @@ const buildingList = [
   {key:'finalForge',name:'Финальная кузница',baseCost:1e67,cps:5e25,emoji:'🔥'}
 ];
 
-// ======== Функции состояния ========
+// ======== Инициализация состояния ========
 function initState() {
   state.buildings = {};
-  buildingList.forEach(b => state.buildings[b.key] = {...b, qty: 0, cost: b.baseCost});
+  buildingList.forEach(b => state.buildings[b.key] = {...b, qty:0,cost:b.baseCost});
   state.upgrades = {};
   const upgradeTypes=['click','cps','building'];
   const buildingKeys=Object.keys(state.buildings);
@@ -181,7 +179,7 @@ function clickCookie(){
   saveState();
 }
 
-// ======== Магазин ========
+// ======== Магазин и апгрейды ========
 function buyBuilding(key){
   const b = state.buildings[key];
   if(state.cookies >= b.cost){
@@ -193,7 +191,6 @@ function buyBuilding(key){
   }
 }
 
-// ======== Апгрейды ========
 function buyUpgrade(id){
   const u = state.upgrades[id];
   if(!u.bought && state.cookies >= u.cost){
@@ -227,8 +224,8 @@ function spawnCrumb(){
   const crumb=document.createElement('div');
   crumb.className='crumb';
   crumb.style.width='10px'; crumb.style.height='10px';
-  crumb.style.left=Math.random()*300+'px';
-  crumb.style.top=Math.random()*300+'px';
+  crumb.style.left=Math.random()*cookie.offsetWidth+'px';
+  crumb.style.top=Math.random()*cookie.offsetHeight+'px';
   cookie.appendChild(crumb);
   setTimeout(()=>crumb.remove(),500);
 }
@@ -238,59 +235,80 @@ function fmt(n){
   if(n<1000) return Math.round(n*100)/100;
   const units=['K','M','B','T','Qa','Qi','Sx','Sp','Oc','No'];
   let u=-1,v=n;
-  while(v>=1000 && u<units.length-1){v/=1000;u++;}
-  return (Math.round(v*100)/100)+units[u];
+  while(v>=1000 && u<units.length-1){v/=1000; u++;}
+  return v.toFixed(2)+units[u];
 }
 
-// ======== Рендер ========
+// ======== Рендеринг ========
 function render(){
   document.getElementById('cookiesDisplay').textContent = fmt(state.cookies);
   document.getElementById('totalCookies').textContent = fmt(state.totalCookies);
   document.getElementById('clicksCount').textContent = fmt(state.clicks);
   document.getElementById('clickPower').textContent = fmt(state.clickPower);
-  document.getElementById('prestigePoints').textContent = state.prestige.points;
-  document.getElementById('cpsDisplay').textContent = fmt(getCPS())+' в сек';
+  document.getElementById('cpsDisplay').textContent = fmt(getCPS()) + ' в сек';
+  document.getElementById('prestigePoints').textContent = fmt(state.prestige.points);
 
-  const store=document.getElementById('store');
-  store.innerHTML='';
-  for(const k in state.buildings){
-    const b=state.buildings[k];
-    const div=document.createElement('div');
-    div.className='item';
+  // Магазин
+  const storeDiv = document.getElementById('store');
+  storeDiv.innerHTML='';
+  buildingList.forEach(b=>{
+    const bi = state.buildings[b.key];
+    const div=document.createElement('div'); div.className='item';
     div.innerHTML=`<div class="icon">${b.emoji}</div>
-      <div class="info"><div class="title">${b.name} (${b.qty})</div><div class="desc">Цена: ${fmt(b.cost)}</div></div>
-      <button onclick="buyBuilding('${k}')">Купить</button>`;
-    store.appendChild(div);
-  }
+      <div class="info"><div class="title">${b.name}</div>
+      <div class="desc">Цена: ${fmt(bi.cost)}, CPS: ${fmt(bi.cps)} × ${bi.qty}</div></div>
+      <button onclick="buyBuilding('${b.key}')">Купить</button>`;
+    storeDiv.appendChild(div);
+  });
 
-  const upg=document.getElementById('upgrades');
-  upg.innerHTML='';
+  // Апгрейды
+  const upgradesDiv = document.getElementById('upgrades');
+  upgradesDiv.innerHTML='';
   for(const k in state.upgrades){
     const u=state.upgrades[k];
     const div=document.createElement('div');
     div.className='upgrade'+(u.bought?' bought':'');
-    div.innerHTML=`<div>${u.name}</div><div>${fmt(u.cost)}</div><button onclick="buyUpgrade(${k})" ${u.bought?'disabled':''}>Купить</button>`;
-    upg.appendChild(div);
+    div.innerHTML=`<div>${u.name} (${fmt(u.cost)})</div>
+      <button onclick="buyUpgrade(${k})" ${u.bought?'disabled':''}>Купить</button>`;
+    upgradesDiv.appendChild(div);
   }
 }
 
-// ======== Интервалы ========
-document.getElementById('cookieBtn').addEventListener('click',clickCookie);
-document.getElementById('prestigeBtn').addEventListener('click',prestigeReset);
-document.getElementById('resetBtn').addEventListener('click',()=>{if(confirm('Сбросить прогресс?')) initState(); render();});
-document.getElementById('exportBtn').addEventListener('click',()=>{prompt('Скопируйте прогресс:', localStorage.getItem(SAVE_KEY));});
-document.getElementById('importBtn').addEventListener('click',()=>{const s=prompt('Вставьте прогресс:'); if(s){localStorage.setItem(SAVE_KEY,s); loadState(); render();}});
-
-loadState();
-render();
-setInterval(()=>{
+// ======== Автосохранение и CPS тик ========
+function gameTick(){
   const now=Date.now();
   const diff=(now-state.lastTick)/1000;
+  const cps=getCPS();
+  state.cookies += cps*diff;
+  state.totalCookies += cps*diff;
   state.lastTick=now;
-  state.cookies += getCPS()*diff;
-  state.totalCookies += getCPS()*diff;
   render();
   saveState();
-},1000);
+}
+setInterval(gameTick,1000/10); // 10 FPS
 
+// ======== Экспорт / импорт ========
+document.getElementById('exportBtn').onclick=()=>{
+  const data=JSON.stringify(state);
+  prompt('Скопируй данные сохранения:',data);
+};
+document.getElementById('importBtn').onclick=()=>{
+  const data=prompt('Вставь данные сохранения:');
+  if(data){state=JSON.parse(data);render();saveState();}
+};
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('Сбросить прогресс?')){localStorage.removeItem(SAVE_KEY);initState();render();}
+};
+document.getElementById('prestigeBtn').onclick=()=>{prestigeReset();}
+
+// ======== Инициализация ========
+loadState();
+render();
+
+// ======== Touch support ========
+const cookieBtn=document.getElementById('cookieBtn');
+cookieBtn.addEventListener('click',clickCookie);
+cookieBtn.addEventListener('touchstart',e=>{ e.preventDefault(); clickCookie(); });
 </script>
+</body>
+</html>
