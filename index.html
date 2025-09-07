@@ -1,277 +1,443 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Ultra Cookie Clicker Mobile</title>
 <style>
-body { margin:0; font-family:sans-serif; background:#1f1f2e; color:white; overflow-x:hidden; display:flex; justify-content:center; }
-.container { width:100%; max-width:500px; display:flex; flex-direction:column; align-items:center; padding:16px; position:relative; z-index:1; }
-.cookie { width:160px; height:160px; border-radius:50%; background:linear-gradient(145deg,#f6e2b3,#f0c66a); display:flex; align-items:center; justify-content:center; font-size:52px; cursor:pointer; position:relative; margin-bottom:16px; box-shadow:0 0 20px rgba(255,255,255,0.2); }
-.crumb { position:absolute; border-radius:50%; width:10px; height:10px; background:rgba(255,255,255,0.6); }
-.stats { display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:16px; }
-.stat { background:rgba(255,255,255,0.1); padding:6px 12px; border-radius:8px; font-size:16px; width:100%; text-align:center; }
-.store, .upgrades { display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; width:100%; margin-bottom:16px; }
-.item, .upgrade { display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.05); border-radius:10px; align-items:center; transition:transform 0.1s; }
-.item button, .upgrade button { background:#f5c24a; border:0; border-radius:8px; cursor:pointer; padding:6px 12px; color:#222; font-weight:700; min-width:70px; }
-.upgrade.bought { opacity:0.5; }
-h3 { margin:8px 0; width:100%; text-align:left; font-size:18px; }
-.modal-bg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:10; }
-.modal { background:#2a2a3d; padding:20px; border-radius:12px; text-align:center; width:80%; max-width:400px; max-height:90%; overflow-y:auto; }
-.modal button { margin:10px; padding:8px 16px; border-radius:8px; border:none; font-weight:700; cursor:pointer; }
-.cookie-fly { position:absolute; font-size:16px; opacity:0.7; pointer-events:none; animation-name:fly; animation-timing-function:linear; }
-@keyframes fly { 0% {transform:translateY(0) rotate(0deg);} 100% {transform:translateY(-1200px) rotate(360deg);} }
-.click-number { position:absolute; color:#fff; font-weight:700; font-size:20px; pointer-events:none; transition: all 1s ease-out; }
-.tab-buttons { display:flex; justify-content:space-around; margin-bottom:12px; }
-.tab-buttons button { flex:1; margin:0 4px; padding:6px; border-radius:8px; border:none; font-weight:700; cursor:pointer; }
-.tab-content { text-align:left; font-size:14px; }
-::-webkit-scrollbar { width:6px; }
-::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.3); border-radius:3px; }
+  :root{ --bg:#1f1f2e; --card:rgba(255,255,255,0.06); --accent:#f5c24a; --accent-2:#ffd700; --text:#fff; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial; background:var(--bg); color:var(--text); overflow-x:hidden; }
+  .wrap{ max-width:820px; margin:0 auto; padding:12px 12px calc(env(safe-area-inset-bottom,0) + 116px); }
+  .top{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .cookie{ width:180px; height:180px; border-radius:50%; background:radial-gradient(#f6e2b3,#f0c66a); display:flex; align-items:center; justify-content:center; font-size:56px; box-shadow:0 8px 30px rgba(0,0,0,.35), 0 0 20px rgba(255,255,255,.12) inset; user-select:none; touch-action:manipulation; position:relative; }
+  .cookie:active{ transform:scale(.98); }
+  .crumb{ position:absolute; width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.6); pointer-events:none; }
+  .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px; }
+  .card{ background:var(--card); border-radius:14px; padding:10px; min-height:120px; }
+  h3{ margin:0 0 8px 0; font-size:16px; opacity:.9; }
+  .list{ display:flex; flex-direction:column; gap:8px; max-height:360px; overflow:auto; }
+  .item,.upgrade{ display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; padding:8px; border-radius:10px; background:rgba(255,255,255,.04); }
+  .item .meta, .upgrade .meta{ font-size:13px; opacity:.9; }
+  button.buy{ background:var(--accent); border:0; border-radius:8px; padding:8px 10px; font-weight:700; color:#222; cursor:pointer; touch-action:manipulation; }
+  button.buy:disabled{ filter:grayscale(1) brightness(.8); opacity:.7; cursor:not-allowed; }
+  .click-number{ position:fixed; left:50%; transform:translateX(-50%); top:calc(20vh + 40px); font-weight:800; pointer-events:none; transition:all 800ms ease; opacity:1; }
+  .fly{ position:fixed; bottom:-40px; left:0; font-size:18px; opacity:.75; pointer-events:none; animation:fly linear forwards; }
+  @keyframes fly{ from{ transform:translateY(0) translateX(var(--x,0)); opacity:.7;} to{ transform:translateY(-120vh) translateX(calc(var(--x,0) + 40px)); opacity:0; } }
+  .bar{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .pill{ background:var(--card); padding:6px 10px; border-radius:999px; font-weight:600; }
+  .prestigeBtn{ width:100%; background:linear-gradient(180deg, var(--accent), #e5ac15); color:#222; border:0; padding:10px 12px; border-radius:10px; font-weight:800; }
+  .prestigeBtn.ready{ outline:2px solid var(--accent-2); box-shadow:0 0 18px rgba(255,215,0,.5); }
+  /* Статистика внизу */
+  .statsDock{ position:fixed; left:0; right:0; bottom:0; padding:8px 10px calc(env(safe-area-inset-bottom,0) + 8px); background:rgba(0,0,0,.5); backdrop-filter:blur(6px); border-top:1px solid rgba(255,255,255,.08); }
+  .statsGrid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .stat{ background:var(--card); border-radius:10px; padding:8px; font-size:13px; }
+  .highlight{ color:var(--accent-2); font-weight:800; }
+  /* Модал престижа */
+  .modalBG{ position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; padding:16px; }
+  .modal{ background:#2a2a3d; color:#fff; border-radius:14px; padding:16px; max-width:420px; width:100%; }
+  .modal h4{ margin:0 0 8px; }
+  .modal p{ margin:0 0 12px; opacity:.95; }
+  .modal .rowBtns{ display:flex; gap:8px; }
+  .modal .rowBtns button{ flex:1; padding:10px 12px; border-radius:10px; border:0; font-weight:800; }
+  .yes{ background:#4caf50; color:#fff; }
+  .no{ background:#f44336; color:#fff; }
 </style>
 </head>
 <body>
-<div class="container">
-  <div id="cookieBtn" class="cookie">🍪</div>
-  <div class="stats">
-    <div class="stat">Печеньки: <span id="cookiesDisplay">0</span></div>
-    <div class="stat">CPS: <span id="cpsDisplay">0</span></div>
-    <div class="stat">Клик: <span id="clickPower">1</span></div>
-    <div class="stat">Престиж: <span id="prestigePoints">0</span></div>
-    <div class="stat">Золотые печеньки: <span id="goldCookies">0</span></div>
-  </div>
-  <h3>Магазин</h3>
-  <div id="store" class="store"></div>
-  <h3>Апгрейды</h3>
-  <div id="upgrades" class="upgrades"></div>
-  <button id="prestigeBtn" style="width:100%; padding:10px; margin-bottom:10px; border-radius:10px; font-size:16px;">Престиж</button>
-  <button id="statsBtn" style="width:100%; padding:10px; border-radius:10px; font-size:16px;">Статистика</button>
-</div>
-
-<div id="prestigeModal" class="modal-bg">
-  <div class="modal">
-    <p id="prestigeText"></p>
-    <button id="prestigeYes" style="background:#4caf50;">Да</button>
-    <button id="prestigeNo" style="background:#f44336;">Нет</button>
-  </div>
-</div>
-
-<div id="statsModal" class="modal-bg">
-  <div class="modal">
-    <div class="tab-buttons">
-      <button id="tabCurrent">Текущий забег</button>
-      <button id="tabOverall">Общая статистика</button>
+<div class="wrap">
+  <div class="top">
+    <div id="cookieBtn" class="cookie" title="Жми!">🍪</div>
+    <div class="bar">
+      <div class="pill">Печеньки: <span id="cookies">0</span></div>
+      <div class="pill">CPS: <span id="cps">0</span></div>
+      <div class="pill">Клик: <span id="clickPower">1</span></div>
+      <div class="pill">Золотые: <span id="gold">0</span></div>
     </div>
-    <div id="tabContent" class="tab-content"></div>
-    <button onclick="document.getElementById('statsModal').style.display='none'">Закрыть</button>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Магазин</h3>
+      <div id="store" class="list"></div>
+    </div>
+    <div class="card">
+      <h3>Апгрейды (следующие)</h3>
+      <div id="upgrades" class="list"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;">
+    <button id="prestigeBtn" class="prestigeBtn">Престиж</button>
+  </div>
+</div>
+
+<!-- Модал престижа -->
+<div id="prestigeModal" class="modalBG">
+  <div class="modal">
+    <h4>Сделать престиж?</h4>
+    <p id="prestigeText">Чтобы сделать престиж, накопите 1 трлн печенек за текущий забег. За каждый трлн вы получите 1 <span class="highlight">золотую печеньку</span>, которая навсегда даёт +0.1% к CPS и клику. Продолжить?</p>
+    <div class="rowBtns">
+      <button id="prestigeYes" class="yes">Да</button>
+      <button id="prestigeNo" class="no">Нет</button>
+    </div>
+  </div>
+</div>
+
+<!-- Статистика док -->
+<div class="statsDock">
+  <div class="statsGrid">
+    <div class="stat">Текущий забег: <span id="runTime">0с</span></div>
+    <div class="stat">Всего за забег: <span id="totalRun">0</span></div>
+    <div class="stat">Всего кликов: <span id="clicks">0</span></div>
+    <div class="stat">Всего престижа: <span id="prestiges">0</span></div>
+    <div class="stat">Всего печенек (все забеги): <span id="overallCookies">0</span></div>
+    <div class="stat">Золотые печеньки (всего): <span id="overallGold">0</span></div>
   </div>
 </div>
 
 <script>
-// ======== Состояние ========
-let state = {
-  cookies:0, totalCookies:0, clicks:0, clickPower:1,
-  goldCookies:0, prestige:{points:0,multiplier:1},
-  buildings:{}, upgrades:{}, lastTick:Date.now(),
-  startTime:Date.now(), sessionTime:0,
-  overall:{totalCookies:0,totalGold:0,prestiges:0,totalTime:0,clicks:0}
+/* ========= Состояние ========= */
+const state = {
+  cookies: 0,
+  totalCookies: 0,          // за текущий забег
+  clicks: 0,
+  clickPower: 1,
+  goldCookies: 0,           // навсегда
+  buildings: {},
+  lastTick: Date.now(),
+  startTime: Date.now(),
+  overall: {
+    totalCookies: 0,        // накоплено при престиже
+    totalGold: 0,
+    prestiges: 0,
+    totalTime: 0,
+    clicks: 0
+  }
 };
 
-// ======== Список построек ========
-const buildingList=[
-  {key:'cursor',name:'Курсор',baseCost:15,baseCPS:0.1,emoji:'🖱️'},
-  {key:'grandma',name:'Бабушка',baseCost:100,baseCPS:1,emoji:'👵'},
-  {key:'farm',name:'Ферма',baseCost:1100,baseCPS:8,emoji:'🌾'},
-  {key:'mine',name:'Шахта',baseCost:12000,baseCPS:47,emoji:'⛏️'},
-  {key:'factory',name:'Фабрика',baseCost:130000,baseCPS:260,emoji:'🏭'},
-  {key:'bank',name:'Банк',baseCost:1400000,baseCPS:1400,emoji:'🏦'},
-  {key:'temple',name:'Храм',baseCost:20000000,baseCPS:7800,emoji:'⛩️'},
-  {key:'wizard',name:'Волшебник',baseCost:330000000,baseCPS:44000,emoji:'🧙‍♂️'},
-  {key:'shipment',name:'Отгрузка',baseCost:5100000000,baseCPS:260000,emoji:'🚢'},
-  {key:'alchemy',name:'Алхимия',baseCost:75000000000,baseCPS:1600000,emoji:'⚗️'},
-  {key:'portal',name:'Портал',baseCost:1e12,baseCPS:10000000,emoji:'🌀'},
-  {key:'blackhole',name:'Чёрная дыра',baseCost:1e14,baseCPS:66666666,emoji:'🌌'},
-  {key:'timeMachine',name:'Машина времени',baseCost:1e16,baseCPS:2e8,emoji:'⏳'},
-  {key:'antimatter',name:'Анти-материя',baseCost:1e18,baseCPS:1e9,emoji:'🕳️'},
-  {key:'quantumLab',name:'Квантовая лаборатория',baseCost:5e19,baseCPS:5e9,emoji:'🔬'}
+const buildingList = [
+  {key:'cursor', name:'Курсор', emoji:'🖱️', baseCost:15, baseCPS:0.1,
+    upgrades:['Смазанные шарниры','Лазерный прицел','Автокликер','Нейро-курсоры','Квантовая мышь','Фазовый луч','Гироскопический шар','Пиксельный след','Турбо-скролл','Гиперклик']},
+  {key:'grandma', name:'Бабушка', emoji:'👵', baseCost:100, baseCPS:1,
+    upgrades:['Бабушкины очки','Двойные спицы','Печь на угле','Суперзамес','Секретное варенье','Духовка-гигант','Чугунный лист','Быстрые перчатки','Сверхдрожжи','Сердце пекаря']},
+  {key:'farm', name:'Ферма', emoji:'🌾', baseCost:1100, baseCPS:8,
+    upgrades:['Удобрение +10','ГМО-печеньки','Мега-трактор','Ферма-робот','Дождевание 2.0','Ультрасемена','Солнечные грядки','Тёплые теплицы','Контроль климата','Гидропоника']},
+  {key:'mine', name:'Шахта', emoji:'⛏️', baseCost:12000, baseCPS:47,
+    upgrades:['Каменный уголь','Железная печь','Алмазные противни','Титановые вагонетки','Автокрепи','Вибропогрузка','Плазменный факел','Караван руды','Смарт-подземелья','Магнито-сепаратор']},
+  {key:'factory', name:'Фабрика', emoji:'🏭', baseCost:130000, baseCPS:260,
+    upgrades:['Конвейер XL','Сверхпечь','Автоматизация','Кибер-фабрика','Роборуки','Нулевой простой','3D-формы','Оптимизация ОТК','Мгновенная упаковка','Нулевые отходы']},
+  {key:'bank', name:'Банк', emoji:'🏦', baseCost:1400000, baseCPS:1400,
+    upgrades:['Сладкие облигации','Ставка сахара','Шоколадные активы','Карамельный резерв','Маршрут ликвидности','Антиинфляционное тесто','Дивиденд муки','Траст хрустинок','Леверидж печенья','Алгоритм дохода']},
+  {key:'temple', name:'Храм', emoji:'⛩️', baseCost:20000000, baseCPS:7800,
+    upgrades:['Хор пекарей','Псалмы с корицей','Жертвенные печенья','Святая выпечка','Молитва дрожжам','Звон карамели','Алтарь глютена','Купол сахара','Икона начинки','Чудо расстойки']},
+  {key:'wizard', name:'Волшебник', emoji:'🧙‍♂️', baseCost:330000000, baseCPS:44000,
+    upgrades:['Магия теста','Заклинание дрожжей','Книга печений','Архимаг-кулинар','Жезл карамели','Манна печенья','Крит магии вкуса','Свиток муки','Мирра ванили','Сфера сахара']},
+  {key:'shipment', name:'Отгрузка', emoji:'🚢', baseCost:5100000000, baseCPS:260000,
+    upgrades:['Гравитационная духовка','Лунные коровы','Марсианская мука','Юпитерский жар','Космо-холод','Флот пряников','Пилоты-андроиды','Астероидный мукомол','Орбитальный склад','Световой трюм']},
+  {key:'alchemy', name:'Алхимия', emoji:'⚗️', baseCost:75000000000, baseCPS:1600000,
+    upgrades:['Камень в печенье','Философская печенька','Золотая крошка','Алхимреактор','Трансмутация сахара','Амброзия','Эссенция теста','Сублимация муки','Лапис печенька','Аркана ванили']},
+  {key:'portal', name:'Портал', emoji:'🌀', baseCost:1e12, baseCPS:1e7,
+    upgrades:['Тоннель в сладость','Бисквитный разлом','Параллельная духовка','Зазеркалье сахара','Кривизна вкуса','Замес вне времени','Рог изобилия','Порт омеги','Синтетический рай','Сладкий фронтир']},
+  {key:'blackhole', name:'Чёрная дыра', emoji:'🌌', baseCost:1e14, baseCPS:6.666e7,
+    upgrades:['Тёмное тесто','Сингулярная печь','Гравитированная крошка','Горизонт вкуса','Аккреционный соус','Аналог Хокинга','Кольцо глютена','Поток карамели','Сладкая тень','Пекарский квазар']},
+  {key:'timeMachine', name:'Машина времени', emoji:'⏳', baseCost:1e16, baseCPS:2e8,
+    upgrades:['Хлеб из прошлого','Дрожжи будущего','Цикл теста','Парадокс духовки','Вечная расстойка','Лента печенья','Хроно-замес','Ретрокарамель','Петля сахара','Нексус вкуса']},
+  {key:'antimatter', name:'Анти-материя', emoji:'🕳️', baseCost:1e18, baseCPS:1e9,
+    upgrades:['Вакуумный сахар','Инверсное печенье','Анти-тесто','Нуль-начинка','Крах вселенной','Зеркальная мука','Контр-глазурь','Отрицательная корица','Тьма калорий','Сладкий разряд']},
+  {key:'quantumLab', name:'Квантовая лаб.', emoji:'🔬', baseCost:5e19, baseCPS:5e9,
+    upgrades:['Квантовая мука','Нанопеченье','Суперпозиция теста','Энтангл-сахар','Туннельная глазурь','Декогеренц-выпечка','Кварковая крошка','Лептонный лист','Гигамешалка','Коллапс вкуса']},
 ];
 
-// ======== Инициализация ========
-function initState(){
-  state.buildings = {};
-  buildingList.forEach(b=>{
-    state.buildings[b.key]={...b, qty:0, cps:b.baseCPS, cost:b.baseCost};
-  });
+const clickUpgradeNames = [
+  'Масло на пальцах','Сила большого пальца','Титановый палец','Божественный клик',
+  'Пульс ускорения','Гипертычок','Турбо-тап','Крит клик','Удар хрустом','Длань печенья'
+];
 
-  // Генерация апгрейдов
-  state.upgrades={};
-  Object.values(state.buildings).forEach(b=>{
-    for(let i=1;i<=10;i++){ // 10 апгрейдов на здание
-      state.upgrades[`${b.key}_${i}`] = {
-        id: `${b.key}_${i}`,
-        type: 'building',
-        target: b.key,
-        bought: false,
-        cost: Math.round(b.baseCost*(1+0.2*i)),
-        multiplier:2,
-        name:`Улучшение ${b.name} ×2`
-      };
-    }
-  });
-  // Апгрейды клика
-  for(let i=1;i<=10;i++){
-    state.upgrades[`click_${i}`] = {
-      id:`click_${i}`,
-      type:'click',
-      bought:false,
-      cost: Math.round(15*(1.2*i)),
-      multiplier:2,
-      name:`Улучшение клика ×2`
+/* ========= Инициализация ========= */
+function init(){
+  // здания
+  state.buildings = {};
+  for(const b of buildingList){
+    state.buildings[b.key] = {
+      ...b,
+      qty: 0,
+      cps: b.baseCPS,
+      cost: b.baseCost,
+      nextUp: { level: 1, // отображение ×2
+                cost: b.baseCost * 10, // старт апгрейда
+                nameIdx: 0 }
     };
   }
+  // клик-апгрейд
+  state.clickUp = { level:1, cost: 15*10, nameIdx:0 }; // старт 150
 }
-initState();
+init();
 
-// ======== Утилиты ========
-function fmt(n){ return n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':Math.floor(n); }
-function getCPS(){ 
-  let cps=0; 
-  Object.values(state.buildings).forEach(b=>cps+=b.qty*b.cps);
-  return cps*(1+state.goldCookies*0.001); 
+/* ========= Утилиты ========= */
+function fmt(n){
+  if(n >= 1e18) return (n/1e18).toFixed(2)+'E';
+  if(n >= 1e15) return (n/1e15).toFixed(2)+'P';
+  if(n >= 1e12) return (n/1e12).toFixed(2)+'T';
+  if(n >= 1e9)  return (n/1e9 ).toFixed(2)+'B';
+  if(n >= 1e6)  return (n/1e6 ).toFixed(2)+'M';
+  if(n >= 1e3)  return (n/1e3 ).toFixed(1)+'K';
+  return Math.floor(n);
+}
+function goldMult(){ return 1 + state.goldCookies * 0.001; } // +0.1% за зол. печеньку
+function getCPS(){
+  let cps = 0;
+  for(const b of Object.values(state.buildings)) cps += b.qty * b.cps;
+  return cps * goldMult();
 }
 
-// ======== Клик по печеньке ========
-function clickCookie(){ state.cookies+=state.clickPower*(1+state.goldCookies*0.001); state.totalCookies+=state.clickPower*(1+state.goldCookies*0.001); state.clicks++; spawnClickNumber(state.clickPower*(1+state.goldCookies*0.001)); spawnCrumb(); spawnFlyingCookie(); animateCookie(); render(); checkGoldCookie(); }
+/* ========= Рендер ========= */
+function render(){
+  // шапка
+  document.getElementById('cookies').textContent = fmt(state.cookies);
+  document.getElementById('cps').textContent = fmt(getCPS());
+  document.getElementById('clickPower').textContent = fmt(state.clickPower * goldMult());
+  document.getElementById('gold').textContent = fmt(state.goldCookies);
 
-// ======== Покупка ========
+  // магазин
+  const store = document.getElementById('store');
+  store.innerHTML = '';
+  for(const b of Object.values(state.buildings)){
+    const div = document.createElement('div');
+    div.className = 'item';
+    const can = state.cookies >= b.cost;
+    div.style.background = can ? 'rgba(0,200,0,.18)' : 'rgba(255,255,255,.04)';
+    div.innerHTML = `
+      <div><strong>${b.emoji} ${b.name}</strong> <span class="meta">(${b.qty}) · +${fmt(b.cps)} CPS/шт</span></div>
+      <div class="meta">${fmt(b.cost)}</div>
+      <button class="buy" ${can?'':'disabled'} data-key="${b.key}">Купить</button>
+    `;
+    const btn = div.querySelector('button.buy');
+    btn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); buyBuilding(b.key); }, {passive:false});
+    store.appendChild(div);
+  }
+
+  // апгрейды (только следующие)
+  renderUpgrades();
+
+  // престиж готов?
+  const canPrestige = Math.floor(state.totalCookies / 1e12) > 0;
+  const pBtn = document.getElementById('prestigeBtn');
+  pBtn.classList.toggle('ready', canPrestige);
+
+  // статистика док
+  const tSec = Math.floor((Date.now()-state.startTime)/1000);
+  document.getElementById('runTime').textContent = tSec<60 ? `${tSec}с` : `${Math.floor(tSec/60)}м ${tSec%60}с`;
+  document.getElementById('totalRun').textContent = fmt(state.totalCookies);
+  document.getElementById('clicks').textContent = fmt(state.clicks);
+  document.getElementById('prestiges').textContent = state.overall.prestiges;
+  document.getElementById('overallCookies').textContent = fmt(state.overall.totalCookies);
+  document.getElementById('overallGold').textContent = fmt(state.overall.totalGold);
+}
+
+function renderUpgrades(){
+  const list = document.getElementById('upgrades');
+  list.innerHTML = '';
+
+  // апгрейд клика (всегда виден)
+  const cu = state.clickUp;
+  const cuName = clickUpgradeNames[Math.min(cu.nameIdx, clickUpgradeNames.length-1)];
+  const cuCost = cu.cost;
+  const cuCan = state.cookies >= cuCost;
+  const cuDiv = document.createElement('div');
+  cuDiv.className = 'upgrade';
+  cuDiv.innerHTML = `
+    <div><strong>${cuName}</strong> <span class="meta">Клик ×${cu.level+1}</span></div>
+    <div class="meta">${fmt(cuCost)}</div>
+    <button class="buy" ${cuCan?'':'disabled'} data-type="click">Купить</button>
+  `;
+  cuDiv.querySelector('button').addEventListener('pointerdown', (e)=>{ e.preventDefault(); buyClickUpgrade(); }, {passive:false});
+  list.appendChild(cuDiv);
+
+  // апгрейды зданий — по одному следующему на каждое, только если qty>0
+  for(const b of Object.values(state.buildings)){
+    if(b.qty <= 0) continue;
+    const uLevel = b.nextUp.level; // отображаем ×(level+1)
+    const name = b.upgrades[Math.min(b.nextUp.nameIdx, b.upgrades.length-1)];
+    const cost = b.nextUp.cost;
+    const can = state.cookies >= cost;
+
+    const div = document.createElement('div');
+    div.className = 'upgrade';
+    div.innerHTML = `
+      <div><strong>${name}</strong> <span class="meta">${b.name} ×${uLevel+1}</span></div>
+      <div class="meta">${fmt(cost)}</div>
+      <button class="buy" ${can?'':'disabled'} data-up="${b.key}">Купить</button>
+    `;
+    div.querySelector('button').addEventListener('pointerdown', (e)=>{ e.preventDefault(); buyBuildingUpgrade(b.key); }, {passive:false});
+    list.appendChild(div);
+  }
+}
+
+/* ========= Логика покупки ========= */
 function buyBuilding(key){
   const b = state.buildings[key];
-  if(state.cookies>=b.cost){ state.cookies-=b.cost; b.qty++; b.cost*=1.15; render(); } 
-}
-function buyUpgrade(id){
-  const u = state.upgrades[id];
-  if(!u.bought && state.cookies>=u.cost){
-    if(u.type==='building' && state.buildings[u.target].qty===0) return; // нельзя купить апгрейд на 0 зданий
-    state.cookies-=u.cost; u.bought=true;
-    if(u.type==='click') state.clickPower*=u.multiplier;
-    else state.buildings[u.target].cps*=u.multiplier;
-    render();
-  }
+  if(state.cookies < b.cost) return;
+  state.cookies -= b.cost;
+  b.qty++;
+  b.cost = Math.round(b.cost * 1.15);
+  pulseCookie();
+  render();
 }
 
-// ======== Престиж ========
-function checkGoldCookie(){ 
-  if(state.totalCookies>=1e12){ document.getElementById('prestigeBtn').style.background='#ffd700'; }
-}
-function prestigeReset(){
-  const earnedGold = Math.floor(state.totalCookies/1e12);
-  if(earnedGold>0){
-    document.getElementById('prestigeText').textContent=`Вы можете заработать ${earnedGold} золотых печенек (0.1% бонус к CPS и клику). Сделать престиж?`;
-    document.getElementById('prestigeModal').style.display='flex';
-  } else alert('Нужно накопить хотя бы 1 трлн печенек для престижа!');
-}
+function buyBuildingUpgrade(key){
+  const b = state.buildings[key];
+  const u = b.nextUp;
+  if(state.cookies < u.cost) return;
 
-// ======== Анимации ========
-function animateCookie(){ const cookie=document.getElementById('cookieBtn'); cookie.style.transform='scale(1.2)'; setTimeout(()=>cookie.style.transform='scale(1)',100); }
-function spawnClickNumber(amount){ const cookie=document.getElementById('cookieBtn'); const num=document.createElement('div'); num.textContent='+'+fmt(amount); num.className='click-number'; cookie.appendChild(num); setTimeout(()=>{ num.style.top='-20px'; num.style.opacity='0'; num.style.fontSize='28px'; },10); setTimeout(()=>num.remove(),1000);}
-function spawnFlyingCookie(){ const fly=document.createElement('div'); fly.className='cookie-fly'; fly.style.left=Math.random()*window.innerWidth+'px'; fly.style.fontSize=(10+Math.random()*20)+'px'; fly.style.animationDuration=(5+Math.random()*5)+'s'; fly.style.opacity=(0.5+Math.random()*0.5); fly.textContent='🍪'; document.body.appendChild(fly); setTimeout(()=>fly.remove(),10000);}
-function spawnCrumb(){ const cookie=document.getElementById('cookieBtn'); const crumb=document.createElement('div'); crumb.className='crumb'; crumb.style.left=Math.random()*140+'px'; crumb.style.top=Math.random()*140+'px'; cookie.appendChild(crumb); setTimeout(()=>crumb.remove(),600); }
+  state.cookies -= u.cost;
 
-// ======== Рендер ========
-function render(){
-  document.getElementById('cookiesDisplay').textContent=fmt(state.cookies);
-  document.getElementById('cpsDisplay').textContent=fmt(getCPS());
-  document.getElementById('clickPower').textContent=fmt(state.clickPower*(1+state.goldCookies*0.001));
-  document.getElementById('prestigePoints').textContent=fmt(state.prestige.points);
-  document.getElementById('goldCookies').textContent=fmt(state.goldCookies);
+  // Эффект: ×2 к cps здания
+  b.cps *= 2;
 
-  // Магазин
-  const storeDiv=document.getElementById('store'); storeDiv.innerHTML='';
-  Object.values(state.buildings).forEach(b=>{
-    const div=document.createElement('div'); div.className='item';
-    div.style.background=state.cookies>=b.cost?'rgba(0,200,0,0.2)':'rgba(255,255,255,0.05)';
-    div.innerHTML=`<div>${b.emoji} ${b.name} (${b.qty}) +${fmt(b.cps)} CPS</div><div>${fmt(b.cost)}</div><button data-key="${b.key}">Купить</button>`;
-    storeDiv.appendChild(div);
-    const btn = div.querySelector('button');
-    ['mousedown','mouseup','touchstart','touchend'].forEach(e=>{
-      btn.addEventListener(e,()=>{div.style.transform=e.includes('start')?'scale(0.95)':'scale(1)';});
-    });
-  });
+  // Подготовить следующий апгрейд
+  u.level += 1;
+  u.nameIdx = Math.min(u.nameIdx + 1, (b.upgrades.length-1));
+  u.cost = nextUpgradeCost(u.cost);
 
-  // Апгрейды
-  const upgradesDiv=document.getElementById('upgrades'); upgradesDiv.innerHTML='';
-  Object.values(state.upgrades).forEach(u=>{
-    if(u.type==='building' && state.buildings[u.target].qty===0) return; // показывать только полезные
-    const div=document.createElement('div'); div.className='upgrade'+(u.bought?' bought':'');
-    div.style.background=!u.bought && state.cookies>=u.cost?'rgba(255,215,0,0.3)':(!u.bought?'rgba(255,255,255,0.05)':'');
-    div.innerHTML=`<div>${u.name} (${fmt(u.cost)})</div><button data-id="${u.id}" ${u.bought?'disabled':''}>Купить</button>`;
-    upgradesDiv.appendChild(div);
-    const btn = div.querySelector('button');
-    ['mousedown','mouseup','touchstart','touchend'].forEach(e=>{
-      btn.addEventListener(e,()=>{div.style.transform=e.includes('start')?'scale(0.95)':'scale(1)';});
-    });
-  });
-
-  document.querySelectorAll('.item button').forEach(btn=>{ btn.onclick=()=>buyBuilding(btn.dataset.key); btn.ontouchstart=()=>buyBuilding(btn.dataset.key); });
-  document.querySelectorAll('.upgrade button').forEach(btn=>{ btn.onclick=()=>buyUpgrade(btn.dataset.id); btn.ontouchstart=()=>buyUpgrade(btn.dataset.id); });
+  burst('+UP!', 0, -30);
+  render();
 }
 
-// ======== Статистика ========
-function updateStatsModal(tab){
-  let html='';
-  if(tab==='current'){
-    let tSec = Math.floor((Date.now()-state.startTime)/1000);
-    html+=`Время текущего забега: ${Math.floor(tSec/3600)}ч ${Math.floor((tSec%3600)/60)}м ${tSec%60}с<br>`;
-    html+=`Печеньки: ${fmt(state.cookies)}<br>`;
-    html+=`Золотые печеньки: ${fmt(state.goldCookies)}<br>`;
-    html+=`Престиж: ${fmt(state.prestige.points)}<br>`;
-    html+=`Клики: ${fmt(state.clicks)}<br>`;
+function buyClickUpgrade(){
+  const u = state.clickUp;
+  if(state.cookies < u.cost) return;
+  state.cookies -= u.cost;
+
+  // Эффект: ×2 к клику
+  state.clickPower *= 2;
+
+  u.level += 1;
+  u.nameIdx = Math.min(u.nameIdx + 1, (clickUpgradeNames.length-1));
+  u.cost = nextUpgradeCost(u.cost);
+
+  burst('+КЛИК!', 0, -30);
+  render();
+}
+
+/* ========= Формула стоимости апгрейда =========
+   новаяЦена = (предыдущая + 10) × (1.7 … 2.2)
+*/
+function nextUpgradeCost(prev){
+  const mult = 1.7 + Math.random()*0.5; // 70%–120% сверху
+  return Math.max(1, Math.round( (prev + 10) * mult ));
+}
+
+/* ========= Престиж ========= */
+function tryPrestige(){
+  const earned = Math.floor(state.totalCookies / 1e12);
+  const modal = document.getElementById('prestigeModal');
+  const pText = document.getElementById('prestigeText');
+  if(earned <= 0){
+    pText.innerHTML = 'Чтобы сделать престиж, накопите <span class="highlight">1 трлн</span> печенек за текущий забег. За каждый трлн вы получите 1 <span class="highlight">золотую печеньку</span> (+0.1% ко всем доходам).';
   } else {
-    let tSec = Math.floor(state.overall.totalTime/1000);
-    html+=`Общее время: ${Math.floor(tSec/3600)}ч ${Math.floor((tSec%3600)/60)}м ${tSec%60}с<br>`;
-    html+=`Общие печеньки: ${fmt(state.overall.totalCookies)}<br>`;
-    html+=`Золотые печеньки: ${fmt(state.overall.totalGold)}<br>`;
-    html+=`Количество престижа: ${state.overall.prestiges}<br>`;
-    html+=`Общее количество кликов: ${fmt(state.overall.clicks)}<br>`;
+    pText.innerHTML = `Вы заработаете <span class="highlight">${earned}</span> золот. печенек (итого бонус: +${(earned*0.1).toFixed(1)}%). Сделать престиж?`;
   }
-  document.getElementById('tabContent').innerHTML=html;
+  modal.style.display = 'flex';
 }
 
-// ======== События ========
-['click','touchstart'].forEach(ev=>{
-  document.getElementById('cookieBtn').addEventListener(ev, e=>{ e.preventDefault(); clickCookie(); });
-  document.getElementById('prestigeBtn').addEventListener(ev, e=>{ e.preventDefault(); prestigeReset(); });
-  document.getElementById('statsBtn').addEventListener(ev, e=>{ e.preventDefault(); document.getElementById('statsModal').style.display='flex'; updateStatsModal('current'); });
-});
-
-document.getElementById('prestigeYes').addEventListener('click',()=>{
-  const earnedGold = Math.floor(state.totalCookies/1e12);
-  state.goldCookies += earnedGold;
-  state.overall.totalGold += earnedGold;
+function doPrestige(){
+  const earned = Math.floor(state.totalCookies / 1e12);
+  const modal = document.getElementById('prestigeModal');
+  if(earned > 0){
+    state.goldCookies += earned;
+    state.overall.totalGold += earned;
+  }
+  // накопленное в общий прогресс
   state.overall.totalCookies += state.totalCookies;
-  state.overall.totalTime += (Date.now()-state.startTime);
-  state.overall.prestiges++;
+  state.overall.totalTime += (Date.now() - state.startTime);
   state.overall.clicks += state.clicks;
-  state.cookies=0; state.totalCookies=0; state.clickPower=1; state.clicks=0; state.startTime=Date.now();
-  Object.values(state.buildings).forEach(b=>{ b.qty=0; b.cps=b.baseCPS; b.cost=b.baseCost; });
-  Object.values(state.upgrades).forEach(u=>u.bought=false);
-  document.getElementById('prestigeModal').style.display='none';
-  render();
-});
-document.getElementById('prestigeNo').addEventListener('click',()=>{ document.getElementById('prestigeModal').style.display='none'; });
-document.getElementById('tabCurrent').addEventListener('click',()=>updateStatsModal('current'));
-document.getElementById('tabOverall').addEventListener('click',()=>updateStatsModal('overall'));
+  state.overall.prestiges += 1;
 
-// ======== Авто CPS ========
+  // сброс забега
+  state.cookies = 0;
+  state.totalCookies = 0;
+  state.clicks = 0;
+  state.clickPower = 1;
+  state.startTime = Date.now();
+  for(const b of Object.values(state.buildings)){
+    b.qty = 0;
+    b.cps = b.baseCPS;
+    b.cost = b.baseCost;
+    b.nextUp = { level:1, cost:b.baseCost*10, nameIdx:0 };
+  }
+  state.clickUp = { level:1, cost:15*10, nameIdx:0 };
+  modal.style.display = 'none';
+  render();
+}
+
+/* ========= Клики/анимации ========= */
+function clickCookie(){
+  const gain = state.clickPower * goldMult();
+  state.cookies += gain;
+  state.totalCookies += gain;
+  state.clicks++;
+  floatingNum('+'+fmt(gain));
+  spawnCrumb();
+  spawnFly();
+  pulseCookie();
+  render();
+}
+
+function pulseCookie(){
+  const node = document.getElementById('cookieBtn');
+  node.style.transition = 'transform .08s';
+  node.style.transform = 'scale(1.06)';
+  setTimeout(()=>{ node.style.transform = 'scale(1)'; }, 80);
+}
+function floatingNum(text){
+  const n = document.createElement('div');
+  n.className = 'click-number';
+  n.textContent = text;
+  document.body.appendChild(n);
+  requestAnimationFrame(()=>{
+    n.style.transform = 'translate(-50%, -28px)';
+    n.style.opacity = '0';
+  });
+  setTimeout(()=> n.remove(), 820);
+}
+function spawnCrumb(){
+  const c = document.createElement('div'); c.className='crumb';
+  const host = document.getElementById('cookieBtn');
+  c.style.left = (20 + Math.random()*140) + 'px';
+  c.style.top  = (20 + Math.random()*140) + 'px';
+  host.appendChild(c);
+  setTimeout(()=>c.remove(), 600);
+}
+function spawnFly(){
+  const e = document.createElement('div'); e.className='fly'; e.textContent='🍪';
+  e.style.left = (Math.random()*100)+'vw';
+  e.style.setProperty('--x', (Math.random()*40-20)+'px');
+  e.style.animationDuration = (5 + Math.random()*5)+'s';
+  document.body.appendChild(e);
+  setTimeout(()=>e.remove(), 10000);
+}
+
+/* ========= События (Pointer Events для мобильных) ========= */
+document.getElementById('cookieBtn').addEventListener('pointerdown', (e)=>{ e.preventDefault(); clickCookie(); }, {passive:false});
+document.getElementById('prestigeBtn').addEventListener('pointerdown', (e)=>{ e.preventDefault(); tryPrestige(); }, {passive:false});
+document.getElementById('prestigeNo').addEventListener('pointerdown', (e)=>{ e.preventDefault(); document.getElementById('prestigeModal').style.display='none'; }, {passive:false});
+document.getElementById('prestigeYes').addEventListener('pointerdown', (e)=>{ e.preventDefault(); doPrestige(); }, {passive:false});
+
+/* ========= Цикл CPS ========= */
 setInterval(()=>{
-  const now = Date.now(); const delta=(now-state.lastTick)/1000;
-  state.lastTick=now;
-  const gain = getCPS()*delta;
-  state.cookies+=gain;
-  state.totalCookies+=gain;
-  render();
-},100);
+  const now = Date.now();
+  const dt = (now - state.lastTick)/1000;
+  state.lastTick = now;
 
-// ======== Первый рендер ========
+  const gain = getCPS() * dt;
+  state.cookies += gain;
+  state.totalCookies += gain;
+
+  render();
+}, 100);
+
+/* ========= Первый рендер ========= */
 render();
 </script>
 </body>
