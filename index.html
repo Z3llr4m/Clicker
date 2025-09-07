@@ -75,6 +75,8 @@ let state = {
   startTime:Date.now(), sessionTime:0,
   overall:{totalCookies:0,totalGold:0,prestiges:0,totalTime:0,clicks:0}
 };
+
+// ======== Список построек ========
 const buildingList=[
   {key:'cursor',name:'Курсор',baseCost:15,baseCPS:0.1,emoji:'🖱️'},
   {key:'grandma',name:'Бабушка',baseCost:100,baseCPS:1,emoji:'👵'},
@@ -102,37 +104,35 @@ function initState(){
   const buildingKeys = Object.keys(state.buildings);
   state.upgrades = {};
   for(let i=1;i<=1000;i++){
-    const type = Math.random()<0.5?'click':'building';
-    let u={id:i,bought:false,type:type,multiplier:2,cost:Math.round(100*Math.pow(1.15,i))};
-    if(type==='click') u.name=`Улучшение клика ×2`;
-    else { u.target=buildingKeys[Math.floor(Math.random()*buildingKeys.length)]; u.name=`Улучшение ${u.target} ×2`; }
+    let u={id:i,bought:false,multiplier:2};
+    if(Math.random()<0.5){ u.type='click'; u.name=`Улучшение клика ×2`; u.cost=Math.round(100*Math.pow(1.15,i)); }
+    else{ u.type='building'; u.target=buildingKeys[Math.floor(Math.random()*buildingKeys.length)]; u.name=`Улучшение ${u.target} ×2`; u.cost=Math.round(state.buildings[u.target].baseCost*Math.pow(1.15,i)); }
     state.upgrades[i]=u;
   }
 }
 initState();
 
-// ======== Функции ========
-function fmt(n){if(n<1000) return Math.round(n*100)/100; const units=['K','M','B','T','Qa','Qi','Sx','Sp','Oc','No']; let u=-1,v=n; while(v>=1000&&u<units.length-1){v/=1000;u++;} return v.toFixed(2)+units[u];}
-
-function getCPS(){ let cps=0; Object.values(state.buildings).forEach(b=>cps+=b.qty*b.cps); return cps*(1+state.goldCookies*0.001); }
-
-function clickCookie(){
-  const amount = state.clickPower*(1+state.goldCookies*0.001);
-  state.cookies+=amount; 
-  state.totalCookies+=amount; 
-  state.clicks++; 
-  spawnCrumb(); spawnFlyingCookie(); spawnClickNumber(amount); animateCookie();
-  render(); checkGoldCookie();
+// ======== Утилиты ========
+function fmt(n){ return n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':Math.floor(n); }
+function getCPS(){ 
+  let cps=0; 
+  Object.values(state.buildings).forEach(b=>cps+=b.qty*b.cps);
+  return cps*(1+state.goldCookies*0.001); 
 }
 
+// ======== Клик по печеньке ========
+function clickCookie(){ state.cookies+=state.clickPower*(1+state.goldCookies*0.001); state.totalCookies+=state.clickPower*(1+state.goldCookies*0.001); state.clicks++; spawnClickNumber(state.clickPower*(1+state.goldCookies*0.001)); spawnCrumb(); spawnFlyingCookie(); animateCookie(); render(); checkGoldCookie(); }
+
+// ======== Покупка ========
 function buyBuilding(key){
   const b = state.buildings[key];
   if(state.cookies>=b.cost){ state.cookies-=b.cost; b.qty++; b.cost*=1.15; render(); } 
 }
-
 function buyUpgrade(id){
   const u = state.upgrades[id];
-  if(!u.bought && state.cookies>=u.cost){ state.cookies-=u.cost; u.bought=true;
+  if(!u.bought && state.cookies>=u.cost){
+    if(u.type==='building' && state.buildings[u.target].qty===0) return; // нельзя купить апгрейд на 0 зданий
+    state.cookies-=u.cost; u.bought=true;
     if(u.type==='click') state.clickPower*=u.multiplier;
     else state.buildings[u.target].cps*=u.multiplier;
     render();
@@ -151,11 +151,11 @@ function prestigeReset(){
   } else alert('Нужно накопить хотя бы 1 трлн печенек для престижа!');
 }
 
-// ======== Всплывающие числа и анимации ========
+// ======== Анимации ========
 function animateCookie(){ const cookie=document.getElementById('cookieBtn'); cookie.style.transform='scale(1.2)'; setTimeout(()=>cookie.style.transform='scale(1)',100); }
 function spawnClickNumber(amount){ const cookie=document.getElementById('cookieBtn'); const num=document.createElement('div'); num.textContent='+'+fmt(amount); num.className='click-number'; cookie.appendChild(num); setTimeout(()=>{ num.style.top='-20px'; num.style.opacity='0'; num.style.fontSize='28px'; },10); setTimeout(()=>num.remove(),1000);}
 function spawnFlyingCookie(){ const fly=document.createElement('div'); fly.className='cookie-fly'; fly.style.left=Math.random()*window.innerWidth+'px'; fly.style.fontSize=(10+Math.random()*20)+'px'; fly.style.animationDuration=(5+Math.random()*5)+'s'; fly.style.opacity=(0.5+Math.random()*0.5); fly.textContent='🍪'; document.body.appendChild(fly); setTimeout(()=>fly.remove(),10000);}
-function spawnCrumb(){ const cookie=document.getElementById('cookieBtn'); const crumb=document.createElement('div'); crumb.className='crumb'; crumb.style.left=Math.random()*140+'px'; crumb.style.top=Math.random()*140+'px'; cookie.appendChild(crumb); setTimeout(()=>crumb.remove(),600);}
+function spawnCrumb(){ const cookie=document.getElementById('cookieBtn'); const crumb=document.createElement('div'); crumb.className='crumb'; crumb.style.left=Math.random()*140+'px'; crumb.style.top=Math.random()*140+'px'; cookie.appendChild(crumb); setTimeout(()=>crumb.remove(),600); }
 
 // ======== Рендер ========
 function render(){
@@ -165,30 +165,31 @@ function render(){
   document.getElementById('prestigePoints').textContent=fmt(state.prestige.points);
   document.getElementById('goldCookies').textContent=fmt(state.goldCookies);
 
+  // Магазин
   const storeDiv=document.getElementById('store'); storeDiv.innerHTML='';
   Object.values(state.buildings).forEach(b=>{
     const div=document.createElement('div'); div.className='item';
     div.style.background=state.cookies>=b.cost?'rgba(0,200,0,0.2)':'rgba(255,255,255,0.05)';
-    div.innerHTML=`<div>${b.emoji} ${b.name} (${b.qty})</div><div>${fmt(b.cost)}</div><button data-key="${b.key}">Купить</button>`;
+    div.innerHTML=`<div>${b.emoji} ${b.name} (${b.qty}) +${fmt(b.cps)} CPS</div><div>${fmt(b.cost)}</div><button data-key="${b.key}">Купить</button>`;
     storeDiv.appendChild(div);
     const btn = div.querySelector('button');
-    btn.addEventListener('mousedown',()=>div.style.transform='scale(0.95)');
-    btn.addEventListener('mouseup',()=>div.style.transform='scale(1)');
-    btn.addEventListener('touchstart',()=>div.style.transform='scale(0.95)');
-    btn.addEventListener('touchend',()=>div.style.transform='scale(1)');
+    ['mousedown','mouseup','touchstart','touchend'].forEach(e=>{
+      btn.addEventListener(e,()=>{div.style.transform=e.includes('start')?'scale(0.95)':'scale(1)';});
+    });
   });
 
+  // Апгрейды
   const upgradesDiv=document.getElementById('upgrades'); upgradesDiv.innerHTML='';
   Object.values(state.upgrades).forEach(u=>{
+    if(u.type==='building' && state.buildings[u.target].qty===0) return; // показывать только полезные
     const div=document.createElement('div'); div.className='upgrade'+(u.bought?' bought':'');
     div.style.background=!u.bought && state.cookies>=u.cost?'rgba(255,215,0,0.3)':(!u.bought?'rgba(255,255,255,0.05)':'');
     div.innerHTML=`<div>${u.name} (${fmt(u.cost)})</div><button data-id="${u.id}" ${u.bought?'disabled':''}>Купить</button>`;
     upgradesDiv.appendChild(div);
     const btn = div.querySelector('button');
-    btn.addEventListener('mousedown',()=>div.style.transform='scale(0.95)');
-    btn.addEventListener('mouseup',()=>div.style.transform='scale(1)');
-    btn.addEventListener('touchstart',()=>div.style.transform='scale(0.95)');
-    btn.addEventListener('touchend',()=>div.style.transform='scale(1)');
+    ['mousedown','mouseup','touchstart','touchend'].forEach(e=>{
+      btn.addEventListener(e,()=>{div.style.transform=e.includes('start')?'scale(0.95)':'scale(1)';});
+    });
   });
 
   document.querySelectorAll('.item button').forEach(btn=>{ btn.onclick=()=>buyBuilding(btn.dataset.key); btn.ontouchstart=()=>buyBuilding(btn.dataset.key); });
@@ -221,7 +222,6 @@ document.getElementById('cookieBtn').addEventListener('touchstart',e=>{e.prevent
 document.getElementById('cookieBtn').addEventListener('mousedown',clickCookie);
 document.getElementById('prestigeBtn').addEventListener('click',prestigeReset);
 document.getElementById('prestigeBtn').addEventListener('touchstart',e=>{e.preventDefault(); prestigeReset();});
-
 document.getElementById('prestigeYes').addEventListener('click',()=>{
   const earnedGold = Math.floor(state.totalCookies/1e12);
   state.goldCookies += earnedGold;
@@ -236,14 +236,11 @@ document.getElementById('prestigeYes').addEventListener('click',()=>{
   document.getElementById('prestigeModal').style.display='none';
   render();
 });
-
 document.getElementById('prestigeNo').addEventListener('click',()=>{ document.getElementById('prestigeModal').style.display='none'; });
-
 document.getElementById('statsBtn').addEventListener('click',()=>{
   document.getElementById('statsModal').style.display='flex';
   updateStatsModal('current');
 });
-
 document.getElementById('tabCurrent').addEventListener('click',()=>updateStatsModal('current'));
 document.getElementById('tabOverall').addEventListener('click',()=>updateStatsModal('overall'));
 
