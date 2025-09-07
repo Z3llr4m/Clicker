@@ -101,13 +101,32 @@ function initState(){
   buildingList.forEach(b=>{
     state.buildings[b.key]={...b, qty:0, cps:b.baseCPS, cost:b.baseCost};
   });
-  const buildingKeys = Object.keys(state.buildings);
-  state.upgrades = {};
-  for(let i=1;i<=1000;i++){
-    let u={id:i,bought:false,multiplier:2};
-    if(Math.random()<0.5){ u.type='click'; u.name=`Улучшение клика ×2`; u.cost=Math.round(100*Math.pow(1.15,i)); }
-    else{ u.type='building'; u.target=buildingKeys[Math.floor(Math.random()*buildingKeys.length)]; u.name=`Улучшение ${u.target} ×2`; u.cost=Math.round(state.buildings[u.target].baseCost*Math.pow(1.15,i)); }
-    state.upgrades[i]=u;
+
+  // Генерация апгрейдов
+  state.upgrades={};
+  Object.values(state.buildings).forEach(b=>{
+    for(let i=1;i<=10;i++){ // 10 апгрейдов на здание
+      state.upgrades[`${b.key}_${i}`] = {
+        id: `${b.key}_${i}`,
+        type: 'building',
+        target: b.key,
+        bought: false,
+        cost: Math.round(b.baseCost*(1+0.2*i)),
+        multiplier:2,
+        name:`Улучшение ${b.name} ×2`
+      };
+    }
+  });
+  // Апгрейды клика
+  for(let i=1;i<=10;i++){
+    state.upgrades[`click_${i}`] = {
+      id:`click_${i}`,
+      type:'click',
+      bought:false,
+      cost: Math.round(15*(1.2*i)),
+      multiplier:2,
+      name:`Улучшение клика ×2`
+    };
   }
 }
 initState();
@@ -218,10 +237,12 @@ function updateStatsModal(tab){
 }
 
 // ======== События ========
-document.getElementById('cookieBtn').addEventListener('touchstart',e=>{e.preventDefault(); clickCookie();});
-document.getElementById('cookieBtn').addEventListener('mousedown',clickCookie);
-document.getElementById('prestigeBtn').addEventListener('click',prestigeReset);
-document.getElementById('prestigeBtn').addEventListener('touchstart',e=>{e.preventDefault(); prestigeReset();});
+['click','touchstart'].forEach(ev=>{
+  document.getElementById('cookieBtn').addEventListener(ev, e=>{ e.preventDefault(); clickCookie(); });
+  document.getElementById('prestigeBtn').addEventListener(ev, e=>{ e.preventDefault(); prestigeReset(); });
+  document.getElementById('statsBtn').addEventListener(ev, e=>{ e.preventDefault(); document.getElementById('statsModal').style.display='flex'; updateStatsModal('current'); });
+});
+
 document.getElementById('prestigeYes').addEventListener('click',()=>{
   const earnedGold = Math.floor(state.totalCookies/1e12);
   state.goldCookies += earnedGold;
@@ -237,10 +258,6 @@ document.getElementById('prestigeYes').addEventListener('click',()=>{
   render();
 });
 document.getElementById('prestigeNo').addEventListener('click',()=>{ document.getElementById('prestigeModal').style.display='none'; });
-document.getElementById('statsBtn').addEventListener('click',()=>{
-  document.getElementById('statsModal').style.display='flex';
-  updateStatsModal('current');
-});
 document.getElementById('tabCurrent').addEventListener('click',()=>updateStatsModal('current'));
 document.getElementById('tabOverall').addEventListener('click',()=>updateStatsModal('overall'));
 
