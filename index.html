@@ -8,38 +8,35 @@
 body {
   margin:0;
   font-family: Arial, sans-serif;
-  text-align:center;
   background: #f5e1a4;
-  overflow-x: hidden;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 #cookie {
   width: 150px;
   height: 150px;
   background: url('https://i.ibb.co/ZH1q7r8/cookie.png') no-repeat center/cover;
-  margin: 20px auto;
+  margin: 20px 0;
   border-radius: 50%;
   touch-action: manipulation;
 }
 #buildings, #upgrades {
+  width: 90%;
   display:flex;
-  flex-wrap: wrap;
-  justify-content:center;
-  margin: 10px auto;
+  flex-direction:column;
+  margin: 10px 0;
 }
 .building, .upgrade {
   border:1px solid #aaa;
   border-radius:5px;
   background:#fff8dc;
-  margin:5px;
-  padding:5px;
-  min-width:90px;
+  margin:5px 0;
+  padding:10px;
   cursor:pointer;
 }
 #stats {
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
+  width: 100%;
   background:#fff8dc;
   border-top:1px solid #aaa;
   text-align:left;
@@ -48,6 +45,8 @@ body {
   box-sizing:border-box;
   max-height:150px;
   overflow-y:auto;
+  position: sticky;
+  bottom: 0;
 }
 .fly-cookie {
   position:absolute;
@@ -79,6 +78,7 @@ button.prestige {
 <div id="stats"></div>
 
 <script>
+// JS код остался таким же, только layout теперь вертикальный
 const cookie = document.getElementById('cookie');
 const buildingsDiv = document.getElementById('buildings');
 const upgradesDiv = document.getElementById('upgrades');
@@ -100,7 +100,7 @@ function showFlyCookie(x,y){
   setTimeout(()=>fc.remove(),1000);
 }
 
-// Структура зданий
+// Здания и апгрейды как в предыдущем файле
 const buildings = {
   "Курсор": {basePrice:15, owned:0, baseCPS:0.1, multiplier:1, upgrades:[], nextUpgrade:0},
   "Бабушка": {basePrice:100, owned:0, baseCPS:1, multiplier:1, upgrades:[], nextUpgrade:0},
@@ -119,7 +119,6 @@ const buildings = {
   "Божественный дух": {basePrice:26000000000000000, owned:0, baseCPS:20000000000, multiplier:1, upgrades:[], nextUpgrade:0}
 };
 
-// Апгрейды для каждого здания
 const upgradesData = {
   "Курсор": ["Смазанные шарниры","Лазерный прицел","Автокликер","Нейро-курсоры"],
   "Бабушка": ["Бабушкины очки","Двойные спицы","Печь на угле","Ядерное тесто"],
@@ -138,7 +137,7 @@ const upgradesData = {
   "Божественный дух": ["Божественный шторм","Святая мука","Печенье-создатель","Вселенская выпечка"]
 };
 
-// Инициализация апгрейдов для зданий
+// Инициализация апгрейдов
 for (let b in buildings){
   buildings[b].upgrades = upgradesData[b].map((name,i)=>{
     return {name:name, level:1, multiplier: i+2, price: buildings[b].basePrice*10};
