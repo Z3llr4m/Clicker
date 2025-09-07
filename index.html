@@ -189,15 +189,15 @@ function updateBuildings(){
   buildingsDiv.innerHTML='';
   Object.keys(buildings).forEach(b=>{
     const bd=buildings[b];
-    const currentCPS = (bd.owned * bd.baseCPS * bd.multiplier).toFixed(1); // текущий CPS здания
+    const currentCPS = (bd.owned * bd.baseCPS * bd.multiplier).toFixed(1);
+    const currentPrice = bd.basePrice * Math.pow(3, bd.owned); // правильная текущая цена
     const div=document.createElement('div');
     div.className='building';
-    div.innerHTML=`<span>${bd.owned>0?bd.owned+'x ':''}${buildingEmojis[b]} ${b} (CPS: ${currentCPS})</span><span>Цена: ${formatNumber(Math.floor(bd.basePrice))}</span>`;
+    div.innerHTML=`<span>${bd.owned>0?bd.owned+'x ':''}${buildingEmojis[b]} ${b} (CPS: ${currentCPS})</span><span>Цена: ${formatNumber(Math.floor(currentPrice))}</span>`;
     div.onclick=()=>{
-      if(cookies>=bd.basePrice){
-        cookies-=bd.basePrice;
+      if(cookies>=currentPrice){
+        cookies-=currentPrice;
         bd.owned++;
-        bd.basePrice*=3;
         animatePurchase(div);
         updateBuildings();
         updateStats();
@@ -206,7 +206,6 @@ function updateBuildings(){
     buildingsDiv.appendChild(div);
   });
 }
-
 // -------------------- Обновление апгрейдов --------------------
 function updateUpgrades(){
   upgradesDiv.innerHTML='';
