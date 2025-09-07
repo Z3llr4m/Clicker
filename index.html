@@ -179,26 +179,38 @@ function clickCookie(){
   saveState();
 }
 
-// ======== Магазин и апгрейды ========
-function buyBuilding(key){
-  const b = state.buildings[key];
-  if(state.cookies >= b.cost){
-    state.cookies -= b.cost;
-    b.qty++;
-    b.cost = Math.round(b.baseCost * Math.pow(1.15,b.qty));
-    render();
-    saveState();
+// ======== Инициализация апгрейдов ========
+function initUpgrades(){
+  const buildingKeys = Object.keys(state.buildings);
+  state.upgrades = {};
+  let id = 1;
+  for(let i=0;i<1000;i++){
+    const type = Math.random()<0.5?'click':'building';
+    let u = { id, bought:false };
+    u.type = type;
+    u.multiplier = 2; // каждый апгрейд ×2
+    u.cost = Math.round(100 * Math.pow(1.15, i));
+    if(type==='click'){
+      u.name = `Улучшение клика ×${Math.pow(2,i+1)}`;
+      u.target = null;
+    } else {
+      const target = buildingKeys[Math.floor(Math.random()*buildingKeys.length)];
+      u.name = `Улучшение ${target} ×${Math.pow(2,i+1)}`;
+      u.target = target;
+    }
+    state.upgrades[id]=u;
+    id++;
   }
 }
 
+// ======== Покупка апгрейда ========
 function buyUpgrade(id){
   const u = state.upgrades[id];
-  if(!u.bought && state.cookies >= u.cost){
+  if(!u.bought && state.cookies>=u.cost){
     state.cookies -= u.cost;
-    u.bought=true;
-    if(u.type==='click') state.clickPower *= u.mult;
-    if(u.type==='cps') { for(const k in state.buildings) state.buildings[k].cps *= u.mult; }
-    if(u.type==='building') state.buildings[u.target].cps *= u.mult;
+    u.bought = true;
+    if(u.type==='click') state.clickPower *= u.multiplier;
+    if(u.type==='building' && u.target) state.buildings[u.target].cps *= u.multiplier;
     render();
     saveState();
   }
@@ -206,16 +218,28 @@ function buyUpgrade(id){
 
 // ======== Престиж ========
 function prestigeReset(){
-  const earned=Math.floor(Math.pow(state.totalCookies/1e6,0.5));
+  const earned = Math.floor(Math.sqrt(state.totalCookies/1e6)); // формула бонуса
   if(earned>0){
     state.prestige.points += earned;
     state.prestige.multiplier = 1 + state.prestige.points*0.05;
-    state.cookies=0; state.clicks=0; state.totalCookies=0;
-    buildingList.forEach(b=>state.buildings[b.key].qty=0);
-    for(const k in state.upgrades) state.upgrades[k].bought=false;
+    state.cookies=0;
+    state.clicks=0;
+    state.totalCookies=0;
+    Object.values(state.buildings).forEach(b=>{
+      b.qty = 0;
+      b.cps = b.baseCPS; // восстанавливаем базовое CPS
+    });
+    Object.values(state.upgrades).forEach(u=>u.bought=false);
     render();
     saveState();
   }
+}
+
+// ======== Получение CPS с учётом престижа ========
+function getCPS(){
+  let cps = 0;
+  Object.values(state.buildings).forEach(b=>cps += b.qty*b.cps);
+  return cps*state.prestige.multiplier;
 }
 
 // ======== Анимация крошек ========
@@ -248,31 +272,6 @@ function render(){
   document.getElementById('cpsDisplay').textContent = fmt(getCPS()) + ' в сек';
   document.getElementById('prestigePoints').textContent = fmt(state.prestige.points);
 
-  // Магазин
-  const storeDiv = document.getElementById('store');
-  storeDiv.innerHTML='';
-  buildingList.forEach(b=>{
-    const bi = state.buildings[b.key];
-    const div=document.createElement('div'); div.className='item';
-    div.innerHTML=`<div class="icon">${b.emoji}</div>
-      <div class="info"><div class="title">${b.name}</div>
-      <div class="desc">Цена: ${fmt(bi.cost)}, CPS: ${fmt(bi.cps)} × ${bi.qty}</div></div>
-      <button onclick="buyBuilding('${b.key}')">Купить</button>`;
-    storeDiv.appendChild(div);
-  });
-
-  // Апгрейды
-  const upgradesDiv = document.getElementById('upgrades');
-  upgradesDiv.innerHTML='';
-  for(const k in state.upgrades){
-    const u=state.upgrades[k];
-    const div=document.createElement('div');
-    div.className='upgrade'+(u.bought?' bought':'');
-    div.innerHTML=`<div>${u.name} (${fmt(u.cost)})</div>
-      <button onclick="buyUpgrade(${k})" ${u.bought?'disabled':''}>Купить</button>`;
-    upgradesDiv.appendChild(div);
-  }
-}
 
 // ======== Автосохранение и CPS тик ========
 function gameTick(){
