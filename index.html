@@ -3,55 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cookie Clicker Mobile</title>
+<title>Cookie Clicker Mobile Dark</title>
 <style>
 body {
   margin:0;
   font-family: Arial, sans-serif;
-  background: #f5e1a4;
+  background: #1c1c1c url('https://i.ibb.co/Jxp0Z1r/milk-bg.png') repeat; /* фон молока на темном фоне */
+  color: #fff;
   display:flex;
   flex-direction:column;
   align-items:center;
 }
 #cookie {
-  width: 150px;
-  height: 150px;
+  width: 200px;
+  height: 200px;
   background: url('https://i.ibb.co/ZH1q7r8/cookie.png') no-repeat center/cover;
   margin: 20px 0;
   border-radius: 50%;
+  box-shadow: 0 0 20px #fff;
   touch-action: manipulation;
 }
-#buildings, #upgrades {
+.container {
   width: 90%;
-  display:flex;
-  flex-direction:column;
+  max-height: 200px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid #444;
+  border-radius: 8px;
   margin: 10px 0;
+  padding: 5px;
 }
 .building, .upgrade {
-  border:1px solid #aaa;
+  border:1px solid #666;
   border-radius:5px;
-  background:#fff8dc;
+  background: rgba(255,255,255,0.1);
   margin:5px 0;
   padding:10px;
   cursor:pointer;
+  color:#fff;
 }
 #stats {
-  width: 100%;
-  background:#fff8dc;
-  border-top:1px solid #aaa;
-  text-align:left;
-  padding:5px;
   font-size:14px;
-  box-sizing:border-box;
-  max-height:150px;
-  overflow-y:auto;
-  position: sticky;
-  bottom: 0;
 }
 .fly-cookie {
   position:absolute;
-  width:30px;
-  height:30px;
+  width:40px;
+  height:40px;
   pointer-events:none;
   background: url('https://i.ibb.co/ZH1q7r8/cookie.png') no-repeat center/cover;
   animation: floatUp 1s forwards;
@@ -63,21 +60,93 @@ body {
 }
 button.prestige {
   margin:10px;
-  padding:5px 10px;
+  padding:10px 20px;
   font-size:16px;
+  background:#444;
+  color:#fff;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
 }
 </style>
 </head>
 <body>
 
-<h1>🍪 Cookie Clicker Mobile</h1>
+<h1>🍪 Cookie Clicker Dark</h1>
 <div id="cookie"></div>
-<div id="buildings"></div>
-<div id="upgrades"></div>
+
+<div class="container" id="buildings"></div>
+<div class="container" id="upgrades"></div>
+<div class="container" id="stats"></div>
+
 <button class="prestige">Престиж</button>
-<div id="stats"></div>
 
 <script>
+// JS код аналогичен предыдущему
+const cookie = document.getElementById('cookie');
+const buildingsDiv = document.getElementById('buildings');
+const upgradesDiv = document.getElementById('upgrades');
+const statsDiv = document.getElementById('stats');
+const prestigeBtn = document.querySelector('.prestige');
+
+let cookies = 0;
+let totalCookies = 0;
+let goldenCookies = 0;
+let prestigeMultiplier = 0;
+let startTime = Date.now();
+
+function showFlyCookie(x,y){
+  const fc = document.createElement('div');
+  fc.className = 'fly-cookie';
+  fc.style.left = x+'px';
+  fc.style.top = y+'px';
+  document.body.appendChild(fc);
+  setTimeout(()=>fc.remove(),1000);
+}
+
+const buildings = {
+  "Курсор": {basePrice:15, owned:0, baseCPS:0.1, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Бабушка": {basePrice:100, owned:0, baseCPS:1, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Ферма": {basePrice:1100, owned:0, baseCPS:8, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Фабрика": {basePrice:12000, owned:0, baseCPS:47, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Шахта": {basePrice:130000, owned:0, baseCPS:260, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Магическая башня": {basePrice:1400000, owned:0, baseCPS:1400, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Храм": {basePrice:20000000, owned:0, baseCPS:7800, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Лаборатория": {basePrice:330000000, owned:0, baseCPS:44000, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Космическая станция": {basePrice:5100000000, owned:0, baseCPS:260000, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Драконье логово": {basePrice:75000000000, owned:0, baseCPS:1600000, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Машина времени": {basePrice:1000000000000, owned:0, baseCPS:10000000, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Антиматерия": {basePrice:14000000000000, owned:0, baseCPS:65000000, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Алхимия": {basePrice:170000000000000, owned:0, baseCPS:430000000, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Космическое печенье": {basePrice:2100000000000000, owned:0, baseCPS:2800000000, multiplier:1, upgrades:[], nextUpgrade:0},
+  "Божественный дух": {basePrice:26000000000000000, owned:0, baseCPS:20000000000, multiplier:1, upgrades:[], nextUpgrade:0}
+};
+
+const upgradesData = {
+  "Курсор": ["Смазанные шарниры","Лазерный прицел","Автокликер","Нейро-курсоры"],
+  "Бабушка": ["Бабушкины очки","Двойные спицы","Печь на угле","Ядерное тесто"],
+  "Ферма": ["Удобрение +10","ГМО-печенье","Мега-трактор","Ферма-робот"],
+  "Фабрика": ["Конвейер XL","Сверхпечь","Автоматизация","Кибер-фабрика"],
+  "Шахта": ["Каменный уголь","Железная печь","Алмазные противни","Адамантиевая мука"],
+  "Магическая башня": ["Магия теста","Заклинание дрожжей","Книга печений","Архимаг-кулинар"],
+  "Храм": ["Хор пекарей","Псалмы с корицей","Жертвенные печенья","Святая выпечка"],
+  "Лаборатория": ["Генетические дрожжи","Нанопеченье","Квантовая мука","Печенье из параллельных миров"],
+  "Космическая станция": ["Гравитационная духовка","Лунные коровы","Марсианская мука","Чёрная дыра-печь"],
+  "Драконье логово": ["Дыхание печенья","Драконьи крошки","Пламя из шоколада","Яйцо карамели"],
+  "Машина времени": ["Хлеб из прошлого","Дрожжи будущего","Цикл теста","Печенье за пределами времени"],
+  "Антиматерия": ["Тёмное тесто","Печенье из вакуума","Сингулярная духовка","Разрушитель вселенной"],
+  "Алхимия": ["Камень в печенье","Философская печенька","Золотая крошка","Алхимический реактор"],
+  "Космическое печенье": ["Космический клик","Галактическая мука","Сверхновая духовка","Чёрная печенька"],
+  "Божественный дух": ["Божественный шторм","Святая мука","Печенье-создатель","Вселенская выпечка"]
+};
+
+// Инициализация апгрейдов для каждого здания
+for (let b in buildings){
+  buildings[b].upgrades = upgradesData[b].map((name,i)=>{
+    return {name:name, level:1, multiplier: i+2, price: buildings[b].basePrice*10};
+  });
+}
+
 // JS код остался таким же, только layout теперь вертикальный
 const cookie = document.getElementById('cookie');
 const buildingsDiv = document.getElementById('buildings');
