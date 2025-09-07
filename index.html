@@ -3,392 +3,205 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ультра Cookie Clicker</title>
+<title>Ultra Cookie Clicker</title>
 <style>
-:root {
-  --bg:#1f1f2e; --panel:#27273a; --accent:#f5c24a; --muted:#bfc3cf; --green:#7be39b;
-}
-* { box-sizing:border-box; font-family: Inter,Segoe UI,Arial,sans-serif; }
-html, body { margin:0; padding:0; background:var(--bg); color:#fff; height:100%; }
-.wrap { display:grid; grid-template-columns:1fr 400px; gap:16px; max-width:1200px; margin:0 auto; padding:16px; }
-.panel { background:var(--panel); border-radius:12px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,0.5); }
-.left { display:flex; flex-direction:column; align-items:center; }
-.cookie { width:80vw; max-width:300px; height:80vw; max-height:300px; border-radius:50%; background:linear-gradient(145deg,#f6e2b3,#f0c66a); display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow:0 12px 30px rgba(0,0,0,0.5),inset -8px -8px 18px rgba(255,255,255,0.15); position:relative; cursor:pointer; user-select:none; transition:transform .08s ease; }
-.cookie:active { transform:scale(.98); }
-.crumb { position:absolute; border-radius:50%; background:rgba(255,255,255,0.2); opacity:0.8; filter:blur(.5px); }
-.stats { display:flex; gap:12px; width:100%; justify-content:space-between; margin-top:10px; flex-wrap:wrap; }
-.stat { background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px; color:var(--muted); font-size:14px; }
-.right { display:flex; flex-direction:column; gap:12px; }
-.store { display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; }
-.item { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; transition:0.2s; }
-.item:hover { background:rgba(245,194,74,0.1); }
-.item .icon { width:56px; height:56px; border-radius:10px; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; font-size:22px; }
-.item .info { flex:1; }
-.item .title { font-weight:600; }
-.item .desc { font-size:13px; color:var(--muted); }
-.item button { padding:8px 12px; border-radius:8px; border:0; background:var(--accent); color:#222; font-weight:700; cursor:pointer; transition:0.2s; }
-.item button:hover { background:#f7d568; }
-.upgrades { display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; }
-.upgrade { display:flex; align-items:center; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.02); border-radius:8px; transition:0.2s; }
-.upgrade.bought { background:rgba(123,227,155,0.2); }
-.achievements { display:flex; flex-wrap:wrap; gap:6px; max-height:100px; overflow-y:auto; margin-top:8px; }
-.achievement { padding:6px 8px; border-radius:6px; background:rgba(255,255,255,0.05); font-size:12px; color:var(--muted); transition:0.3s; }
-.achievement.unlocked { background:var(--green); color:#222; }
-footer { margin-top:16px; color:var(--muted); font-size:13px; text-align:center; }
-@media (max-width:900px) {
-  .wrap { grid-template-columns:1fr; padding:12px; }
-  .cookie { width:70vw; height:70vw; font-size:40px; }
-}
+body { margin:0; font-family:sans-serif; background:#1f1f2e; color:white; transition:background 1s ease; }
+.wrap { display:flex; gap:16px; max-width:1200px; margin:0 auto; padding:16px; }
+.left { flex:1; display:flex; flex-direction:column; align-items:center; }
+.cookie { width:200px; height:200px; border-radius:50%; background:linear-gradient(145deg,#f6e2b3,#f0c66a); display:flex; align-items:center; justify-content:center; font-size:48px; cursor:pointer; position:relative; }
+.crumb { position:absolute; border-radius:50%; width:10px; height:10px; background:rgba(255,255,255,0.6); }
+.stats { display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
+.stat { background:rgba(255,255,255,0.1); padding:6px 10px; border-radius:6px; font-size:14px; }
+.right { width:400px; display:flex; flex-direction:column; gap:12px; }
+.store, .upgrades { display:flex; flex-direction:column; gap:6px; max-height:300px; overflow-y:auto; }
+.item, .upgrade { display:flex; justify-content:space-between; padding:6px 10px; background:rgba(255,255,255,0.05); border-radius:6px; }
+.item button, .upgrade button { background:#f5c24a; border:0; border-radius:6px; cursor:pointer; padding:4px 8px; color:#222; font-weight:700; }
+.upgrade.bought { opacity:0.5; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="panel left">
-    <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <h1>Мои печеньки</h1>
-        <div style="color:var(--muted); font-size:13px;">Кликни по печеньке!</div>
-      </div>
-      <div style="text-align:right;">
-        <div id="cookiesDisplay" style="font-weight:800;font-size:20px;">0</div>
-        <div style="color:var(--muted);font-size:13px;" id="cpsDisplay">0 в сек</div>
-      </div>
-    </div>
-    <div class="cookie" id="cookieBtn">🍪</div>
+  <div class="left">
+    <div id="cookieBtn" class="cookie">🍪</div>
     <div class="stats">
-      <div class="stat">Всего печенек: <strong id="totalCookies">0</strong></div>
-      <div class="stat">Клики: <strong id="clicksCount">0</strong></div>
-      <div class="stat">Клик-сила: <strong id="clickPower">1</strong></div>
-      <div class="stat">Престиж: <strong id="prestigePoints">0</strong></div>
+      <div class="stat">Печеньки: <span id="cookiesDisplay">0</span></div>
+      <div class="stat">CPS: <span id="cpsDisplay">0</span></div>
+      <div class="stat">Клик: <span id="clickPower">1</span></div>
+      <div class="stat">Престиж: <span id="prestigePoints">0</span></div>
     </div>
-    <strong>Достижения</strong>
-    <div class="achievements" id="achievements"></div>
-    <footer>Сохраняется автоматически. Экспорт / импорт доступен справа.</footer>
   </div>
-
-  <div class="panel right">
-    <strong>Магазин</strong>
-    <div class="store" id="store"></div>
-    <hr style="border:none;height:8px;">
-    <strong>Апгрейды</strong>
-    <div class="upgrades" id="upgrades"></div>
-    <hr style="border:none;height:8px;">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;">
-      <button id="exportBtn">Экспорт</button>
-      <button id="importBtn">Импорт</button>
-      <button id="resetBtn">Сброс</button>
-      <button id="prestigeBtn" style="background:var(--green);color:#222;">Престиж</button>
-    </div>
+  <div class="right">
+    <h3>Магазин</h3>
+    <div id="store" class="store"></div>
+    <h3>Апгрейды</h3>
+    <div id="upgrades" class="upgrades"></div>
+    <button id="prestigeBtn">Престиж</button>
   </div>
 </div>
-  <script>
-// ======== Настройки и состояние ========
-const SAVE_KEY = 'ultra_cookie_clicker';
+
+<script>
+// ======== Состояние ========
 let state = {
-  cookies: 0,
-  totalCookies: 0,
-  clicks: 0,
-  clickPower: 1,
-  prestige: { points: 0, multiplier: 1 },
-  buildings: {},
-  upgrades: {},
-  achievements: {},
-  lastTick: Date.now()
+  cookies:0, totalCookies:0, clicks:0, clickPower:1,
+  prestige:{points:0,multiplier:1},
+  buildings:{}, upgrades:{}, lastTick:Date.now()
 };
 
-// ======== Список зданий (40 штук) ========
-const buildingList = [
-  {key:'cursor',name:'Курсор',baseCost:15,cps:0.1,emoji:'🖱️'},
-  {key:'grandma',name:'Бабушка',baseCost:100,cps:1,emoji:'👵'},
-  {key:'farm',name:'Ферма',baseCost:1100,cps:8,emoji:'🌾'},
-  {key:'mine',name:'Шахта',baseCost:12000,cps:47,emoji:'⛏️'},
-  {key:'factory',name:'Фабрика',baseCost:130000,cps:260,emoji:'🏭'},
-  {key:'bank',name:'Банк',baseCost:1400000,cps:1400,emoji:'🏦'},
-  {key:'temple',name:'Храм',baseCost:20000000,cps:7800,emoji:'⛩️'},
-  {key:'wizard',name:'Волшебник',baseCost:330000000,cps:44000,emoji:'🧙‍♂️'},
-  {key:'shipment',name:'Отгрузка',baseCost:5100000000,cps:260000,emoji:'🚢'},
-  {key:'alchemy',name:'Алхимия',baseCost:75000000000,cps:1600000,emoji:'⚗️'},
-  {key:'portal',name:'Портал',baseCost:1e12,cps:10000000,emoji:'🌀'},
-  {key:'blackhole',name:'Чёрная дыра',baseCost:1e14,cps:66666666,emoji:'🌌'},
-  {key:'timeMachine',name:'Машина времени',baseCost:1e16,cps:2e8,emoji:'⏳'},
-  {key:'antimatter',name:'Анти-материя',baseCost:1e18,cps:1e9,emoji:'🕳️'},
-  {key:'quantumLab',name:'Квантовая лаборатория',baseCost:5e19,cps:5e9,emoji:'🔬'},
-  {key:'galaxyFactory',name:'Галактическая фабрика',baseCost:1e21,cps:2e10,emoji:'🌌'},
-  {key:'universeForge',name:'Вселенская кузница',baseCost:1e23,cps:1e11,emoji:'🌠'},
-  {key:'darkMatterPlant',name:'Фабрика тёмной материи',baseCost:1e25,cps:5e11,emoji:'🛸'},
-  {key:'nanoFactory',name:'Нанофабрика',baseCost:1e27,cps:2e12,emoji:'🤖'},
-  {key:'cosmoLab',name:'Космологическая лаборатория',baseCost:1e29,cps:1e13,emoji:'🪐'},
-  {key:'megaBank',name:'Мега-Банк',baseCost:1e31,cps:5e13,emoji:'🏛️'},
-  {key:'aiOverlord',name:'ИИ Повелитель',baseCost:1e33,cps:2e14,emoji:'🤖'},
-  {key:'orbitalStation',name:'Орбитальная станция',baseCost:1e35,cps:1e15,emoji:'🛰️'},
-  {key:'terraformer',name:'Терраформер',baseCost:1e37,cps:5e15,emoji:'🏞️'},
-  {key:'spaceFactory',name:'Космическая фабрика',baseCost:1e39,cps:2e16,emoji:'🚀'},
-  {key:'starForge',name:'Кузница звёзд',baseCost:1e41,cps:1e17,emoji:'⭐'},
-  {key:'blackHoleForge',name:'Фабрика чёрных дыр',baseCost:1e43,cps:5e17,emoji:'🕳️'},
-  {key:'multiverseLab',name:'Лаборатория мультивселенной',baseCost:1e45,cps:2e18,emoji:'🌌'},
-  {key:'dimensionGate',name:'Врата измерений',baseCost:1e47,cps:1e19,emoji:'🌀'},
-  {key:'timeForge',name:'Вечная кузница времени',baseCost:1e49,cps:5e19,emoji:'⏳'},
-  {key:'eternityLab',name:'Лаборатория вечности',baseCost:1e51,cps:2e20,emoji:'🪐'},
-  {key:'galacticBank',name:'Галактический банк',baseCost:1e53,cps:1e21,emoji:'🏦'},
-  {key:'darkEnergyPlant',name:'Фабрика тёмной энергии',baseCost:1e55,cps:5e21,emoji:'⚡'},
-  {key:'supernovaLab',name:'Лаборатория сверхновых',baseCost:1e57,cps:2e22,emoji:'💥'},
-  {key:'quantumForge',name:'Квантовая кузница',baseCost:1e59,cps:1e23,emoji:'🔬'},
-  {key:'infinityFactory',name:'Фабрика бесконечности',baseCost:1e61,cps:5e23,emoji:'♾️'},
-  {key:'omniverseLab',name:'Лаборатория Омниверсум',baseCost:1e63,cps:2e24,emoji:'🌌'},
-  {key:'godMachine',name:'Машина Бога',baseCost:1e65,cps:1e25,emoji:'🛸'},
-  {key:'finalForge',name:'Финальная кузница',baseCost:1e67,cps:5e25,emoji:'🔥'}
+const buildingList=[
+  {key:'cursor',name:'Курсор',baseCost:15,baseCPS:0.1,emoji:'🖱️'},
+  {key:'grandma',name:'Бабушка',baseCost:100,baseCPS:1,emoji:'👵'},
+  {key:'farm',name:'Ферма',baseCost:1100,baseCPS:8,emoji:'🌾'},
+  {key:'mine',name:'Шахта',baseCost:12000,baseCPS:47,emoji:'⛏️'},
+  {key:'factory',name:'Фабрика',baseCost:130000,baseCPS:260,emoji:'🏭'},
+  {key:'bank',name:'Банк',baseCost:1400000,baseCPS:1400,emoji:'🏦'},
+  {key:'temple',name:'Храм',baseCost:20000000,baseCPS:7800,emoji:'⛩️'},
+  {key:'wizard',name:'Волшебник',baseCost:330000000,baseCPS:44000,emoji:'🧙‍♂️'},
+  {key:'shipment',name:'Отгрузка',baseCost:5100000000,baseCPS:260000,emoji:'🚢'},
+  {key:'alchemy',name:'Алхимия',baseCost:75000000000,baseCPS:1600000,emoji:'⚗️'},
+  {key:'portal',name:'Портал',baseCost:1e12,baseCPS:10000000,emoji:'🌀'},
+  {key:'blackhole',name:'Чёрная дыра',baseCost:1e14,baseCPS:66666666,emoji:'🌌'},
+  {key:'timeMachine',name:'Машина времени',baseCost:1e16,baseCPS:2e8,emoji:'⏳'},
+  {key:'antimatter',name:'Анти-материя',baseCost:1e18,baseCPS:1e9,emoji:'🕳️'},
+  {key:'quantumLab',name:'Квантовая лаборатория',baseCost:5e19,baseCPS:5e9,emoji:'🔬'},
+  {key:'galaxyFactory',name:'Галактическая фабрика',baseCost:1e21,baseCPS:2e10,emoji:'🌌'},
+  {key:'universeForge',name:'Вселенская кузница',baseCost:1e23,baseCPS:1e11,emoji:'🌠'},
+  {key:'darkMatterPlant',name:'Фабрика тёмной материи',baseCost:1e25,baseCPS:5e11,emoji:'🛸'},
+  {key:'nanoFactory',name:'Нанофабрика',baseCost:1e27,baseCPS:2e12,emoji:'🤖'},
+  {key:'cosmoLab',name:'Космологическая лаборатория',baseCost:1e29,baseCPS:1e13,emoji:'🪐'},
+  {key:'megaBank',name:'Мега-Банк',baseCost:1e31,baseCPS:5e13,emoji:'🏛️'},
+  {key:'aiOverlord',name:'ИИ Повелитель',baseCost:1e33,baseCPS:2e14,emoji:'🤖'},
+  {key:'orbitalStation',name:'Орбитальная станция',baseCost:1e35,baseCPS:1e15,emoji:'🛰️'},
+  {key:'terraformer',name:'Терраформер',baseCost:1e37,baseCPS:5e15,emoji:'🏞️'},
+  {key:'spaceFactory',name:'Космическая фабрика',baseCost:1e39,baseCPS:2e16,emoji:'🚀'},
+  {key:'starForge',name:'Кузница звёзд',baseCost:1e41,baseCPS:1e17,emoji:'⭐'},
+  {key:'blackHoleForge',name:'Фабрика чёрных дыр',baseCost:1e43,baseCPS:5e17,emoji:'🕳️'},
+  {key:'multiverseLab',name:'Лаборатория мультивселенной',baseCost:1e45,baseCPS:2e18,emoji:'🌌'},
+  {key:'dimensionGate',name:'Врата измерений',baseCost:1e47,baseCPS:1e19,emoji:'🌀'},
+  {key:'timeForge',name:'Вечная кузница времени',baseCost:1e49,baseCPS:5e19,emoji:'⏳'},
+  {key:'eternityLab',name:'Лаборатория вечности',baseCost:1e51,baseCPS:2e20,emoji:'🪐'},
+  {key:'galacticBank',name:'Галактический банк',baseCost:1e53,baseCPS:1e21,emoji:'🏦'},
+  {key:'darkEnergyPlant',name:'Фабрика тёмной энергии',baseCost:1e55,baseCPS:5e21,emoji:'⚡'},
+  {key:'supernovaLab',name:'Лаборатория сверхновых',baseCost:1e57,baseCPS:2e22,emoji:'💥'},
+  {key:'quantumForge',name:'Квантовая кузница',baseCost:1e59,baseCPS:1e23,emoji:'🔬'},
+  {key:'infinityFactory',name:'Фабрика бесконечности',baseCost:1e61,baseCPS:5e23,emoji:'♾️'},
+  {key:'omniverseLab',name:'Лаборатория Омниверсум',baseCost:1e63,baseCPS:2e24,emoji:'🌌'},
+  {key:'godMachine',name:'Машина Бога',baseCost:1e65,baseCPS:1e25,emoji:'🛸'},
+  {key:'finalForge',name:'Финальная кузница',baseCost:1e67,baseCPS:5e25,emoji:'🔥'}
 ];
 
 // ======== Инициализация состояния ========
-function initState() {
+function initState(){
   state.buildings = {};
-  buildingList.forEach(b => state.buildings[b.key] = {...b, qty:0,cost:b.baseCost});
-  state.upgrades = {};
-  const upgradeTypes=['click','cps','building'];
-  const buildingKeys=Object.keys(state.buildings);
-  for(let i=1;i<=1000;i++){
-    const type=upgradeTypes[Math.floor(Math.random()*upgradeTypes.length)];
-    let u={bought:false};
-    u.name=`${type.toUpperCase()} Уровень ${i}`;
-    u.cost=Math.round(100*Math.pow(1.15,i));
-    u.type=type;
-    u.mult=1+i*0.01;
-    if(type==='building') u.target=buildingKeys[Math.floor(Math.random()*buildingKeys.length)];
-    state.upgrades[i]=u;
-  }
-  state.achievements={};
-  saveState();
-}
-
-function saveState(){localStorage.setItem(SAVE_KEY, JSON.stringify(state));}
-function loadState(){const s=localStorage.getItem(SAVE_KEY);if(s){state=JSON.parse(s);}else{initState();}}
-
-// ======== CPS и клики ========
-function getCPS(){
-  let cps=0;
-  for(const k in state.buildings) cps += state.buildings[k].qty * state.buildings[k].cps;
-  return cps * state.prestige.multiplier;
-}
-
-function clickCookie(){
-  state.cookies += state.clickPower;
-  state.totalCookies += state.clickPower;
-  state.clicks++;
-  spawnCrumb();
-  render();
-  saveState();
-}
-
-// ======== Инициализация апгрейдов ========
-function initUpgrades(){
+  buildingList.forEach(b=>{
+    state.buildings[b.key]={...b, qty:0, cps:b.baseCPS, cost:b.baseCost};
+  });
+  // 1000 апгрейдов
   const buildingKeys = Object.keys(state.buildings);
   state.upgrades = {};
-  let id = 1;
-  for(let i=0;i<1000;i++){
+  for(let i=1;i<=1000;i++){
     const type = Math.random()<0.5?'click':'building';
-    let u = { id, bought:false };
-    u.type = type;
-    u.multiplier = 2; // каждый апгрейд ×2
-    u.cost = Math.round(100 * Math.pow(1.15, i));
-    if(type==='click'){
-      u.name = `Улучшение клика ×${Math.pow(2,i+1)}`;
-      u.target = null;
-    } else {
-      const target = buildingKeys[Math.floor(Math.random()*buildingKeys.length)];
-      u.name = `Улучшение ${target} ×${Math.pow(2,i+1)}`;
-      u.target = target;
-    }
-    state.upgrades[id]=u;
-    id++;
+    let u={id:i,bought:false,type:type,multiplier:2,cost:Math.round(100*Math.pow(1.15,i))};
+    if(type==='click') u.name=`Улучшение клика ×2`;
+    else { u.target=buildingKeys[Math.floor(Math.random()*buildingKeys.length)]; u.name=`Улучшение ${u.target} ×2`; }
+    state.upgrades[i]=u;
   }
 }
+initState();
 
-// ======== Покупка апгрейда ========
+// ======== Функции игры ========
+function fmt(n){if(n<1000) return Math.round(n*100)/100; const units=['K','M','B','T','Qa','Qi','Sx','Sp','Oc','No']; let u=-1,v=n; while(v>=1000&&u<units.length-1){v/=1000;u++;} return v.toFixed(2)+units[u];}
+
+function clickCookie(){ state.cookies+=state.clickPower; state.totalCookies+=state.clickPower; spawnCrumb(); render(); }
+
+function buyBuilding(key){
+  const b=state.buildings[key];
+  if(state.cookies>=b.cost){ state.cookies-=b.cost; b.qty++; b.cost=Math.round(b.baseCost*Math.pow(1.15,b.qty)); render(); }
+}
+
 function buyUpgrade(id){
-  const u = state.upgrades[id];
+  const u=state.upgrades[id];
   if(!u.bought && state.cookies>=u.cost){
-    state.cookies -= u.cost;
-    u.bought = true;
-    if(u.type==='click') state.clickPower *= u.multiplier;
-    if(u.type==='building' && u.target) state.buildings[u.target].cps *= u.multiplier;
+    state.cookies-=u.cost;
+    u.bought=true;
+    if(u.type==='click') state.clickPower*=u.multiplier;
+    if(u.type==='building') state.buildings[u.target].cps*=u.multiplier;
     render();
-    saveState();
   }
 }
 
-// ======== Престиж ========
 function prestigeReset(){
-  const earned = Math.floor(Math.sqrt(state.totalCookies/1e6)); // формула бонуса
+  const earned=Math.floor(Math.sqrt(state.totalCookies/1e6));
   if(earned>0){
-    state.prestige.points += earned;
-    state.prestige.multiplier = 1 + state.prestige.points*0.05;
-    state.cookies=0;
-    state.clicks=0;
-    state.totalCookies=0;
-    Object.values(state.buildings).forEach(b=>{
-      b.qty = 0;
-      b.cps = b.baseCPS; // восстанавливаем базовое CPS
-    });
+    state.prestige.points+=earned;
+    state.prestige.multiplier=1+state.prestige.points*0.05;
+    state.cookies=0; state.clicks=0; state.totalCookies=0;
+    Object.values(state.buildings).forEach(b=>{ b.qty=0; b.cps=b.baseCPS; b.cost=b.baseCost; });
     Object.values(state.upgrades).forEach(u=>u.bought=false);
     render();
-    saveState();
   }
 }
 
-// ======== Получение CPS с учётом престижа ========
-function getCPS(){
-  let cps = 0;
-  Object.values(state.buildings).forEach(b=>cps += b.qty*b.cps);
-  return cps*state.prestige.multiplier;
+function getCPS(){ let cps=0; Object.values(state.buildings).forEach(b=>cps+=b.qty*b.cps); return cps*state.prestige.multiplier; }
+
+// ======== Render ========
+function render(){
+  document.getElementById('cookiesDisplay').textContent=fmt(state.cookies);
+  document.getElementById('cpsDisplay').textContent=fmt(getCPS());
+  document.getElementById('clickPower').textContent=fmt(state.clickPower);
+  document.getElementById('prestigePoints').textContent=fmt(state.prestige.points);
+
+  const storeDiv=document.getElementById('store'); storeDiv.innerHTML='';
+  buildingList.forEach(b=>{
+    const bi=state.buildings[b.key];
+    const div=document.createElement('div'); div.className='item';
+    div.innerHTML=`<div>${b.emoji} ${b.name}</div><div>${fmt(bi.cost)} | CPS: ${fmt(bi.cps)} × ${bi.qty}</div><button onclick="buyBuilding('${b.key}')">Купить</button>`;
+    storeDiv.appendChild(div);
+  });
+
+  const upDiv=document.getElementById('upgrades'); upDiv.innerHTML='';
+  Object.values(state.upgrades).forEach(u=>{
+    const div=document.createElement('div'); div.className='upgrade'+(u.bought?' bought':'');
+    div.innerHTML=`<div>${u.name} (${fmt(u.cost)})</div><button onclick="buyUpgrade(${u.id})" ${u.bought?'disabled':''}>Купить</button>`;
+    upDiv.appendChild(div);
+  });
 }
 
-// ======== Анимация крошек ========
+// ======== Крошки ========
 function spawnCrumb(){
   const cookie=document.getElementById('cookieBtn');
   const crumb=document.createElement('div');
   crumb.className='crumb';
-  crumb.style.width='10px'; crumb.style.height='10px';
-  crumb.style.left=Math.random()*cookie.offsetWidth+'px';
-  crumb.style.top=Math.random()*cookie.offsetHeight+'px';
+  crumb.style.left=Math.random()*180+'px';
+  crumb.style.top=Math.random()*180+'px';
   cookie.appendChild(crumb);
   setTimeout(()=>crumb.remove(),500);
 }
 
-// ======== Форматирование чисел ========
-function fmt(n){
-  if(n<1000) return Math.round(n*100)/100;
-  const units=['K','M','B','T','Qa','Qi','Sx','Sp','Oc','No'];
-  let u=-1,v=n;
-  while(v>=1000 && u<units.length-1){v/=1000; u++;}
-  return v.toFixed(2)+units[u];
+// ======== Динамический фон ========
+function updateBackground(){
+  const levels=['#1f1f2e','#27273a','#2f2f44','#383854','#414164'];
+  let index=Math.min(levels.length-1,Math.floor(Math.log10(state.totalCookies+1)/13*levels.length));
+  document.body.style.background=levels[index];
 }
 
-// ======== Рендеринг ========
-function render(){
-  document.getElementById('cookiesDisplay').textContent = fmt(state.cookies);
-  document.getElementById('totalCookies').textContent = fmt(state.totalCookies);
-  document.getElementById('clicksCount').textContent = fmt(state.clicks);
-  document.getElementById('clickPower').textContent = fmt(state.clickPower);
-  document.getElementById('cpsDisplay').textContent = fmt(getCPS()) + ' в сек';
-  document.getElementById('prestigePoints').textContent = fmt(state.prestige.points);
-
-
-// ======== Автосохранение и CPS тик ========
+// ======== Цикл игры ========
 function gameTick(){
   const now=Date.now();
   const diff=(now-state.lastTick)/1000;
-  const cps=getCPS();
-  state.cookies += cps*diff;
-  state.totalCookies += cps*diff;
+  state.cookies+=getCPS()*diff;
+  state.totalCookies+=getCPS()*diff;
   state.lastTick=now;
   render();
-  saveState();
+  updateBackground();
 }
-setInterval(gameTick,1000/10); // 10 FPS
+setInterval(gameTick,100);
 
-// ======== Экспорт / импорт ========
-document.getElementById('exportBtn').onclick=()=>{
-  const data=JSON.stringify(state);
-  prompt('Скопируй данные сохранения:',data);
-};
-document.getElementById('importBtn').onclick=()=>{
-  const data=prompt('Вставь данные сохранения:');
-  if(data){state=JSON.parse(data);render();saveState();}
-};
-document.getElementById('resetBtn').onclick=()=>{
-  if(confirm('Сбросить прогресс?')){localStorage.removeItem(SAVE_KEY);initState();render();}
-};
-document.getElementById('prestigeBtn').onclick=()=>{prestigeReset();}
-
-// ======== Инициализация ========
-loadState();
-render();
-
-// ======== Touch support ========
+// ======== События ========
 const cookieBtn=document.getElementById('cookieBtn');
 cookieBtn.addEventListener('click',clickCookie);
 cookieBtn.addEventListener('touchstart',e=>{ e.preventDefault(); clickCookie(); });
-</script>
-</body>
-</html>
 
-<script>
-<script>
-// ======== Плавный динамический фон ========
-const bgImages = [
-  'https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1517832207067-4db24a2ae47c?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?auto=format&fit=crop&w=1200&q=80'
-];
+document.getElementById('prestigeBtn').onclick=prestigeReset;
 
-let currentBgIndex = 0;
-let nextBgIndex = 1;
-let bgBlend = 0;
-
-function updateBackground(){
-  const total = state.totalCookies;
-  // Вычисляем индекс и следующий индекс на основе логарифма количества печенек
-
-// ======== Достижения ========
-const achievementList = [
-  {key:'firstClick',name:'Первый клик',condition:()=>state.clicks>=1},
-  {key:'hundredCookies',name:'100 печенек',condition:()=>state.totalCookies>=100},
-  {key:'thousandCookies',name:'1000 печенек',condition:()=>state.totalCookies>=1000},
-  {key:'firstBuilding',name:'Первое здание',condition:()=>Object.values(state.buildings).some(b=>b.qty>=1)},
-  {key:'prestigeOnce',name:'Первый престиж',condition:()=>state.prestige.points>=1}
-];
-
-function checkAchievements(){
-  const container = document.getElementById('achievements');
-  achievementList.forEach(a=>{
-    if(!state.achievements[a.key] && a.condition()){
-      state.achievements[a.key]=true;
-    }
-  });
-  container.innerHTML='';
-  achievementList.forEach(a=>{
-    const div=document.createElement('div');
-    div.className='achievement'+(state.achievements[a.key]?' unlocked':'');
-    div.textContent=a.name;
-    container.appendChild(div);
-  });
-}
-
-// ======== Анимация крошек ========
-function spawnCrumb(){
-  const cookie=document.getElementById('cookieBtn');
-  const crumb=document.createElement('div');
-  crumb.className='crumb';
-  crumb.style.width='12px';
-  crumb.style.height='12px';
-  crumb.style.left=(Math.random()*cookie.offsetWidth)+'px';
-  crumb.style.top=(Math.random()*cookie.offsetHeight)+'px';
-  crumb.style.background='rgba(255,255,255,0.6)';
-  cookie.appendChild(crumb);
-  setTimeout(()=>crumb.remove(),600);
-}
-
-// ======== Подсветка апгрейдов ========
-function highlightUpgrades(){
-  const container=document.getElementById('upgrades');
-  for(let i=0;i<container.children.length;i++){
-    const div=container.children[i];
-    const u=state.upgrades[i+1];
-    if(u && !u.bought){
-      if(state.cookies>=u.cost) div.style.background='rgba(245,194,74,0.15)';
-      else div.style.background='rgba(255,255,255,0.02)';
-    }
-  }
-}
-
-// ======== Обновление игры ========
-function gameLoop(){
-  gameTick();
-  updateBackground();
-  checkAchievements();
-  highlightUpgrades();
-}
-setInterval(gameLoop,100); // 10 раз в секунду
+render();
 </script>
