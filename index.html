@@ -5,17 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ultra Cookie Clicker Mobile</title>
 <style>
-body { margin:0; font-family:sans-serif; background:#1f1f2e; color:white; transition:background 1s ease; display:flex; justify-content:center; }
-.container { width:100%; max-width:500px; display:flex; flex-direction:column; align-items:center; padding:16px; }
+body { margin:0; font-family:sans-serif; background:#1f1f2e; color:white; overflow-x:hidden; display:flex; justify-content:center; }
+.container { width:100%; max-width:500px; display:flex; flex-direction:column; align-items:center; padding:16px; position:relative; z-index:1; }
 .cookie { width:160px; height:160px; border-radius:50%; background:linear-gradient(145deg,#f6e2b3,#f0c66a); display:flex; align-items:center; justify-content:center; font-size:52px; cursor:pointer; position:relative; margin-bottom:16px; box-shadow:0 0 20px rgba(255,255,255,0.2); }
 .crumb { position:absolute; border-radius:50%; width:10px; height:10px; background:rgba(255,255,255,0.6); }
 .stats { display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:16px; }
 .stat { background:rgba(255,255,255,0.1); padding:6px 12px; border-radius:8px; font-size:16px; width:100%; text-align:center; }
 .store, .upgrades { display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; width:100%; margin-bottom:16px; }
-.item, .upgrade { display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.05); border-radius:10px; align-items:center; }
+.item, .upgrade { display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.05); border-radius:10px; align-items:center; transition:transform 0.1s; }
 .item button, .upgrade button { background:#f5c24a; border:0; border-radius:8px; cursor:pointer; padding:6px 12px; color:#222; font-weight:700; min-width:70px; }
 .upgrade.bought { opacity:0.5; }
 h3 { margin:8px 0; width:100%; text-align:left; font-size:18px; }
+.modal-bg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:10; }
+.modal { background:#2a2a3d; padding:20px; border-radius:12px; text-align:center; width:80%; max-width:400px; max-height:90%; overflow-y:auto; }
+.modal button { margin:10px; padding:8px 16px; border-radius:8px; border:none; font-weight:700; cursor:pointer; }
+.cookie-fly { position:absolute; font-size:16px; opacity:0.7; pointer-events:none; animation-name:fly; animation-timing-function:linear; }
+@keyframes fly { 0% {transform:translateY(0) rotate(0deg);} 100% {transform:translateY(-1200px) rotate(360deg);} }
+.click-number { position:absolute; color:#fff; font-weight:700; font-size:20px; pointer-events:none; transition: all 1s ease-out; }
+.tab-buttons { display:flex; justify-content:space-around; margin-bottom:12px; }
+.tab-buttons button { flex:1; margin:0 4px; padding:6px; border-radius:8px; border:none; font-weight:700; cursor:pointer; }
+.tab-content { text-align:left; font-size:14px; }
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.3); border-radius:3px; }
 </style>
@@ -28,22 +37,44 @@ h3 { margin:8px 0; width:100%; text-align:left; font-size:18px; }
     <div class="stat">CPS: <span id="cpsDisplay">0</span></div>
     <div class="stat">Клик: <span id="clickPower">1</span></div>
     <div class="stat">Престиж: <span id="prestigePoints">0</span></div>
+    <div class="stat">Золотые печеньки: <span id="goldCookies">0</span></div>
   </div>
   <h3>Магазин</h3>
   <div id="store" class="store"></div>
   <h3>Апгрейды</h3>
   <div id="upgrades" class="upgrades"></div>
-  <button id="prestigeBtn" style="width:100%; padding:10px; margin-bottom:20px; border-radius:10px; font-size:16px;">Престиж</button>
+  <button id="prestigeBtn" style="width:100%; padding:10px; margin-bottom:10px; border-radius:10px; font-size:16px;">Престиж</button>
+  <button id="statsBtn" style="width:100%; padding:10px; border-radius:10px; font-size:16px;">Статистика</button>
+</div>
+
+<div id="prestigeModal" class="modal-bg">
+  <div class="modal">
+    <p id="prestigeText"></p>
+    <button id="prestigeYes" style="background:#4caf50;">Да</button>
+    <button id="prestigeNo" style="background:#f44336;">Нет</button>
+  </div>
+</div>
+
+<div id="statsModal" class="modal-bg">
+  <div class="modal">
+    <div class="tab-buttons">
+      <button id="tabCurrent">Текущий забег</button>
+      <button id="tabOverall">Общая статистика</button>
+    </div>
+    <div id="tabContent" class="tab-content"></div>
+    <button onclick="document.getElementById('statsModal').style.display='none'">Закрыть</button>
+  </div>
 </div>
 
 <script>
 // ======== Состояние ========
 let state = {
   cookies:0, totalCookies:0, clicks:0, clickPower:1,
-  prestige:{points:0,multiplier:1},
-  buildings:{}, upgrades:{}, lastTick:Date.now()
+  goldCookies:0, prestige:{points:0,multiplier:1},
+  buildings:{}, upgrades:{}, lastTick:Date.now(),
+  startTime:Date.now(), sessionTime:0,
+  overall:{totalCookies:0,totalGold:0,prestiges:0,totalTime:0,clicks:0}
 };
-
 const buildingList=[
   {key:'cursor',name:'Курсор',baseCost:15,baseCPS:0.1,emoji:'🖱️'},
   {key:'grandma',name:'Бабушка',baseCost:100,baseCPS:1,emoji:'👵'},
@@ -62,7 +93,7 @@ const buildingList=[
   {key:'quantumLab',name:'Квантовая лаборатория',baseCost:5e19,baseCPS:5e9,emoji:'🔬'}
 ];
 
-// ======== Инициализация состояния ========
+// ======== Инициализация ========
 function initState(){
   state.buildings = {};
   buildingList.forEach(b=>{
@@ -80,85 +111,154 @@ function initState(){
 }
 initState();
 
-// ======== Игровые функции ========
+// ======== Функции ========
 function fmt(n){if(n<1000) return Math.round(n*100)/100; const units=['K','M','B','T','Qa','Qi','Sx','Sp','Oc','No']; let u=-1,v=n; while(v>=1000&&u<units.length-1){v/=1000;u++;} return v.toFixed(2)+units[u];}
-function clickCookie(){ state.cookies+=state.clickPower; state.totalCookies+=state.clickPower; spawnCrumb(); render(); }
-function buyBuilding(key){ const b=state.buildings[key]; if(state.cookies>=b.cost){ state.cookies-=b.cost; b.qty++; b.cost=Math.round(b.baseCost*Math.pow(1.15,b.qty)); render(); } }
-function buyUpgrade(id){ const u=state.upgrades[id]; if(!u.bought && state.cookies>=u.cost){ state.cookies-=u.cost; u.bought=true; if(u.type==='click') state.clickPower*=u.multiplier; if(u.type==='building') state.buildings[u.target].cps*=u.multiplier; render(); } }
-function prestigeReset(){ const earned = Math.floor(Math.sqrt(state.totalCookies/1e6)); if(earned>0){ state.prestige.points += earned; state.prestige.multiplier = 1 + state.prestige.points*0.05; state.cookies=0; state.clicks=0; state.totalCookies=0; Object.values(state.buildings).forEach(b=>{ b.qty=0; b.cps=b.baseCPS; b.cost=b.baseCost; }); Object.values(state.upgrades).forEach(u=>u.bought=false); render(); } }
-function getCPS(){ let cps=0; Object.values(state.buildings).forEach(b=>cps+=b.qty*b.cps); return cps*state.prestige.multiplier; }
+
+function getCPS(){ let cps=0; Object.values(state.buildings).forEach(b=>cps+=b.qty*b.cps); return cps*(1+state.goldCookies*0.001); }
+
+function clickCookie(){
+  const amount = state.clickPower*(1+state.goldCookies*0.001);
+  state.cookies+=amount; 
+  state.totalCookies+=amount; 
+  state.clicks++; 
+  spawnCrumb(); spawnFlyingCookie(); spawnClickNumber(amount); animateCookie();
+  render(); checkGoldCookie();
+}
+
+function buyBuilding(key){
+  const b = state.buildings[key];
+  if(state.cookies>=b.cost){ state.cookies-=b.cost; b.qty++; b.cost*=1.15; render(); } 
+}
+
+function buyUpgrade(id){
+  const u = state.upgrades[id];
+  if(!u.bought && state.cookies>=u.cost){ state.cookies-=u.cost; u.bought=true;
+    if(u.type==='click') state.clickPower*=u.multiplier;
+    else state.buildings[u.target].cps*=u.multiplier;
+    render();
+  }
+}
+
+// ======== Престиж ========
+function checkGoldCookie(){ 
+  if(state.totalCookies>=1e12){ document.getElementById('prestigeBtn').style.background='#ffd700'; }
+}
+function prestigeReset(){
+  const earnedGold = Math.floor(state.totalCookies/1e12);
+  if(earnedGold>0){
+    document.getElementById('prestigeText').textContent=`Вы можете заработать ${earnedGold} золотых печенек (0.1% бонус к CPS и клику). Сделать престиж?`;
+    document.getElementById('prestigeModal').style.display='flex';
+  } else alert('Нужно накопить хотя бы 1 трлн печенек для престижа!');
+}
+
+// ======== Всплывающие числа и анимации ========
+function animateCookie(){ const cookie=document.getElementById('cookieBtn'); cookie.style.transform='scale(1.2)'; setTimeout(()=>cookie.style.transform='scale(1)',100); }
+function spawnClickNumber(amount){ const cookie=document.getElementById('cookieBtn'); const num=document.createElement('div'); num.textContent='+'+fmt(amount); num.className='click-number'; cookie.appendChild(num); setTimeout(()=>{ num.style.top='-20px'; num.style.opacity='0'; num.style.fontSize='28px'; },10); setTimeout(()=>num.remove(),1000);}
+function spawnFlyingCookie(){ const fly=document.createElement('div'); fly.className='cookie-fly'; fly.style.left=Math.random()*window.innerWidth+'px'; fly.style.fontSize=(10+Math.random()*20)+'px'; fly.style.animationDuration=(5+Math.random()*5)+'s'; fly.style.opacity=(0.5+Math.random()*0.5); fly.textContent='🍪'; document.body.appendChild(fly); setTimeout(()=>fly.remove(),10000);}
+function spawnCrumb(){ const cookie=document.getElementById('cookieBtn'); const crumb=document.createElement('div'); crumb.className='crumb'; crumb.style.left=Math.random()*140+'px'; crumb.style.top=Math.random()*140+'px'; cookie.appendChild(crumb); setTimeout(()=>crumb.remove(),600);}
 
 // ======== Рендер ========
 function render(){
   document.getElementById('cookiesDisplay').textContent=fmt(state.cookies);
   document.getElementById('cpsDisplay').textContent=fmt(getCPS());
-  document.getElementById('clickPower').textContent=fmt(state.clickPower);
+  document.getElementById('clickPower').textContent=fmt(state.clickPower*(1+state.goldCookies*0.001));
   document.getElementById('prestigePoints').textContent=fmt(state.prestige.points);
+  document.getElementById('goldCookies').textContent=fmt(state.goldCookies);
 
   const storeDiv=document.getElementById('store'); storeDiv.innerHTML='';
   Object.values(state.buildings).forEach(b=>{
     const div=document.createElement('div'); div.className='item';
+    div.style.background=state.cookies>=b.cost?'rgba(0,200,0,0.2)':'rgba(255,255,255,0.05)';
     div.innerHTML=`<div>${b.emoji} ${b.name} (${b.qty})</div><div>${fmt(b.cost)}</div><button data-key="${b.key}">Купить</button>`;
     storeDiv.appendChild(div);
+    const btn = div.querySelector('button');
+    btn.addEventListener('mousedown',()=>div.style.transform='scale(0.95)');
+    btn.addEventListener('mouseup',()=>div.style.transform='scale(1)');
+    btn.addEventListener('touchstart',()=>div.style.transform='scale(0.95)');
+    btn.addEventListener('touchend',()=>div.style.transform='scale(1)');
   });
 
   const upgradesDiv=document.getElementById('upgrades'); upgradesDiv.innerHTML='';
   Object.values(state.upgrades).forEach(u=>{
     const div=document.createElement('div'); div.className='upgrade'+(u.bought?' bought':'');
+    div.style.background=!u.bought && state.cookies>=u.cost?'rgba(255,215,0,0.3)':(!u.bought?'rgba(255,255,255,0.05)':'');
     div.innerHTML=`<div>${u.name} (${fmt(u.cost)})</div><button data-id="${u.id}" ${u.bought?'disabled':''}>Купить</button>`;
     upgradesDiv.appendChild(div);
+    const btn = div.querySelector('button');
+    btn.addEventListener('mousedown',()=>div.style.transform='scale(0.95)');
+    btn.addEventListener('mouseup',()=>div.style.transform='scale(1)');
+    btn.addEventListener('touchstart',()=>div.style.transform='scale(0.95)');
+    btn.addEventListener('touchend',()=>div.style.transform='scale(1)');
   });
 
-  document.querySelectorAll('.item button').forEach(btn=>{
-    btn.onclick=()=>buyBuilding(btn.dataset.key);
-    btn.ontouchstart=()=>buyBuilding(btn.dataset.key);
-  });
-  document.querySelectorAll('.upgrade button').forEach(btn=>{
-    btn.onclick=()=>buyUpgrade(btn.dataset.id);
-    btn.ontouchstart=()=>buyUpgrade(btn.dataset.id);
-  });
+  document.querySelectorAll('.item button').forEach(btn=>{ btn.onclick=()=>buyBuilding(btn.dataset.key); btn.ontouchstart=()=>buyBuilding(btn.dataset.key); });
+  document.querySelectorAll('.upgrade button').forEach(btn=>{ btn.onclick=()=>buyUpgrade(btn.dataset.id); btn.ontouchstart=()=>buyUpgrade(btn.dataset.id); });
 }
 
-// ======== Крошки ========
-function spawnCrumb(){
-  const cookie=document.getElementById('cookieBtn');
-  const crumb=document.createElement('div'); crumb.className='crumb';
-  crumb.style.left=Math.random()*140+'px';
-  crumb.style.top=Math.random()*140+'px';
-  cookie.appendChild(crumb);
-  setTimeout(()=>crumb.remove(),600);
-}
-
-// ======== Цикл игры ========
-function gameTick(){
-  const now=Date.now();
-  const diff=(now-state.lastTick)/1000;
-  state.lastTick=now;
-  state.cookies+=getCPS()*diff;
-  state.totalCookies+=getCPS()*diff;
-  render();
-  updateBackground();
-}
-setInterval(gameTick,100);
-
-// ======== Динамический фон ========
-const bgImages=[
-  'https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1517832207067-4db24a2ae47c?auto=format&fit=crop&w=1200&q=80'
-];
-function updateBackground(){
-  const total=state.totalCookies;
-  let idx = Math.min(bgImages.length-1, Math.floor(Math.log10(total+1)/13*bgImages.length));
-  document.body.style.background=`url(${bgImages[idx]}) no-repeat center center fixed`;
-  document.body.style.backgroundSize='cover';
+// ======== Статистика ========
+function updateStatsModal(tab){
+  let html='';
+  if(tab==='current'){
+    let tSec = Math.floor((Date.now()-state.startTime)/1000);
+    html+=`Время текущего забега: ${Math.floor(tSec/3600)}ч ${Math.floor((tSec%3600)/60)}м ${tSec%60}с<br>`;
+    html+=`Печеньки: ${fmt(state.cookies)}<br>`;
+    html+=`Золотые печеньки: ${fmt(state.goldCookies)}<br>`;
+    html+=`Престиж: ${fmt(state.prestige.points)}<br>`;
+    html+=`Клики: ${fmt(state.clicks)}<br>`;
+  } else {
+    let tSec = Math.floor(state.overall.totalTime/1000);
+    html+=`Общее время: ${Math.floor(tSec/3600)}ч ${Math.floor((tSec%3600)/60)}м ${tSec%60}с<br>`;
+    html+=`Общие печеньки: ${fmt(state.overall.totalCookies)}<br>`;
+    html+=`Золотые печеньки: ${fmt(state.overall.totalGold)}<br>`;
+    html+=`Количество престижа: ${state.overall.prestiges}<br>`;
+    html+=`Общее количество кликов: ${fmt(state.overall.clicks)}<br>`;
+  }
+  document.getElementById('tabContent').innerHTML=html;
 }
 
 // ======== События ========
-document.getElementById('cookieBtn').addEventListener('click',clickCookie);
 document.getElementById('cookieBtn').addEventListener('touchstart',e=>{e.preventDefault(); clickCookie();});
+document.getElementById('cookieBtn').addEventListener('mousedown',clickCookie);
 document.getElementById('prestigeBtn').addEventListener('click',prestigeReset);
 document.getElementById('prestigeBtn').addEventListener('touchstart',e=>{e.preventDefault(); prestigeReset();});
 
+document.getElementById('prestigeYes').addEventListener('click',()=>{
+  const earnedGold = Math.floor(state.totalCookies/1e12);
+  state.goldCookies += earnedGold;
+  state.overall.totalGold += earnedGold;
+  state.overall.totalCookies += state.totalCookies;
+  state.overall.totalTime += (Date.now()-state.startTime);
+  state.overall.prestiges++;
+  state.overall.clicks += state.clicks;
+  state.cookies=0; state.totalCookies=0; state.clickPower=1; state.clicks=0; state.startTime=Date.now();
+  Object.values(state.buildings).forEach(b=>{ b.qty=0; b.cps=b.baseCPS; b.cost=b.baseCost; });
+  Object.values(state.upgrades).forEach(u=>u.bought=false);
+  document.getElementById('prestigeModal').style.display='none';
+  render();
+});
+
+document.getElementById('prestigeNo').addEventListener('click',()=>{ document.getElementById('prestigeModal').style.display='none'; });
+
+document.getElementById('statsBtn').addEventListener('click',()=>{
+  document.getElementById('statsModal').style.display='flex';
+  updateStatsModal('current');
+});
+
+document.getElementById('tabCurrent').addEventListener('click',()=>updateStatsModal('current'));
+document.getElementById('tabOverall').addEventListener('click',()=>updateStatsModal('overall'));
+
+// ======== Авто CPS ========
+setInterval(()=>{
+  const now = Date.now(); const delta=(now-state.lastTick)/1000;
+  state.lastTick=now;
+  const gain = getCPS()*delta;
+  state.cookies+=gain;
+  state.totalCookies+=gain;
+  render();
+},100);
+
+// ======== Первый рендер ========
 render();
 </script>
+</body>
+</html>
