@@ -312,3 +312,84 @@ cookieBtn.addEventListener('touchstart',e=>{ e.preventDefault(); clickCookie(); 
 </script>
 </body>
 </html>
+
+<script>
+<script>
+// ======== Плавный динамический фон ========
+const bgImages = [
+  'https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1517832207067-4db24a2ae47c?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?auto=format&fit=crop&w=1200&q=80'
+];
+
+let currentBgIndex = 0;
+let nextBgIndex = 1;
+let bgBlend = 0;
+
+function updateBackground(){
+  const total = state.totalCookies;
+  // Вычисляем индекс и следующий индекс на основе логарифма количества печенек
+
+// ======== Достижения ========
+const achievementList = [
+  {key:'firstClick',name:'Первый клик',condition:()=>state.clicks>=1},
+  {key:'hundredCookies',name:'100 печенек',condition:()=>state.totalCookies>=100},
+  {key:'thousandCookies',name:'1000 печенек',condition:()=>state.totalCookies>=1000},
+  {key:'firstBuilding',name:'Первое здание',condition:()=>Object.values(state.buildings).some(b=>b.qty>=1)},
+  {key:'prestigeOnce',name:'Первый престиж',condition:()=>state.prestige.points>=1}
+];
+
+function checkAchievements(){
+  const container = document.getElementById('achievements');
+  achievementList.forEach(a=>{
+    if(!state.achievements[a.key] && a.condition()){
+      state.achievements[a.key]=true;
+    }
+  });
+  container.innerHTML='';
+  achievementList.forEach(a=>{
+    const div=document.createElement('div');
+    div.className='achievement'+(state.achievements[a.key]?' unlocked':'');
+    div.textContent=a.name;
+    container.appendChild(div);
+  });
+}
+
+// ======== Анимация крошек ========
+function spawnCrumb(){
+  const cookie=document.getElementById('cookieBtn');
+  const crumb=document.createElement('div');
+  crumb.className='crumb';
+  crumb.style.width='12px';
+  crumb.style.height='12px';
+  crumb.style.left=(Math.random()*cookie.offsetWidth)+'px';
+  crumb.style.top=(Math.random()*cookie.offsetHeight)+'px';
+  crumb.style.background='rgba(255,255,255,0.6)';
+  cookie.appendChild(crumb);
+  setTimeout(()=>crumb.remove(),600);
+}
+
+// ======== Подсветка апгрейдов ========
+function highlightUpgrades(){
+  const container=document.getElementById('upgrades');
+  for(let i=0;i<container.children.length;i++){
+    const div=container.children[i];
+    const u=state.upgrades[i+1];
+    if(u && !u.bought){
+      if(state.cookies>=u.cost) div.style.background='rgba(245,194,74,0.15)';
+      else div.style.background='rgba(255,255,255,0.02)';
+    }
+  }
+}
+
+// ======== Обновление игры ========
+function gameLoop(){
+  gameTick();
+  updateBackground();
+  checkAchievements();
+  highlightUpgrades();
+}
+setInterval(gameLoop,100); // 10 раз в секунду
+</script>
