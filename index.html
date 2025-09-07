@@ -100,13 +100,21 @@ const buildingEmojis = {
 
 const buildings = {};
 Object.keys(buildingEmojis).forEach((name,i)=>{
-  buildings[name]={basePrice: Math.pow(10,i+1)*15, owned:0, baseCPS: Math.pow(10,i)/10, multiplier:1, nextUpgrade:0, upgrades:[]};
+  let base = Math.pow(10,i+1)*15 / 12; // цены уменьшены в 12 раз
+  buildings[name] = {
+    basePrice: base,
+    owned:0,
+    baseCPS: Math.pow(10,i)/10,
+    multiplier:1,
+    nextUpgrade:0,
+    upgrades:[]
+  };
   for(let j=1;j<=10;j++){
     buildings[name].upgrades.push({
-      level:j, 
-      multiplier:2, 
-      price: buildings[name].basePrice*10 + (j-1)*10, 
-      emoji: buildingEmojis[name], 
+      level:j,
+      multiplier:2,
+      price: (base*10 + (j-1)*10)/12, // апгрейды тоже делим на 12
+      emoji: buildingEmojis[name],
       name:`${name} x${j+1}`
     });
   }
