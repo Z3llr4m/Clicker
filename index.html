@@ -100,7 +100,7 @@ const buildingEmojis = {
 
 const buildings = {};
 Object.keys(buildingEmojis).forEach((name,i)=>{
-  let base = Math.pow(10,i+1)*15 / 12; // цены уменьшены в 12 раз
+  let base = Math.pow(10,i+1)*15; // оригинальная цена
   buildings[name] = {
     basePrice: base,
     owned:0,
@@ -113,7 +113,7 @@ Object.keys(buildingEmojis).forEach((name,i)=>{
     buildings[name].upgrades.push({
       level:j,
       multiplier:2,
-      price: (base*10 + (j-1)*10)/12, // апгрейды тоже делим на 12
+      price: (base*10 + (j-1)*10), // оригинальная цена
       emoji: buildingEmojis[name],
       name:`${name} x${j+1}`
     });
