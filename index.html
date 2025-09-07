@@ -100,7 +100,7 @@ const buildingEmojis = {
 
 const buildings = {};
 Object.keys(buildingEmojis).forEach((name,i)=>{
-  let base = Math.pow(10,i+1)*15; 
+  let base = Math.pow(10,i+1)*15/10; // цены в 10 раз меньше
   buildings[name] = {
     basePrice: base,
     owned:0,
