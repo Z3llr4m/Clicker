@@ -1,150 +1,37 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<link rel="stylesheet" href="style.css">
-<script src="script.js"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cookie Clicker Mobile</title>
-<style>
-    /* ===================== */
-    /* 🌑 ТЕМНЫЙ ДИЗАЙН */
-    /* ===================== */
-    body {
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(to bottom, #2b2b2b, #1a1a1a);
-        color: #fff;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        overflow-x: hidden;
-    }
-
-    /* ===================== */
-    /* 🍪 ПЕЧЕНЬКА */
-    /* ===================== */
-    #cookie {
-        width: 150px;
-        height: 150px;
-        margin: 20px auto;
-        cursor: pointer;
-        transition: transform 0.1s;
-        z-index: 10;
-    }
-    #cookie:active {
-        transform: scale(0.95);
-    }
-
-    /* ===================== */
-    /* 📊 СТАТИСТИКА */
-    /* ===================== */
-    .stats-window {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        max-height: 150px;
-        overflow-y: auto;
-        background-color: rgba(20,20,20,0.9);
-        color: #fff;
-        font-size: 14px;
-        padding: 10px;
-        box-sizing: border-box;
-        z-index: 100;
-        text-align: left;
-    }
-
-    /* ===================== */
-    /* 🏠 ЗДАНИЯ И АПГРЕЙДЫ */
-    /* ===================== */
-    #buildings, #upgrades {
-        max-height: 200px;
-        overflow-y: auto;
-        margin: 10px 0;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    button.building, button.upgrade, #prestigeButton {
-        background-color: #444;
-        border: none;
-        color: #fff;
-        padding: 8px;
-        font-size: 14px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    button.building.available, button.upgrade.available {
-        background-color: #2ecc71;
-    }
-
-    button.building:hover, button.upgrade:hover, #prestigeButton:hover {
-        background-color: #16a085;
-    }
-
-    #prestigeButton {
-        margin: 10px;
-        padding: 10px 20px;
-        font-size: 16px;
-        background-color: #e67e22;
-    }
-
-    #prestigeButton:hover {
-        background-color: #d35400;
-    }
-
-    /* ===================== */
-    /* ✨ ВЫЛЕТАЮЩИЕ ПЕЧЕНЬКИ */
-    /* ===================== */
-    .floating-cookie {
-        position: fixed;
-        font-size: 20px;
-        font-weight: bold;
-        color: #ffd700;
-        animation: floatUp 1s forwards;
-        pointer-events: none;
-        z-index: 200;
-    }
-
-    @keyframes floatUp {
-        0% {opacity: 1; transform: translateY(0);}
-        100% {opacity: 0; transform: translateY(-50px);}
-    }
-
-    /* ===================== */
-    /* ✨ ЛЕТЯЩИЕ ПЕЧЕНЬКИ НА ФОНЕ */
-    /* ===================== */
-    .flying-cookie {
-        position: absolute;
-        font-size: 18px;
-        color: #ffd700;
-        animation: flyUp 4s linear forwards;
-        pointer-events: none;
-        z-index: 0;
-        opacity: 0.8;
-    }
-
-    @keyframes flyUp {
-        0% {transform: translateY(0) scale(1);}
-        50% {transform: translateY(-150px) scale(1.2);}
-        100% {transform: translateY(-300px) scale(0.5); opacity: 0;}
-    }
-
-    /* ===================== */
-    /* ✨ АНИМАЦИИ ДЛЯ АПГРЕЙДОВ */
-    /* ===================== */
-    .upgrade-anim {
-        animation: upgradeFlash 0.5s;
-    }
-
-    @keyframes upgradeFlash {
-        0% {background-color: #2ecc71;}
-        50% {background-color: #f1c40f;}
-        100% {background-color: #2ecc71;}
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Clicker Mobile</title>
+    <!-- Подключение внешнего CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Подключение JS с defer, чтобы скрипт загружался после DOM -->
+    <script src="script.js" defer></script>
 </head>
 <body>
+
+    <!-- 🍪 Печенька -->
+    <img id="cookie" src="cookie.png" alt="Печенька">
+
+    <!-- 📊 Статистика -->
+    <div class="stats-window">
+        <p>Печенек: <span id="cookieCount">0</span></p>
+        <p>Сек/п: <span id="cookiesPerSecond">0</span></p>
+    </div>
+
+    <!-- 🏠 Здания -->
+    <div id="buildings">
+        <!-- Кнопки для зданий будут динамически добавляться через JS -->
+    </div>
+
+    <!-- ⚡ Апгрейды -->
+    <div id="upgrades">
+        <!-- Кнопки для апгрейдов будут динамически добавляться через JS -->
+    </div>
+
+    <!-- 🌟 Престиж -->
+    <button id="prestigeButton">Prestige</button>
+
+</body>
+</html>
