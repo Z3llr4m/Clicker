@@ -1,5 +1,11 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie Clicker Clone</title>
 <style>
-/* Общий стиль */
+/* ===== Общий стиль ===== */
 body {
   margin: 0;
   font-family: 'Verdana', sans-serif;
@@ -10,7 +16,7 @@ body {
   min-height: 100vh;
 }
 
-/* Верхняя панель */
+/* ===== Верхняя панель ===== */
 header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -24,23 +30,16 @@ header {
   gap: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-header p {
-  margin: 5px;
-  font-weight: bold;
-  font-size: 1rem;
-}
+header p { margin: 5px; font-weight: bold; font-size: 1rem; }
 #prestigeBtn {
   background-color: #d4a017;
   color: white;
   font-weight: bold;
   transition: transform 0.1s, background-color 0.2s;
 }
-#prestigeBtn:hover {
-  transform: scale(1.05);
-  background-color: #e0b027;
-}
+#prestigeBtn:hover { transform: scale(1.05); background-color: #e0b027; }
 
-/* Основная зона */
+/* ===== Основная зона ===== */
 #main {
   margin-top: 150px;
   display: flex;
@@ -53,7 +52,7 @@ header p {
   box-sizing: border-box;
 }
 
-/* Печенька */
+/* ===== Печенька ===== */
 #cookie {
   font-size: 150px;
   cursor: pointer;
@@ -63,7 +62,7 @@ header p {
 #cookie:hover { filter: brightness(1.1); }
 #cookie:active { transform: scale(1.2); filter: brightness(0.9); }
 
-/* Разделы объектов и апгрейдов */
+/* ===== Разделы объектов и апгрейдов ===== */
 .section {
   width: 100%;
   background-color: #fffbe0;
@@ -77,7 +76,7 @@ header p {
 }
 .section h2 { margin-top: 0; text-align: center; font-size: 1.2rem; }
 
-/* Объекты и апгрейды */
+/* ===== Объекты и апгрейды ===== */
 .object, .upgrade {
   display: flex;
   justify-content: space-between;
@@ -88,11 +87,9 @@ header p {
   background-color: #f7ecd6;
   transition: background-color 0.2s;
 }
-.object:hover, .upgrade:hover {
-  background-color: #f1dfb5;
-}
+.object:hover, .upgrade:hover { background-color: #f1dfb5; }
 
-/* Кнопки покупки */
+/* ===== Кнопки покупки ===== */
 button {
   padding: 5px 12px;
   border-radius: 6px;
@@ -106,9 +103,242 @@ button {
 button:hover { background-color: #e0b27a; transform: scale(1.05); }
 button:disabled { background-color: #ccc; cursor: not-allowed; }
 
-/* Адаптив */
+/* ===== Анимации +1 и летящие печеньки ===== */
+.plus-one {
+  position: absolute;
+  color: gold;
+  font-weight: bold;
+  pointer-events: none;
+  animation: plus1 0.8s ease-out forwards;
+  z-index: 100;
+}
+@keyframes plus1 {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
+}
+
+.flying-cookie {
+  position: absolute;
+  font-size: 24px;
+  pointer-events: none;
+  animation: fly 1s linear forwards;
+  z-index: 100;
+}
+@keyframes fly {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
+}
+
+/* ===== Адаптив ===== */
 @media (max-width: 768px) {
   #cookie { font-size: 120px; }
   header p { font-size: 0.9rem; }
 }
 </style>
+</head>
+<body>
+
+<header>
+  <p>Печеньки: <span id="cookies">0</span></p>
+  <p>CPS: <span id="cps">0</span></p>
+  <p>Клики: <span id="clicks">0</span></p>
+  <p>Престиж: <span id="prestige">0</span></p>
+  <button id="prestigeBtn">Престиж</button>
+</header>
+
+<div id="main">
+  <div id="cookie">🍪</div>
+  <div class="section">
+    <h2>Объекты</h2>
+    <div id="objects"></div>
+  </div>
+  <div class="section">
+    <h2>Апгрейды</h2>
+    <div id="upgrades"></div>
+  </div>
+</div>
+
+<script>
+let cookies = 0, totalClicks = 0, clickPower = 1, cps = 0;
+let prestigePoints = 0, prestigeMultiplier = 1;
+
+const objectsData = [
+  { name: 'Cursor', cost: 15, cps: 0.1, amount: 0 },
+  { name: 'Grandma', cost: 100, cps: 1, amount: 0 },
+  { name: 'Farm', cost: 500, cps: 8, amount: 0 },
+  { name: 'Factory', cost: 3000, cps: 47, amount: 0 },
+  { name: 'Mine', cost: 10000, cps: 260, amount: 0 }
+];
+
+const upgradesData = [
+  { name: 'Сильнее клик', cost: 100, type: 'click', multiplier: 2, purchased: false },
+  { name: 'Бабушка эффективнее', cost: 500, type: 'object', target: 'Grandma', multiplier: 2, purchased: false }
+];
+
+const cookieBtn = document.getElementById('cookie');
+const cookiesDisplay = document.getElementById('cookies');
+const clicksDisplay = document.getElementById('clicks');
+const cpsDisplay = document.getElementById('cps');
+const prestigeDisplay = document.getElementById('prestige');
+const objectsContainer = document.getElementById('objects');
+const upgradesContainer = document.getElementById('upgrades');
+const prestigeBtn = document.getElementById('prestigeBtn');
+
+/* ===== Механика ===== */
+function updateStats(){
+  cookiesDisplay.textContent = Math.floor(cookies);
+  clicksDisplay.textContent = totalClicks;
+  cpsDisplay.textContent = (cps*prestigeMultiplier).toFixed(1);
+  prestigeDisplay.textContent = prestigePoints;
+}
+
+function calculateCPS(){
+  cps = objectsData.reduce((sum,obj)=>sum + obj.cps*obj.amount,0);
+}
+
+function initObjects(){
+  objectsContainer.innerHTML = '';
+  objectsData.forEach((obj,index)=>{
+    const button = document.createElement('button');
+    button.textContent = `Купить (${obj.cost})`;
+    button.disabled = cookies < obj.cost;
+    button.addEventListener('pointerdown',()=>buyObject(index));
+    const div = document.createElement('div');
+    div.className='object';
+    div.innerHTML=`<span>${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>`;
+    div.appendChild(button);
+    objectsContainer.appendChild(div);
+  });
+}
+
+function buyObject(index){
+  const obj = objectsData[index];
+  if(cookies >= obj.cost){
+    cookies -= obj.cost;
+    obj.amount++;
+    obj.cost = Math.floor(obj.cost * 1.15);
+    calculateCPS();
+    updateStats();
+    initObjects();
+    flyingCookieEffect(cookieBtn);
+    saveGame();
+  }
+}
+
+function initUpgrades(){
+  upgradesContainer.innerHTML = '';
+  upgradesData.forEach((upg,index)=>{
+    const button = document.createElement('button');
+    button.textContent = `Купить (${upg.cost})`;
+    button.disabled = upg.purchased || cookies < upg.cost;
+    button.addEventListener('pointerdown',()=>buyUpgrade(index));
+    const div = document.createElement('div');
+    div.className='upgrade';
+    div.innerHTML=`<span>${upg.name}</span>`;
+    div.appendChild(button);
+    upgradesContainer.appendChild(div);
+  });
+}
+
+function buyUpgrade(index){
+  const upg = upgradesData[index];
+  if(cookies >= upg.cost && !upg.purchased){
+    cookies -= upg.cost;
+    upg.purchased = true;
+    if(upg.type === 'click') clickPower *= upg.multiplier;
+    else if(upg.type === 'object'){
+      const obj = objectsData.find(o=>o.name===upg.target);
+      obj.cps *= upg.multiplier;
+      calculateCPS();
+    }
+    updateStats();
+    initObjects();
+    initUpgrades();
+    flyingCookieEffect(cookieBtn);
+    saveGame();
+  }
+}
+
+/* ===== Анимации ===== */
+function plusOneEffect(){
+  const span = document.createElement('span');
+  span.className='plus-one';
+  span.textContent = `+${clickPower}`;
+  document.body.appendChild(span);
+  const rect = cookieBtn.getBoundingClientRect();
+  span.style.left = rect.left + rect.width/2 + 'px';
+  span.style.top = rect.top + 'px';
+  setTimeout(()=>span.remove(),800);
+}
+
+function flyingCookieEffect(target){
+  const span = document.createElement('span');
+  span.className='flying-cookie';
+  span.textContent='🍪';
+  document.body.appendChild(span);
+  const rect = target.getBoundingClientRect();
+  span.style.left = rect.left + Math.random()*50 + 'px';
+  span.style.top = rect.top + 'px';
+  setTimeout(()=>span.remove(),1000);
+}
+
+/* ===== Клик по печеньке ===== */
+cookieBtn.addEventListener('pointerdown',()=>{
+  cookies += clickPower*prestigeMultiplier;
+  totalClicks++;
+  updateStats();
+  plusOneEffect();
+  saveGame();
+});
+
+/* ===== Автосчёт CPS ===== */
+setInterval(()=>{
+  cookies += cps*prestigeMultiplier/10;
+  updateStats();
+},100);
+
+/* ===== Престиж ===== */
+prestigeBtn.addEventListener('pointerdown',()=>{
+  if(cookies >= 10000){
+    prestigePoints++;
+    prestigeMultiplier = 1 + prestigePoints*0.1;
+    cookies=0;
+    objectsData.forEach(obj=>obj.amount=0);
+    upgradesData.forEach(upg=>upg.purchased=false);
+    calculateCPS();
+    updateStats();
+    initObjects();
+    initUpgrades();
+    saveGame();
+  }
+});
+
+/* ===== Сохранение и загрузка ===== */
+function saveGame(){
+  const save={cookies,totalClicks,clickPower,cps,prestigePoints,objectsData,upgradesData};
+  localStorage.setItem('cookieClickerSave',JSON.stringify(save));
+}
+
+function loadGame(){
+  const save=JSON.parse(localStorage.getItem('cookieClickerSave'));
+  if(save){
+    cookies=save.cookies;
+    totalClicks=save.totalClicks;
+    clickPower=save.clickPower;
+    cps=save.cps;
+    prestigePoints=save.prestigePoints;
+    prestigeMultiplier = 1 + prestigePoints*0.1;
+    save.objectsData.forEach((obj,i)=>objectsData[i].amount=obj.amount);
+    save.upgradesData.forEach((upg,i)=>upgradesData[i].purchased=upg.purchased);
+    calculateCPS();
+  }
+}
+
+loadGame();
+initObjects();
+initUpgrades();
+updateStats();
+</script>
+
+</body>
+</html>
