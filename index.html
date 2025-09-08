@@ -68,7 +68,15 @@ button.prestige {
 <div class="container" id="upgrades"></div>
 <div id="stats"></div>
 
-<button class="prestige">Престиж</button>
+<button class="prestige">Престиж</button><div id="saveMenu" class="p-2 space-y-2 bg-gray-900 rounded-2xl shadow-lg mt-4">
+  <button onclick="saveGame()" class="w-full p-2 bg-blue-600 rounded-2xl">💾 Сохранить</button>
+  <button onclick="exportSave()" class="w-full p-2 bg-green-600 rounded-2xl">📤 Экспорт</button>
+  <button onclick="importSave()" class="w-full p-2 bg-yellow-600 rounded-2xl">📥 Импорт</button>
+  <button onclick="resetGame()" class="w-full p-2 bg-red-600 rounded-2xl">🗑 Сброс</button>
+</div>
+
+
+  
 
 <script>
 // -------------------- Основные переменные --------------------
@@ -291,7 +299,37 @@ setInterval(flyingCookiesBackground, 500);
 updateBuildings();
 updateUpgrades();
 updateStats();
-</script>
 
+// === Локальное сохранение ===
+function saveGame() {
+  const saveData = {
+    cookies: cookies,
+    totalCookies: totalCookies,
+    buildings: buildings,
+    upgrades: upgrades,
+    prestige: prestige
+  };
+  localStorage.setItem("cookieSave", JSON.stringify(saveData));
+}
+
+function loadGame() {
+  const saveData = JSON.parse(localStorage.getItem("cookieSave"));
+  if (saveData) {
+    cookies = saveData.cookies || 0;
+    totalCookies = saveData.totalCookies || 0;
+    buildings = saveData.buildings || buildings;
+    upgrades = saveData.upgrades || upgrades;
+    prestige = saveData.prestige || 0;
+    updateDisplay();
+  }
+}
+
+// Автосейв каждые 5 секунд
+setInterval(saveGame, 5000);
+
+// Загружаем сохранение при запуске
+window.onload = loadGame;
+
+</script>
 </body>
 </html>
