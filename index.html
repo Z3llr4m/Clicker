@@ -162,38 +162,35 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
 let cookies = 0, totalClicks = 0, clickPower = 1, cps = 0;
 let prestigePoints = 0, prestigeMultiplier = 1;
 
-// ===== Здания =====
+// ===== Здания с эмоджи =====
 const objectsData = [
-  { name: 'Cursor', cost: 15, cps: 0.1, amount: 0 },
-  { name: 'Grandma', cost: 100, cps: 1, amount: 0 },
-  { name: 'Farm', cost: 500, cps: 8, amount: 0 },
-  { name: 'Factory', cost: 3000, cps: 47, amount: 0 },
-  { name: 'Mine', cost: 10000, cps: 260, amount: 0 },
-  { name: 'Shipment', cost: 40000, cps: 1400, amount: 0 },
-  { name: 'Alchemy Lab', cost: 200000, cps: 7800, amount: 0 },
-  { name: 'Portal', cost: 3300000, cps: 44000, amount: 0 },
-  { name: 'Time Machine', cost: 51000000, cps: 260000, amount: 0 },
-  { name: 'Antimatter Condenser', cost: 750000000, cps: 1600000, amount: 0 }
+  { name: 'Cursor', emoji: '🖱️', cost: 15, cps: 0.1, amount: 0 },
+  { name: 'Grandma', emoji: '👵', cost: 100, cps: 1, amount: 0 },
+  { name: 'Farm', emoji: '🌾', cost: 500, cps: 8, amount: 0 },
+  { name: 'Factory', emoji: '🏭', cost: 3000, cps: 47, amount: 0 },
+  { name: 'Mine', emoji: '⛏️', cost: 10000, cps: 260, amount: 0 },
+  { name: 'Shipment', emoji: '🚚', cost: 40000, cps: 1400, amount: 0 },
+  { name: 'Alchemy Lab', emoji: '⚗️', cost: 200000, cps: 7800, amount: 0 },
+  { name: 'Portal', emoji: '🌀', cost: 3300000, cps: 44000, amount: 0 },
+  { name: 'Time Machine', emoji: '⏰', cost: 51000000, cps: 260000, amount: 0 },
+  { name: 'Antimatter Condenser', emoji: '🛸', cost: 750000000, cps: 1600000, amount: 0 }
 ];
 
-// ===== Апгрейды =====
+// ===== Апгрейды для каждого здания =====
 const upgradesData = [
   { name: 'Сильнее клик', cost: 100, type: 'click', multiplier: 2, purchased: false },
-  { name: 'Супер клик', cost: 1000, type: 'click', multiplier: 5, purchased: false },
-  { name: 'Бабушка эффективнее', cost: 500, type: 'object', target: 'Grandma', multiplier: 2, purchased: false },
-  { name: 'Ферма эффективнее', cost: 5000, type: 'object', target: 'Farm', multiplier: 2, purchased: false },
-  { name: 'Фабрика эффективнее', cost: 20000, type: 'object', target: 'Factory', multiplier: 2, purchased: false },
-  { name: 'Все здания +50%', cost: 100000, type: 'global', multiplier: 1.5, purchased: false }
+  { name: 'Cursor мастер', cost: 500, type: 'object', target: 'Cursor', multiplier: 2, purchased: false },
+  { name: 'Бабушка супер', cost: 1000, type: 'object', target: 'Grandma', multiplier: 2, purchased: false },
+  { name: 'Ферма улучшена', cost: 5000, type: 'object', target: 'Farm', multiplier: 2, purchased: false },
+  { name: 'Фабрика модернизирована', cost: 20000, type: 'object', target: 'Factory', multiplier: 2, purchased: false },
+  { name: 'Шахта эффективнее', cost: 100000, type: 'object', target: 'Mine', multiplier: 2, purchased: false },
+  { name: 'Отгрузка ускорена', cost: 400000, type: 'object', target: 'Shipment', multiplier: 2, purchased: false },
+  { name: 'Алхимическая лаборатория', cost: 1000000, type: 'object', target: 'Alchemy Lab', multiplier: 2, purchased: false },
+  { name: 'Портал усилен', cost: 5000000, type: 'object', target: 'Portal', multiplier: 2, purchased: false },
+  { name: 'Машина времени улучшена', cost: 30000000, type: 'object', target: 'Time Machine', multiplier: 2, purchased: false },
+  { name: 'Конденсатор антиматерии', cost: 150000000, type: 'object', target: 'Antimatter Condenser', multiplier: 2, purchased: false },
 ];
 
-const cookieBtn = document.getElementById('cookie');
-const cookiesDisplay = document.getElementById('cookies');
-const clicksDisplay = document.getElementById('clicks');
-const cpsDisplay = document.getElementById('cps');
-const prestigeDisplay = document.getElementById('prestige');
-const objectsContainer = document.getElementById('objects');
-const upgradesContainer = document.getElementById('upgrades');
-const prestigeBtn = document.getElementById('prestigeBtn');
 
 /* ===== Механика ===== */
 function updateStats(){
