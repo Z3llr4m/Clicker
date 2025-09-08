@@ -69,14 +69,20 @@
       justify-content: center;
       position: relative;
       min-height: 200px;
+      background: linear-gradient(135deg, #87CEEB 0%, #ADD8E6 100%);
+      border-radius: 20px;
+      margin: 10px;
+      box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.3);
     }
 
     #cookie {
-      font-size: 80px;
+      font-size: 200px;
       cursor: pointer;
       transition: transform 0.1s;
       padding: 20px;
       touch-action: manipulation;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+      z-index: 2;
     }
 
     #cookie:active {
@@ -94,14 +100,47 @@
       font-size: 12px;
       border: none;
       color: white;
+      z-index: 3;
     }
 
-    #panels {
+    #panels-container {
+      flex: 1;
       display: flex;
-      height: 45%;
+      flex-direction: column;
       min-height: 300px;
       background: #2b2b2b;
       border-top: 2px solid #444;
+      overflow: hidden;
+    }
+
+    .tab-buttons {
+      display: flex;
+      background: #333;
+      border-bottom: 1px solid #444;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: #2b2b2b;
+      border: none;
+      border-right: 1px solid #444;
+      cursor: pointer;
+      font-size: 14px;
+      color: #fff;
+      min-height: 44px;
+    }
+
+    .tab-btn.active {
+      background: #333;
+      border-bottom: 2px solid #ffcc66;
+    }
+
+    #panels {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
     }
 
     .panel {
@@ -110,6 +149,7 @@
       overflow-y: auto;
       border-right: 1px solid #444;
       -webkit-overflow-scrolling: touch;
+      height: 100%;
     }
 
     .panel:last-child {
@@ -123,6 +163,10 @@
       border-bottom: 1px solid #555;
       padding-bottom: 5px;
       font-size: 16px;
+      position: sticky;
+      top: 0;
+      background: #2b2b2b;
+      z-index: 1;
     }
 
     .building-item, .upgrade-item {
@@ -223,29 +267,6 @@
       z-index: 1000;
     }
 
-    .tab-buttons {
-      display: flex;
-      background: #333;
-      border-bottom: 1px solid #444;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 12px;
-      background: #2b2b2b;
-      border: none;
-      border-right: 1px solid #444;
-      cursor: pointer;
-      font-size: 14px;
-      color: #fff;
-      min-height: 44px;
-    }
-
-    .tab-btn.active {
-      background: #333;
-      border-bottom: 2px solid #ffcc66;
-    }
-
     .tab-content {
       display: none;
       padding: 10px;
@@ -273,15 +294,14 @@
     }
 
     /* Адаптивность для очень маленьких экранов */
-    @media (max-height: 600px) {
+    @media (max-height: 700px) {
       #cookie {
-        font-size: 60px;
-        padding: 10px;
+        font-size: 150px;
+        padding: 15px;
       }
       
-      #panels {
-        height: 50%;
-        min-height: 250px;
+      #cookie-section {
+        min-height: 180px;
       }
       
       .building-item, .upgrade-item {
@@ -294,6 +314,42 @@
         font-size: 12px;
         min-height: 40px;
       }
+    }
+
+    @media (max-height: 600px) {
+      #cookie {
+        font-size: 120px;
+        padding: 10px;
+      }
+      
+      #cookie-section {
+        min-height: 150px;
+      }
+    }
+
+    /* Milk background effect */
+    .milk-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, rgba(173, 216, 230, 0.05) 70%, transparent 100%);
+      border-radius: 20px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .milk-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: floatBubble 8s infinite ease-in-out;
+    }
+
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
+      50% { transform: translateY(-20px) scale(1.1); opacity: 0.9; }
     }
   </style>
 </head>
@@ -308,28 +364,37 @@
 
   <div id="main-content">
     <div id="cookie-section">
+      <div class="milk-effect"></div>
       <button id="prestige-btn" onclick="doPrestige()">Prestige (0)</button>
       <div id="cookie">🍪</div>
     </div>
 
-    <div class="tab-buttons">
-      <button class="tab-btn active" onclick="switchTab('buildings')">Buildings</button>
-      <button class="tab-btn" onclick="switchTab('upgrades')">Upgrades</button>
-      <button class="tab-btn" onclick="switchTab('stats')">Stats</button>
-    </div>
+    <div id="panels-container">
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab('buildings')">Buildings</button>
+        <button class="tab-btn" onclick="switchTab('upgrades')">Upgrades</button>
+        <button class="tab-btn" onclick="switchTab('stats')">Stats</button>
+      </div>
 
-    <div id="panels">
-      <div id="buildings" class="tab-content active"></div>
-      <div id="upgrades" class="tab-content"></div>
-      <div id="stats" class="tab-content">
-        <h3>Statistics</h3>
-        <div class="stat">Total Cookies: <span id="total-cookies" class="stat-value">0</span></div>
-        <div class="stat">Total Clicks: <span id="total-clicks" class="stat-value">0</span></div>
-        <div class="stat">Golden Cookies: <span id="golden-cookies-clicked" class="stat-value">0</span></div>
-        <div class="stat">Play Time: <span id="play-time" class="stat-value">0s</span></div>
-        <div style="margin-top: 15px;">
-          <button onclick="saveGame(true)">Save Game</button>
-          <button onclick="resetGame()" style="background: linear-gradient(135deg, #ff6b6b 0%, #c23616 100%);">Hard Reset</button>
+      <div id="panels">
+        <div id="buildings" class="panel active">
+          <h3>Buildings</h3>
+          <div id="buildings-content"></div>
+        </div>
+        <div id="upgrades" class="panel">
+          <h3>Upgrades</h3>
+          <div id="upgrades-content"></div>
+        </div>
+        <div id="stats" class="panel">
+          <h3>Statistics</h3>
+          <div class="stat">Total Cookies: <span id="total-cookies" class="stat-value">0</span></div>
+          <div class="stat">Total Clicks: <span id="total-clicks" class="stat-value">0</span></div>
+          <div class="stat">Golden Cookies: <span id="golden-cookies-clicked" class="stat-value">0</span></div>
+          <div class="stat">Play Time: <span id="play-time" class="stat-value">0s</span></div>
+          <div style="margin-top: 15px;">
+            <button onclick="saveGame(true)">Save Game</button>
+            <button onclick="resetGame()" style="background: linear-gradient(135deg, #ff6b6b 0%, #c23616 100%);">Hard Reset</button>
+          </div>
         </div>
       </div>
     </div>
@@ -423,10 +488,11 @@ const cookieEl = document.getElementById("cookie");
 const cookiesEl = document.getElementById("cookies");
 const cpsEl = document.getElementById("cps");
 const heavenlyChipsEl = document.getElementById("heavenly-chips");
-const buildingsEl = document.getElementById("buildings");
-const upgradesEl = document.getElementById("upgrades");
+const buildingsEl = document.getElementById("buildings-content");
+const upgradesEl = document.getElementById("upgrades-content");
 const prestigeBtn = document.getElementById("prestige-btn");
 const saveNotification = document.getElementById("save-notification");
+const milkEffect = document.querySelector('.milk-effect');
 
 // =============================
 // Utility Functions
@@ -440,11 +506,31 @@ function formatNumber(num) {
 }
 
 function switchTab(tabName) {
-  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   
   document.getElementById(tabName).classList.add('active');
   document.querySelector(`.tab-btn[onclick="switchTab('${tabName}')"]`).classList.add('active');
+}
+
+function createMilkBubbles() {
+  for (let i = 0; i < 15; i++) {
+    const bubble = document.createElement('div');
+    bubble.className = 'milk-bubble';
+    
+    const size = Math.random() * 20 + 5;
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    const delay = Math.random() * 5;
+    
+    bubble.style.width = size + 'px';
+    bubble.style.height = size + 'px';
+    bubble.style.left = left + '%';
+    bubble.style.top = top + '%';
+    bubble.style.animationDelay = delay + 's';
+    
+    milkEffect.appendChild(bubble);
+  }
 }
 
 // =============================
@@ -613,7 +699,6 @@ function spawnGoldenCookie() {
     updateUI();
   };
 
-  // Добавляем обработчики и для touch и для click
   goldenCookie.addEventListener('click', handleGoldenCookieClick);
   goldenCookie.addEventListener('touchend', handleGoldenCookieClick);
 
@@ -771,7 +856,6 @@ function resetGame() {
 // Event Listeners - OPTIMIZED FOR MOBILE
 // =============================
 function handleCookieClick(e) {
-  // Получаем координаты касания/клика
   const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
   const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
   
@@ -781,17 +865,14 @@ function handleCookieClick(e) {
   spawnFloatingText(x, y, `+${formatNumber(clickPower)}`);
   updateUI();
   
-  // Предотвращаем стандартное поведение на мобильных
   if (e.type.includes('touch')) {
     e.preventDefault();
   }
 }
 
-// Добавляем оба обработчика для максимальной совместимости
 cookieEl.addEventListener('click', handleCookieClick);
 cookieEl.addEventListener('touchstart', handleCookieClick, { passive: false });
 
-// Оптимизация для кнопок - предотвращаем залипание
 document.querySelectorAll('button').forEach(btn => {
   btn.addEventListener('touchstart', function(e) {
     this.style.transform = 'scale(0.98)';
@@ -828,15 +909,14 @@ setInterval(saveGame, 30000);
 // Initialization
 // =============================
 loadGame();
+createMilkBubbles();
 scheduleGoldenCookie();
 updateUI();
 
-// Предотвращаем масштабирование при двойном тапе
 document.addEventListener('dblclick', function(e) {
   e.preventDefault();
 }, { passive: false });
 
-// Предотвращаем контекстное меню при долгом нажатии
 document.addEventListener('contextmenu', function(e) {
   e.preventDefault();
 });
