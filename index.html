@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Cookie Clicker</title>
+<title>Cookie Clicker Clone</title>
 <style>
 body {
   font-family: Arial;
   text-align: center;
   background: linear-gradient(to bottom, #87ceeb, #f5f5dc);
-  margin: 0; padding: 20px;
+  margin: 0;
+  padding: 20px;
   overflow: hidden;
 }
 h1 { margin-bottom: 10px; }
@@ -21,7 +22,6 @@ h1 { margin-bottom: 10px; }
   transition: transform 0.1s;
   user-select: none;
 }
-
 #cookie:active { transform: scale(1.2); }
 
 .section {
@@ -47,7 +47,6 @@ button {
 }
 button:disabled { background-color: #ccc; cursor: not-allowed; }
 
-/* Летящие печеньки */
 .flying-cookie {
   position: absolute;
   font-size: 24px;
@@ -59,7 +58,6 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
   100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
 }
 
-/* +1 при клике */
 .plus-one {
   position: absolute;
   color: gold;
@@ -75,7 +73,7 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
 </head>
 <body>
 
-<h1>Mini Cookie Clicker</h1>
+<h1>Cookie Clicker Clone</h1>
 <div id="cookie">🍪</div>
 
 <div id="stats">
@@ -98,7 +96,7 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
 <button id="prestigeBtn">Престиж</button>
 
 <script>
-/* ======== ДАННЫЕ ======== */
+/* ===== ДАННЫЕ ===== */
 let cookies = 0;
 let totalClicks = 0;
 let clickPower = 1;
@@ -107,18 +105,20 @@ let prestigePoints = 0;
 let prestigeMultiplier = 1;
 
 const objectsData = [
-  { name: 'Пекарь', baseCost: 10, cps: 1, amount: 0 },
-  { name: 'Ферма', baseCost: 100, cps: 10, amount: 0 },
-  { name: 'Завод', baseCost: 1000, cps: 100, amount: 0 }
+  { name: 'Cursor', emoji: '🖱️', baseCost: 15, cps: 0.1, amount: 0 },
+  { name: 'Grandma', emoji: '👵', baseCost: 100, cps: 1, amount: 0 },
+  { name: 'Farm', emoji: '🌾', baseCost: 500, cps: 8, amount: 0 },
+  { name: 'Factory', emoji: '🏭', baseCost: 3000, cps: 47, amount: 0 },
+  { name: 'Mine', emoji: '⛏️', baseCost: 10000, cps: 260, amount: 0 }
 ];
 
 const upgradesData = [
-  { name: 'Сильный клик', cost: 50, type: 'click', multiplier: 2, purchased: false },
-  { name: 'Эффективные Пекари', cost: 200, type: 'object', target: 'Пекарь', multiplier: 2, purchased: false },
-  { name: 'Эффективная Ферма', cost: 500, type: 'object', target: 'Ферма', multiplier: 2, purchased: false }
+  { name: 'Stronger Click', cost: 100, type: 'click', multiplier: 2, purchased: false },
+  { name: 'Grandma Efficiency', cost: 500, type: 'object', target: 'Grandma', multiplier: 2, purchased: false },
+  { name: 'Farm Efficiency', cost: 1000, type: 'object', target: 'Farm', multiplier: 2, purchased: false }
 ];
 
-/* ======== ЭЛЕМЕНТЫ ======== */
+/* ===== ЭЛЕМЕНТЫ ===== */
 const cookieBtn = document.getElementById('cookie');
 const cookiesDisplay = document.getElementById('cookies');
 const clicksDisplay = document.getElementById('clicks');
@@ -128,7 +128,7 @@ const objectsContainer = document.getElementById('objects');
 const upgradesContainer = document.getElementById('upgrades');
 const prestigeBtn = document.getElementById('prestigeBtn');
 
-/* ======== ФУНКЦИИ ======== */
+/* ===== ФУНКЦИИ ===== */
 function updateStats() {
   cookiesDisplay.textContent = Math.floor(cookies);
   clicksDisplay.textContent = totalClicks;
@@ -147,7 +147,7 @@ function initObjects() {
     const cost = Math.floor(obj.baseCost * Math.pow(1.15, obj.amount));
     const div = document.createElement('div');
     div.className = 'object';
-    div.innerHTML = `<span>${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>
+    div.innerHTML = `<span>${obj.emoji} ${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>
                      <button ${cookies >= cost ? '' : 'disabled'} id="buy-object-${index}">Купить (${cost})</button>`;
     objectsContainer.appendChild(div);
     document.getElementById(`buy-object-${index}`).addEventListener('click', () => buyObject(index));
@@ -200,7 +200,7 @@ function buyUpgrade(index) {
   }
 }
 
-/* ======== КЛИК ПО ПЕЧЕНЬКЕ ======== */
+/* ===== КЛИК ПО ПЕЧЕНЬКЕ ===== */
 cookieBtn.addEventListener('click', e => {
   cookies += clickPower * prestigeMultiplier;
   totalClicks++;
@@ -209,7 +209,7 @@ cookieBtn.addEventListener('click', e => {
   plusOneEffect(e);
 });
 
-/* ======== АВТОПРОИЗВОДСТВО ======== */
+/* ===== АВТОПРОИЗВОДСТВО ===== */
 setInterval(() => {
   const gain = cps * prestigeMultiplier / 10;
   cookies += gain;
@@ -219,7 +219,7 @@ setInterval(() => {
   if (gain > 0) flyingCookieEffect(cookieBtn);
 }, 100);
 
-/* ======== ЭФФЕКТ +1 ======== */
+/* ===== +1 ЭФФЕКТ ===== */
 function plusOneEffect(e) {
   const span = document.createElement('span');
   span.className = 'plus-one';
@@ -231,7 +231,7 @@ function plusOneEffect(e) {
   setTimeout(() => span.remove(), 800);
 }
 
-/* ======== ЛЕТЯЩИЕ ПЕЧЕНЬКИ ======== */
+/* ===== ЛЕТЯЩИЕ ПЕЧЕНЬКИ ===== */
 function flyingCookieEffect(target) {
   const span = document.createElement('span');
   span.className = 'flying-cookie';
@@ -243,7 +243,7 @@ function flyingCookieEffect(target) {
   setTimeout(() => span.remove(), 1000);
 }
 
-/* ======== СИСТЕМА ПРЕСТИЖА ======== */
+/* ===== СИСТЕМА ПРЕСТИЖА ===== */
 prestigeBtn.addEventListener('click', () => {
   if (cookies >= 10000) {
     const gained = Math.floor(cookies / 10000);
@@ -264,7 +264,7 @@ prestigeBtn.addEventListener('click', () => {
   }
 });
 
-/* ======== СОХРАНЕНИЕ ======== */
+/* ===== СОХРАНЕНИЕ ===== */
 function saveGame() {
   const save = {
     cookies, totalClicks, clickPower, prestigePoints, prestigeMultiplier,
