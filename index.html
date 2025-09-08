@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cookie Clicker Mobile</title>
+  <title>Cookie Clicker Deluxe</title>
   <style>
     * {
       box-sizing: border-box;
@@ -26,63 +26,93 @@
       touch-action: manipulation;
     }
 
+    /* Header */
     header {
-      padding: 15px;
+      padding: 12px;
       background: #2b2b2b;
       text-align: center;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      flex-shrink: 0;
     }
 
+    /* Stats */
     #stats-container {
       display: flex;
       justify-content: space-around;
       padding: 10px;
       background: #333;
       border-bottom: 1px solid #444;
+      flex-shrink: 0;
     }
 
     .stat {
       text-align: center;
-      padding: 5px;
-      font-size: 14px;
+      padding: 4px;
+      font-size: 12px;
     }
 
     .stat-value {
       font-weight: bold;
       color: #ffcc66;
+      font-size: 14px;
     }
 
+    /* Main content with scrolling */
     #main-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
+    /* Cookie section */
     #cookie-section {
-      flex: 1;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
-      min-height: 200px;
+      min-height: 250px;
       background: linear-gradient(135deg, #87CEEB 0%, #ADD8E6 100%);
-      border-radius: 20px;
       margin: 10px;
-      box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .milk-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, rgba(173, 216, 230, 0.05) 70%, transparent 100%);
+      border-radius: 20px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .milk-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: floatBubble 8s infinite ease-in-out;
+    }
+
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
+      50% { transform: translateY(-20px) scale(1.1); opacity: 0.9; }
     }
 
     #cookie {
-      font-size: 200px;
+      font-size: 120px;
       cursor: pointer;
       transition: transform 0.1s;
-      padding: 20px;
-      touch-action: manipulation;
-      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
       z-index: 2;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
     }
 
     #cookie:active {
@@ -90,29 +120,18 @@
     }
 
     #prestige-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
       background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-      padding: 8px 12px;
-      border-radius: 15px;
+      padding: 10px 15px;
+      border-radius: 20px;
       font-weight: bold;
-      font-size: 12px;
+      font-size: 14px;
       border: none;
       color: white;
-      z-index: 3;
+      margin-top: 10px;
+      z-index: 2;
     }
 
-    #panels-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 300px;
-      background: #2b2b2b;
-      border-top: 2px solid #444;
-      overflow: hidden;
-    }
-
+    /* Tabs */
     .tab-buttons {
       display: flex;
       background: #333;
@@ -137,42 +156,23 @@
       border-bottom: 2px solid #ffcc66;
     }
 
-    #panels {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
-
-    .panel {
-      flex: 1;
-      padding: 10px;
+    /* Tab content */
+    .tab-content {
+      display: none;
+      padding: 15px;
       overflow-y: auto;
-      border-right: 1px solid #444;
       -webkit-overflow-scrolling: touch;
-      height: 100%;
     }
 
-    .panel:last-child {
-      border-right: none;
+    .tab-content.active {
+      display: block;
     }
 
-    .panel h3 {
-      margin-bottom: 12px;
-      text-align: center;
-      color: #ffcc66;
-      border-bottom: 1px solid #555;
-      padding-bottom: 5px;
-      font-size: 16px;
-      position: sticky;
-      top: 0;
-      background: #2b2b2b;
-      z-index: 1;
-    }
-
+    /* Buildings and Upgrades */
     .building-item, .upgrade-item {
       background: #333;
-      margin-bottom: 8px;
-      padding: 10px;
+      margin-bottom: 10px;
+      padding: 12px;
       border-radius: 8px;
       border-left: 4px solid #ffcc66;
     }
@@ -180,12 +180,12 @@
     .building-header, .upgrade-header {
       display: flex;
       align-items: center;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
     }
 
     .building-emoji, .upgrade-emoji {
-      font-size: 20px;
-      margin-right: 8px;
+      font-size: 24px;
+      margin-right: 12px;
       min-width: 30px;
       text-align: center;
     }
@@ -194,20 +194,14 @@
       background: linear-gradient(135deg, #444 0%, #333 100%);
       color: white;
       border: none;
-      padding: 12px 8px;
+      padding: 12px;
       margin-top: 8px;
       border-radius: 6px;
       width: 100%;
       cursor: pointer;
-      transition: all 0.2s;
       font-weight: bold;
       font-size: 14px;
-      touch-action: manipulation;
       min-height: 44px;
-    }
-
-    button:hover:not(:disabled) {
-      background: linear-gradient(135deg, #555 0%, #444 100%);
     }
 
     button:active:not(:disabled) {
@@ -220,6 +214,7 @@
       cursor: not-allowed;
     }
 
+    /* Golden Cookie */
     .golden-cookie {
       position: fixed;
       font-size: 40px;
@@ -227,7 +222,6 @@
       z-index: 1000;
       animation: float 3s ease-in-out infinite;
       text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-      touch-action: manipulation;
     }
 
     @keyframes float {
@@ -235,6 +229,7 @@
       50% { transform: translateY(-10px); }
     }
 
+    /* Animations */
     @keyframes floatUp {
       from {
         opacity: 1;
@@ -255,6 +250,7 @@
       50% { text-shadow: 0 0 30px rgba(255, 50, 50, 0.8); }
     }
 
+    /* Save Notification */
     #save-notification {
       position: fixed;
       bottom: 20px;
@@ -267,94 +263,52 @@
       z-index: 1000;
     }
 
-    .tab-content {
-      display: none;
-      padding: 10px;
-      overflow-y: auto;
-      height: 100%;
-      -webkit-overflow-scrolling: touch;
+    /* Achievements */
+    .achievement {
+      background: #333;
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #ffcc66;
     }
 
-    .tab-content.active {
-      display: block;
+    .achievement.locked {
+      opacity: 0.6;
+      border-left: 4px solid #555;
     }
 
-    /* Улучшения для мобильной прокрутки */
-    .panel::-webkit-scrollbar {
-      width: 6px;
+    /* Mini-games */
+    .minigame-container {
+      background: #333;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
     }
 
-    .panel::-webkit-scrollbar-track {
-      background: #2b2b2b;
-    }
-
-    .panel::-webkit-scrollbar-thumb {
-      background: #555;
-      border-radius: 3px;
-    }
-
-    /* Адаптивность для очень маленьких экранов */
+    /* Responsive */
     @media (max-height: 700px) {
       #cookie {
-        font-size: 150px;
-        padding: 15px;
+        font-size: 100px;
       }
-      
       #cookie-section {
-        min-height: 180px;
-      }
-      
-      .building-item, .upgrade-item {
-        padding: 8px;
-        margin-bottom: 6px;
-      }
-      
-      button {
-        padding: 10px 6px;
-        font-size: 12px;
-        min-height: 40px;
+        min-height: 200px;
+        padding: 15px;
       }
     }
 
     @media (max-height: 600px) {
       #cookie {
-        font-size: 120px;
+        font-size: 80px;
+      }
+      #cookie-section {
+        min-height: 180px;
         padding: 10px;
       }
-      
-      #cookie-section {
-        min-height: 150px;
-      }
-    }
-
-    /* Milk background effect */
-    .milk-effect {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, rgba(173, 216, 230, 0.05) 70%, transparent 100%);
-      border-radius: 20px;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .milk-bubble {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      animation: floatBubble 8s infinite ease-in-out;
-    }
-
-    @keyframes floatBubble {
-      0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
-      50% { transform: translateY(-20px) scale(1.1); opacity: 0.9; }
     }
   </style>
 </head>
 <body>
-  <header>🍪 Cookie Clicker Mobile</header>
+  <header>🍪 Cookie Clicker Deluxe</header>
 
   <div id="stats-container">
     <div class="stat">Cookies: <span id="cookies" class="stat-value">0</span></div>
@@ -363,39 +317,38 @@
   </div>
 
   <div id="main-content">
+    <!-- Cookie Section -->
     <div id="cookie-section">
       <div class="milk-effect"></div>
-      <button id="prestige-btn" onclick="doPrestige()">Prestige (0)</button>
       <div id="cookie">🍪</div>
+      <button id="prestige-btn" onclick="doPrestige()">Prestige (0)</button>
     </div>
 
-    <div id="panels-container">
-      <div class="tab-buttons">
-        <button class="tab-btn active" onclick="switchTab('buildings')">Buildings</button>
-        <button class="tab-btn" onclick="switchTab('upgrades')">Upgrades</button>
-        <button class="tab-btn" onclick="switchTab('stats')">Stats</button>
-      </div>
+    <!-- Tabs -->
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab('buildings')">Buildings</button>
+      <button class="tab-btn" onclick="switchTab('upgrades')">Upgrades</button>
+      <button class="tab-btn" onclick="switchTab('achievements')">Achievements</button>
+      <button class="tab-btn" onclick="switchTab('minigames')">Mini-games</button>
+    </div>
 
-      <div id="panels">
-        <div id="buildings" class="panel active">
-          <h3>Buildings</h3>
-          <div id="buildings-content"></div>
-        </div>
-        <div id="upgrades" class="panel">
-          <h3>Upgrades</h3>
-          <div id="upgrades-content"></div>
-        </div>
-        <div id="stats" class="panel">
-          <h3>Statistics</h3>
-          <div class="stat">Total Cookies: <span id="total-cookies" class="stat-value">0</span></div>
-          <div class="stat">Total Clicks: <span id="total-clicks" class="stat-value">0</span></div>
-          <div class="stat">Golden Cookies: <span id="golden-cookies-clicked" class="stat-value">0</span></div>
-          <div class="stat">Play Time: <span id="play-time" class="stat-value">0s</span></div>
-          <div style="margin-top: 15px;">
-            <button onclick="saveGame(true)">Save Game</button>
-            <button onclick="resetGame()" style="background: linear-gradient(135deg, #ff6b6b 0%, #c23616 100%);">Hard Reset</button>
-          </div>
-        </div>
+    <!-- Tab Contents -->
+    <div id="buildings" class="tab-content active"></div>
+    
+    <div id="upgrades" class="tab-content"></div>
+    
+    <div id="achievements" class="tab-content">
+      <h3>🏆 Achievements</h3>
+      <div id="achievements-list"></div>
+    </div>
+    
+    <div id="minigames" class="tab-content">
+      <h3>🎮 Mini-games</h3>
+      <div class="minigame-container">
+        <h4>Cookie Lottery 🎰</h4>
+        <p>Spend 100 cookies for a chance to win big!</p>
+        <button onclick="playLottery()">Play Lottery (100 cookies)</button>
+        <div id="lottery-result"></div>
       </div>
     </div>
   </div>
@@ -460,24 +413,40 @@ const upgrades = [
     require: 1, 
     effect: () => { buildings[1].cps *= 2; },
     description: "Double Grandma CPS"
+  }
+];
+
+// =============================
+// Achievements
+// =============================
+const achievements = [
+  {
+    id: "first_click",
+    name: "First Click!",
+    description: "Click the cookie for the first time",
+    unlocked: false,
+    check: () => totalClicks >= 1
   },
-  { 
-    name: "Cheap fertilizer", 
-    emoji: "🌱",
-    cost: 11000, 
-    bought: false, 
-    require: 2, 
-    effect: () => { buildings[2].cps *= 2; },
-    description: "Double Farm CPS"
+  {
+    id: "hundred_clicks",
+    name: "Cookie Monster",
+    description: "Reach 100 clicks",
+    unlocked: false,
+    check: () => totalClicks >= 100
   },
-  { 
-    name: "Steel-plated factories", 
-    emoji: "🔩",
-    cost: 130000, 
-    bought: false, 
-    require: 3, 
-    effect: () => { buildings[3].cps *= 2; },
-    description: "Double Factory CPS"
+  {
+    id: "thousand_cookies",
+    name: "Cookie Collector",
+    description: "Earn 1,000 cookies total",
+    unlocked: false,
+    check: () => totalCookiesEarned >= 1000
+  },
+  {
+    id: "first_golden",
+    name: "Golden Touch",
+    description: "Click your first golden cookie",
+    unlocked: false,
+    check: () => goldenCookiesClicked >= 1
   }
 ];
 
@@ -488,11 +457,10 @@ const cookieEl = document.getElementById("cookie");
 const cookiesEl = document.getElementById("cookies");
 const cpsEl = document.getElementById("cps");
 const heavenlyChipsEl = document.getElementById("heavenly-chips");
-const buildingsEl = document.getElementById("buildings-content");
-const upgradesEl = document.getElementById("upgrades-content");
+const buildingsEl = document.getElementById("buildings");
+const upgradesEl = document.getElementById("upgrades");
+const achievementsEl = document.getElementById("achievements-list");
 const prestigeBtn = document.getElementById("prestige-btn");
-const saveNotification = document.getElementById("save-notification");
-const milkEffect = document.querySelector('.milk-effect');
 
 // =============================
 // Utility Functions
@@ -506,7 +474,7 @@ function formatNumber(num) {
 }
 
 function switchTab(tabName) {
-  document.querySelectorAll('.panel').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   
   document.getElementById(tabName).classList.add('active');
@@ -514,11 +482,12 @@ function switchTab(tabName) {
 }
 
 function createMilkBubbles() {
-  for (let i = 0; i < 15; i++) {
+  const milkEffect = document.querySelector('.milk-effect');
+  for (let i = 0; i < 10; i++) {
     const bubble = document.createElement('div');
     bubble.className = 'milk-bubble';
     
-    const size = Math.random() * 20 + 5;
+    const size = Math.random() * 15 + 5;
     const left = Math.random() * 100;
     const top = Math.random() * 100;
     const delay = Math.random() * 5;
@@ -541,17 +510,15 @@ function updateUI() {
   cpsEl.textContent = formatNumber(cps);
   heavenlyChipsEl.textContent = formatNumber(heavenlyChips);
   
-  document.getElementById('total-cookies').textContent = formatNumber(totalCookiesEarned);
-  document.getElementById('total-clicks').textContent = formatNumber(totalClicks);
-  document.getElementById('golden-cookies-clicked').textContent = formatNumber(goldenCookiesClicked);
-  document.getElementById('play-time').textContent = `${Math.floor(playTime)}s`;
+  // Update prestige button
+  const chips = calculateHeavenlyChips();
+  prestigeBtn.textContent = `Prestige (${formatNumber(chips)})`;
+  prestigeBtn.disabled = chips <= 0;
 
   // Update buildings
-  buildingsEl.innerHTML = '';
+  buildingsEl.innerHTML = '<h3>🏗️ Buildings</h3>';
   buildings.forEach((b, i) => {
-    if (!b.unlocked && cookies >= b.baseCost * 0.5) {
-      b.unlocked = true;
-    }
+    if (!b.unlocked && cookies >= b.baseCost * 0.5) b.unlocked = true;
     
     if (b.unlocked) {
       const cost = Math.floor(b.baseCost * Math.pow(1.15, b.count));
@@ -579,15 +546,12 @@ function updateUI() {
   });
 
   // Update upgrades
-  upgradesEl.innerHTML = '';
+  upgradesEl.innerHTML = '<h3>⚡ Upgrades</h3>';
   upgrades.forEach((u, i) => {
     if (!u.bought) {
       let available = false;
-      if (u.require === "click") {
-        available = true;
-      } else if (typeof u.require === "number" && buildings[u.require].count > 0) {
-        available = true;
-      }
+      if (u.require === "click") available = true;
+      else if (typeof u.require === "number" && buildings[u.require].count > 0) available = true;
 
       if (available) {
         const upgradeDiv = document.createElement('div');
@@ -614,10 +578,28 @@ function updateUI() {
     }
   });
 
-  // Update prestige button
-  const chips = calculateHeavenlyChips();
-  prestigeBtn.textContent = `Prestige (${formatNumber(chips)})`;
-  prestigeBtn.disabled = chips <= 0;
+  // Update achievements
+  updateAchievements();
+}
+
+function updateAchievements() {
+  achievementsEl.innerHTML = '';
+  achievements.forEach(achievement => {
+    const achieved = achievement.check();
+    if (achieved && !achievement.unlocked) {
+      achievement.unlocked = true;
+      showNotification(`Achievement unlocked: ${achievement.name}!`);
+    }
+    
+    const achievementDiv = document.createElement('div');
+    achievementDiv.className = `achievement ${achievement.unlocked ? '' : 'locked'}`;
+    achievementDiv.innerHTML = `
+      <div><strong>${achievement.name}</strong></div>
+      <div>${achievement.description}</div>
+      <div>${achievement.unlocked ? '✅ Unlocked' : '🔒 Locked'}</div>
+    `;
+    achievementsEl.appendChild(achievementDiv);
+  });
 }
 
 // =============================
@@ -628,9 +610,7 @@ function calculateCPS() {
   buildings.forEach(b => {
     cps += b.count * b.cps * (1 + heavenlyChips * 0.01);
   });
-  if (isFrenzyActive) {
-    cps *= 7;
-  }
+  if (isFrenzyActive) cps *= 7;
 }
 
 function buyBuilding(index) {
@@ -656,64 +636,22 @@ function buyUpgrade(index) {
 }
 
 // =============================
-// Golden Cookies
+// Mini-games
 // =============================
-let goldenCookieTimeout;
-
-function spawnGoldenCookie() {
-  const goldenCookie = document.createElement('div');
-  goldenCookie.className = 'golden-cookie';
-  goldenCookie.textContent = '🍪';
-  goldenCookie.style.left = Math.random() * (window.innerWidth - 60) + 'px';
-  goldenCookie.style.top = Math.random() * (window.innerHeight - 60) + 'px';
-
-  const handleGoldenCookieClick = () => {
-    goldenCookiesClicked++;
-    const effects = [
-      () => { // Lucky
-        const bonus = cookies * 0.1;
-        cookies += bonus;
-        spawnFloatingTextFromElement(goldenCookie, `+${formatNumber(bonus)}!`);
-      },
-      () => { // Frenzy
-        spawnFloatingTextFromElement(goldenCookie, 'FRENZY! x7 CPS');
-        isFrenzyActive = true;
-        frenzyTimeLeft = 13;
-        cookieEl.classList.add('frenzy-active');
-        calculateCPS();
-        updateUI();
-      },
-      () => { // Click Storm
-        spawnFloatingTextFromElement(goldenCookie, 'CLICK STORM!');
-        clickPower *= 10;
-        setTimeout(() => { clickPower /= 10; updateUI(); }, 10000);
-      }
-    ];
+function playLottery() {
+  if (cookies >= 100) {
+    cookies -= 100;
+    const win = Math.random() < 0.3; // 30% chance to win
+    const prize = win ? Math.floor(Math.random() * 1000) + 500 : 0;
     
-    const randomEffect = effects[Math.floor(Math.random() * effects.length)];
-    randomEffect();
-    
-    document.body.removeChild(goldenCookie);
-    clearTimeout(goldenCookieTimeout);
-    scheduleGoldenCookie();
-    updateUI();
-  };
-
-  goldenCookie.addEventListener('click', handleGoldenCookieClick);
-  goldenCookie.addEventListener('touchend', handleGoldenCookieClick);
-
-  document.body.appendChild(goldenCookie);
-
-  goldenCookieTimeout = setTimeout(() => {
-    if (document.body.contains(goldenCookie)) {
-      document.body.removeChild(goldenCookie);
-      scheduleGoldenCookie();
+    if (win) {
+      cookies += prize;
+      showNotification(`🎉 You won ${prize} cookies!`);
+    } else {
+      showNotification("😢 Better luck next time!");
     }
-  }, 6000);
-}
-
-function scheduleGoldenCookie() {
-  goldenCookieTimeout = setTimeout(spawnGoldenCookie, 30000 + Math.random() * 90000);
+    updateUI();
+  }
 }
 
 // =============================
@@ -725,84 +663,66 @@ function calculateHeavenlyChips() {
 
 function doPrestige() {
   const chipsGained = calculateHeavenlyChips();
-  if (chipsGained > 0) {
-    if (confirm(`Reset your game to gain ${formatNumber(chipsGained)} Heavenly Chips?`)) {
-      heavenlyChips += chipsGained;
-      
-      // Reset game state but keep heavenly chips
-      cookies = 0;
-      clickPower = 1;
-      totalClicks = 0;
-      goldenCookiesClicked = 0;
-      playTime = 0;
-      isFrenzyActive = false;
-      frenzyTimeLeft = 0;
-      
-      buildings.forEach(b => {
-        b.count = 0;
-        b.unlocked = b.name === "Cursor" || b.name === "Grandma";
-      });
-      
-      upgrades.forEach(u => u.bought = false);
-      
-      calculateCPS();
-      saveGame();
-      updateUI();
-    }
+  if (chipsGained > 0 && confirm(`Reset for ${formatNumber(chipsGained)} Heavenly Chips?`)) {
+    heavenlyChips += chipsGained;
+    resetGameState();
   }
 }
 
-// =============================
-// Visual Effects
-// =============================
-function spawnFloatingText(x, y, text) {
-  const span = document.createElement('span');
-  span.textContent = text;
-  span.style.position = 'fixed';
-  span.style.left = x + 'px';
-  span.style.top = y + 'px';
-  span.style.color = '#ffcc66';
-  span.style.fontWeight = 'bold';
-  span.style.pointerEvents = 'none';
-  span.style.userSelect = 'none';
-  span.style.animation = 'floatUp 1s ease-out forwards';
-  span.style.zIndex = '1000';
-  span.style.textShadow = '0 0 5px rgba(0,0,0,0.8)';
-  span.style.fontSize = '16px';
-
-  document.body.appendChild(span);
-  setTimeout(() => span.remove(), 1000);
+function resetGameState() {
+  cookies = clickPower = totalClicks = goldenCookiesClicked = playTime = 0;
+  isFrenzyActive = false;
+  frenzyTimeLeft = 0;
+  
+  buildings.forEach(b => {
+    b.count = 0;
+    b.unlocked = b.name === "Cursor" || b.name === "Grandma";
+  });
+  
+  upgrades.forEach(u => u.bought = false);
+  achievements.forEach(a => a.unlocked = false);
+  
+  calculateCPS();
+  saveGame();
+  updateUI();
 }
 
-function spawnFloatingTextFromElement(element, text) {
-  const rect = element.getBoundingClientRect();
-  spawnFloatingText(rect.left + rect.width / 2, rect.top + rect.height / 2, text);
+// =============================
+// Notifications
+// =============================
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 1000;
+    font-weight: bold;
+  `;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => notification.remove(), 3000);
 }
 
 // =============================
 // Save/Load System
 // =============================
-function saveGame(showNotification = false) {
+function saveGame() {
   const saveData = {
-    cookies,
-    totalCookiesEarned,
-    clickPower,
-    totalClicks,
-    goldenCookiesClicked,
-    playTime,
-    heavenlyChips,
+    cookies, totalCookiesEarned, clickPower, totalClicks,
+    goldenCookiesClicked, playTime, heavenlyChips, isFrenzyActive, frenzyTimeLeft,
     buildings: buildings.map(b => ({ count: b.count, unlocked: b.unlocked })),
     upgrades: upgrades.map(u => ({ bought: u.bought })),
-    isFrenzyActive,
-    frenzyTimeLeft
+    achievements: achievements.map(a => ({ unlocked: a.unlocked }))
   };
   
   localStorage.setItem('cookieClickerSave', JSON.stringify(saveData));
-  
-  if (showNotification) {
-    saveNotification.style.opacity = '1';
-    setTimeout(() => { saveNotification.style.opacity = '0'; }, 2000);
-  }
 }
 
 function loadGame() {
@@ -810,16 +730,7 @@ function loadGame() {
   if (data) {
     try {
       const save = JSON.parse(data);
-      
-      cookies = save.cookies || 0;
-      totalCookiesEarned = save.totalCookiesEarned || 0;
-      clickPower = save.clickPower || 1;
-      totalClicks = save.totalClicks || 0;
-      goldenCookiesClicked = save.goldenCookiesClicked || 0;
-      playTime = save.playTime || 0;
-      heavenlyChips = save.heavenlyChips || 0;
-      isFrenzyActive = save.isFrenzyActive || false;
-      frenzyTimeLeft = save.frenzyTimeLeft || 0;
+      Object.assign(this, save);
       
       if (save.buildings) {
         save.buildings.forEach((b, i) => {
@@ -830,13 +741,13 @@ function loadGame() {
         });
       }
       
-      if (save.upgrades) {
-        save.upgrades.forEach((u, i) => {
-          if (i < upgrades.length) {
-            upgrades[i].bought = u.bought || false;
-          }
-        });
-      }
+      if (save.upgrades) save.upgrades.forEach((u, i) => {
+        if (i < upgrades.length) upgrades[i].bought = u.bought || false;
+      });
+      
+      if (save.achievements) save.achievements.forEach((a, i) => {
+        if (i < achievements.length) achievements[i].unlocked = a.unlocked || false;
+      });
       
       calculateCPS();
     } catch (e) {
@@ -845,15 +756,8 @@ function loadGame() {
   }
 }
 
-function resetGame() {
-  if (confirm('Are you sure? This will delete ALL your progress!')) {
-    localStorage.removeItem('cookieClickerSave');
-    location.reload();
-  }
-}
-
 // =============================
-// Event Listeners - OPTIMIZED FOR MOBILE
+// Event Listeners
 // =============================
 function handleCookieClick(e) {
   const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
@@ -865,23 +769,11 @@ function handleCookieClick(e) {
   spawnFloatingText(x, y, `+${formatNumber(clickPower)}`);
   updateUI();
   
-  if (e.type.includes('touch')) {
-    e.preventDefault();
-  }
+  if (e.type.includes('touch')) e.preventDefault();
 }
 
 cookieEl.addEventListener('click', handleCookieClick);
 cookieEl.addEventListener('touchstart', handleCookieClick, { passive: false });
-
-document.querySelectorAll('button').forEach(btn => {
-  btn.addEventListener('touchstart', function(e) {
-    this.style.transform = 'scale(0.98)';
-  }, { passive: true });
-  
-  btn.addEventListener('touchend', function() {
-    this.style.transform = '';
-  }, { passive: true });
-});
 
 // =============================
 // Game Loop
@@ -910,16 +802,7 @@ setInterval(saveGame, 30000);
 // =============================
 loadGame();
 createMilkBubbles();
-scheduleGoldenCookie();
 updateUI();
-
-document.addEventListener('dblclick', function(e) {
-  e.preventDefault();
-}, { passive: false });
-
-document.addEventListener('contextmenu', function(e) {
-  e.preventDefault();
-});
 </script>
 </body>
 </html>
