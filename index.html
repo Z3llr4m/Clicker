@@ -6,22 +6,23 @@
 <title>Mini Cookie Clicker</title>
 <style>
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   text-align: center;
-  background-color: #f5f5dc;
-  margin: 0;
-  padding: 20px;
+  background: linear-gradient(to bottom, #87ceeb, #f5f5dc);
+  margin: 0; padding: 20px;
+  overflow: hidden;
 }
 h1 { margin-bottom: 10px; }
+
 #cookie {
-  width: 200px; height: 200px;
-  background: url('https://i.imgur.com/6d1ZWYw.png') no-repeat center center;
-  background-size: contain;
-  margin: 20px auto;
+  font-size: 150px;
   cursor: pointer;
+  display: inline-block;
   transition: transform 0.1s;
+  user-select: none;
 }
-#cookie:active { transform: scale(1.1); }
+
+#cookie:active { transform: scale(1.2); }
 
 .section {
   border: 1px solid #ccc;
@@ -45,12 +46,37 @@ button {
   color: #fff;
 }
 button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+/* Летящие печеньки */
+.flying-cookie {
+  position: absolute;
+  font-size: 24px;
+  pointer-events: none;
+  animation: fly 1s linear forwards;
+}
+@keyframes fly {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
+}
+
+/* +1 при клике */
+.plus-one {
+  position: absolute;
+  color: gold;
+  font-weight: bold;
+  pointer-events: none;
+  animation: plus1 0.8s ease-out forwards;
+}
+@keyframes plus1 {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
+}
 </style>
 </head>
 <body>
 
 <h1>Mini Cookie Clicker</h1>
-<div id="cookie"></div>
+<div id="cookie">🍪</div>
 
 <div id="stats">
   <p>Печеньки: <span id="cookies">0</span></p>
@@ -152,6 +178,7 @@ function buyObject(index) {
     calculateCPS();
     initObjects();
     updateStats();
+    flyingCookieEffect(cookieBtn);
     saveGame();
   }
 }
@@ -174,20 +201,47 @@ function buyUpgrade(index) {
 }
 
 /* ======== КЛИК ПО ПЕЧЕНЬКЕ ======== */
-cookieBtn.addEventListener('click', () => {
+cookieBtn.addEventListener('click', e => {
   cookies += clickPower * prestigeMultiplier;
   totalClicks++;
   updateStats();
   initUpgrades();
+  plusOneEffect(e);
 });
 
 /* ======== АВТОПРОИЗВОДСТВО ======== */
 setInterval(() => {
-  cookies += cps * prestigeMultiplier / 10; // добавляем 1/10 CPS каждые 100ms
+  const gain = cps * prestigeMultiplier / 10;
+  cookies += gain;
   updateStats();
   initObjects();
   initUpgrades();
+  if (gain > 0) flyingCookieEffect(cookieBtn);
 }, 100);
+
+/* ======== ЭФФЕКТ +1 ======== */
+function plusOneEffect(e) {
+  const span = document.createElement('span');
+  span.className = 'plus-one';
+  span.textContent = `+${clickPower}`;
+  document.body.appendChild(span);
+  const rect = cookieBtn.getBoundingClientRect();
+  span.style.left = rect.left + rect.width/2 + 'px';
+  span.style.top = rect.top + 'px';
+  setTimeout(() => span.remove(), 800);
+}
+
+/* ======== ЛЕТЯЩИЕ ПЕЧЕНЬКИ ======== */
+function flyingCookieEffect(target) {
+  const span = document.createElement('span');
+  span.className = 'flying-cookie';
+  span.textContent = '🍪';
+  document.body.appendChild(span);
+  const rect = target.getBoundingClientRect();
+  span.style.left = rect.left + Math.random()*50 + 'px';
+  span.style.top = rect.top + 'px';
+  setTimeout(() => span.remove(), 1000);
+}
 
 /* ======== СИСТЕМА ПРЕСТИЖА ======== */
 prestigeBtn.addEventListener('click', () => {
@@ -240,5 +294,6 @@ function loadGame() {
 loadGame();
 setInterval(saveGame, 10000);
 </script>
+
 </body>
 </html>
