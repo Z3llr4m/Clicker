@@ -19,6 +19,7 @@
       --primary-color: #ffcc66;
       --secondary-color: #4CAF50;
       --danger-color: #ff6b6b;
+      --prestige-color: #9c27b0;
       --background-dark: #1e1e1e;
       --background-medium: #2d2d2d;
       --background-light: #333;
@@ -191,7 +192,7 @@
     }
 
     .prestige-button {
-      background: linear-gradient(135deg, var(--danger-color) 0%, #ee5a24 100%);
+      background: linear-gradient(135deg, var(--prestige-color) 0%, #7b1fa2 100%);
       padding: 12px 20px;
       border-radius: 25px;
       font-weight: bold;
@@ -272,7 +273,7 @@
     }
 
     /* Buildings and Upgrades */
-    .building-item, .upgrade-item {
+    .building-item, .upgrade-item, .prestige-upgrade-item {
       background: var(--background-light);
       margin-bottom: 12px;
       padding: 15px;
@@ -281,39 +282,44 @@
       transition: transform var(--transition-speed);
     }
 
-    .building-item:active, .upgrade-item:active {
+    .prestige-upgrade-item {
+      border-left: 4px solid var(--prestige-color);
+    }
+
+    .building-item:active, .upgrade-item:active, .prestige-upgrade-item:active {
       transform: scale(0.98);
     }
 
-    .building-header, .upgrade-header {
+    .building-header, .upgrade-header, .prestige-upgrade-header {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
     }
 
-    .building-emoji, .upgrade-emoji {
+    .building-emoji, .upgrade-emoji, .prestige-upgrade-emoji {
       font-size: 28px;
       margin-right: 15px;
       min-width: 35px;
       text-align: center;
     }
 
-    .building-info, .upgrade-info {
+    .building-info, .upgrade-info, .prestige-upgrade-info {
       flex: 1;
     }
 
-    .building-name, .upgrade-name {
+    .building-name, .upgrade-name, .prestige-upgrade-name {
       font-weight: bold;
       font-size: 16px;
       margin-bottom: 4px;
     }
 
-    .building-desc, .upgrade-desc {
+    .building-desc, .upgrade-desc, .prestige-upgrade-desc {
       font-size: 14px;
       color: var(--text-secondary);
+      margin-bottom: 8px;
     }
 
-    .building-stats, .upgrade-stats {
+    .building-stats, .upgrade-stats, .prestige-upgrade-stats {
       display: flex;
       justify-content: space-between;
       margin-top: 8px;
@@ -333,6 +339,10 @@
       font-size: 14px;
       min-height: 44px;
       transition: transform var(--transition-speed), opacity var(--transition-speed);
+    }
+
+    .prestige-upgrade-btn {
+      background: linear-gradient(135deg, var(--prestige-color) 0%, #7b1fa2 100%);
     }
 
     button:active:not(:disabled) {
@@ -687,6 +697,10 @@
       font-weight: bold;
     }
 
+    .offline-notification {
+      background: var(--prestige-color);
+    }
+
     /* Responsive */
     @media (max-height: 700px) {
       .cookie {
@@ -719,6 +733,23 @@
         padding: 10px 5px;
       }
     }
+
+    /* Loading animation */
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary-color);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -746,6 +777,10 @@
       <span class="stat-icon">💰</span>
       <span id="heavenly-chips" class="stat-value">0</span>
     </div>
+    <div class="stat">
+      <span class="stat-icon">⭐</span>
+      <span id="prestige-points" class="stat-value">0</span>
+    </div>
   </div>
 
   <div id="main-content">
@@ -767,13 +802,17 @@
         <span class="tab-emoji">⚡</span>
         <span class="tab-text">Upgrades</span>
       </button>
+      <button class="tab-btn" data-tab="prestige-upgrades">
+        <span class="tab-emoji">⭐</span>
+        <span class="tab-text">Prestige</span>
+      </button>
       <button class="tab-btn" data-tab="achievements">
         <span class="tab-emoji">🏆</span>
         <span class="tab-text">Achievements</span>
       </button>
-      <button class="tab-btn" data-tab="minigames">
-        <span class="tab-emoji">🎮</span>
-        <span class="tab-text">Mini-games</span>
+      <button class="tab-btn" data-tab="stats">
+        <span class="tab-emoji">📊</span>
+        <span class="tab-text">Stats</span>
       </button>
     </div>
 
@@ -782,18 +821,23 @@
     
     <div id="upgrades" class="tab-content"></div>
     
+    <div id="prestige-upgrades" class="tab-content">
+      <h3 class="tab-title">⭐ Prestige Upgrades</h3>
+      <div id="prestige-upgrades-list"></div>
+    </div>
+    
     <div id="achievements" class="tab-content">
       <h3 class="tab-title">🏆 Achievements</h3>
       <div id="achievements-list" class="achievements-grid"></div>
     </div>
     
-    <div id="minigames" class="tab-content">
-      <h3 class="tab-title">🎮 Mini-games</h3>
+    <div id="stats" class="tab-content">
+      <h3 class="tab-title">📊 Statistics</h3>
       <div class="minigame-container">
-        <h4>Cookie Lottery 🎰</h4>
-        <p>Spend 100 cookies for a chance to win big!</p>
-        <button id="lottery-btn" class="minigame-button">Play Lottery (100 cookies)</button>
-        <div id="lottery-result"></div>
+        <h4>Game Stats</h4>
+        <div id="game-stats"></div>
+        <h4>Offline Progress</h4>
+        <div id="offline-stats"></div>
       </div>
     </div>
   </div>
@@ -833,6 +877,11 @@
             <span class="slider"></span>
             <span class="switch-label">Animations</span>
           </label>
+          <label class="switch">
+            <input type="checkbox" id="offline-progress-toggle" checked>
+            <span class="slider"></span>
+            <span class="switch-label">Offline Progress</span>
+          </label>
         </div>
       </div>
     </div>
@@ -847,6 +896,7 @@
       </div>
       <div class="modal-body">
         <p>You will gain <span id="chips-gain" class="highlight">0</span> Heavenly Chips</p>
+        <p>You will gain <span id="points-gain" class="highlight">0</span> Prestige Points</p>
         <p>Your CPS will increase by <span id="cps-boost" class="highlight">0%</span></p>
         <div class="prestige-rewards">
           <h3>Prestige Rewards</h3>
@@ -854,8 +904,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button id="confirm-prestige" class="modal-btn confirm">Confirm Prestige</button>
-        <button class="modal-btn cancel">Cancel</button>
+        <button id="confirm-prestige" class="modal-btn confirm">Ascend to Glory</button>
+        <button class="modal-btn cancel">Not Yet</button>
       </div>
     </div>
   </div>
@@ -867,18 +917,20 @@
 
     // Game Configuration
     const CONFIG = {
-        VERSION: '1.2.0',
+        VERSION: '2.0.0',
         SAVE_INTERVAL: 30000,
         GOLDEN_COOKIE_CHANCE: 0.005,
         GOLDEN_COOKIE_DURATION: 15,
         FRENZY_MULTIPLIER: 7,
         NOTIFICATION_DURATION: 3000,
         PRESTIGE_BASE: 1000000,
-        PERFORMANCE_THRESHOLD: 1000 // Количество элементов UI для оптимизации
+        PRESTIGE_POINTS_MULTIPLIER: 0.1,
+        OFFLINE_MAX_TIME: 86400, // 24 hours in seconds
+        PERFORMANCE_THRESHOLD: 1000
     };
 
     // =============================
-    // Buildings with emojis and metadata
+    // Buildings (10 optimized buildings)
     // =============================
     const buildings = [
         { 
@@ -899,7 +951,7 @@
             count: 0, 
             baseCps: 1, 
             unlocked: true,
-            description: "A nice grandma to bake more cookies"
+            description: "A nice grandma to bake cookies"
         },
         { 
             id: "farm",
@@ -929,7 +981,7 @@
             count: 0, 
             baseCps: 260, 
             unlocked: false,
-            description: "Produces cookies at an industrial rate"
+            description: "Produces cookies at industrial rate"
         },
         { 
             id: "bank",
@@ -949,7 +1001,7 @@
             count: 0, 
             baseCps: 7800, 
             unlocked: false,
-            description: "Magically produces cookies from the cookie gods"
+            description: "Magically produces cookies from gods"
         },
         { 
             id: "wizard_tower",
@@ -979,397 +1031,126 @@
             count: 0, 
             baseCps: 1600000, 
             unlocked: false,
-            description: "Turns lead into cookies"
-        },
-        { 
-            id: "portal",
-            name: "Portal", 
-            emoji: "🌀", 
-            baseCost: 1000000000000, 
-            count: 0, 
-            baseCps: 10000000, 
-            unlocked: false,
-            description: "Brings cookies from other dimensions"
-        },
-        { 
-            id: "time_machine",
-            name: "Time Machine", 
-            emoji: "⏰", 
-            baseCost: 14000000000000, 
-            count: 0, 
-            baseCps: 65000000, 
-            unlocked: false,
-            description: "Gets cookies from the past and future"
-        },
-        { 
-            id: "antimatter_condenser",
-            name: "Antimatter Condenser", 
-            emoji: "⚛️", 
-            baseCost: 170000000000000, 
-            count: 0, 
-            baseCps: 430000000, 
-            unlocked: false,
-            description: "Creates cookies from pure energy"
-        },
-        { 
-            id: "prism",
-            name: "Prism", 
-            emoji: "🔮", 
-            baseCost: 2100000000000000, 
-            count: 0, 
-            baseCps: 2900000000, 
-            unlocked: false,
-            description: "Focuses light into cookies"
-        },
-        { 
-            id: "chancemaker",
-            name: "Chancemaker", 
-            emoji: "🎲", 
-            baseCost: 26000000000000000, 
-            count: 0, 
-            baseCps: 21000000000, 
-            unlocked: false,
-            description: "Creates cookies from probability"
+            description: "Turns lead into golden cookies"
         }
     ];
 
     // =============================
-    // Upgrades with emojis and metadata
+    // Upgrades (50 upgrades)
     // =============================
     const upgrades = [
-        // Click upgrades
-        { 
-            id: "reinforced_finger",
-            name: "Reinforced index finger", 
-            emoji: "💪",
-            cost: 100, 
-            bought: false, 
-            requirement: { type: "click", value: 1 },
-            effect: () => { gameState.clickPower += 1; },
-            description: "+1 cookie per click",
-            category: "click"
-        },
-        { 
-            id: "carpal_tunnel_cream",
-            name: "Carpal tunnel prevention cream", 
-            emoji: "💊",
-            cost: 500, 
-            bought: false, 
-            requirement: { type: "click", value: 50 },
-            effect: () => { gameState.clickPower += 2; },
-            description: "+2 cookies per click",
-            category: "click"
-        },
-        { 
-            id: "ambidextrous",
-            name: "Ambidextrous", 
-            emoji: "🤲",
-            cost: 10000, 
-            bought: false, 
-            requirement: { type: "click", value: 200 },
-            effect: () => { gameState.clickPower *= 2; },
-            description: "Double clicking power",
-            category: "click"
-        },
-        
-        // Grandma upgrades
-        { 
-            id: "forwards_from_grandma",
-            name: "Forwards from grandma", 
-            emoji: "📧",
-            cost: 1000, 
-            bought: false, 
-            requirement: { type: "building", buildingId: "grandma", value: 1 },
-            effect: () => { getBuildingById("grandma").cpsMultiplier = 2; },
-            description: "Double Grandma CPS",
-            category: "grandma"
-        },
-        { 
-            id: "steel_plated_rolling_pins",
-            name: "Steel-plated rolling pins", 
-            emoji: "🥖",
-            cost: 5000, 
-            bought: false, 
-            requirement: { type: "building", buildingId: "grandma", value: 5 },
-            effect: () => { getBuildingById("grandma").cpsMultiplier = 1.5; },
-            description: "+50% Grandma CPS",
-            category: "grandma"
-        },
-        { 
-            id: "elder_wrath",
-            name: "Elder wrath", 
-            emoji: "👹",
-            cost: 12000, 
-            bought: false, 
-            requirement: { type: "building", buildingId: "grandma", value: 10 },
-            effect: () => { 
-                buildings.forEach(b => {
-                    if (b.id !== "grandma") b.cpsMultiplier = 1.1;
-                });
-            },
-            description: "+10% CPS for all non-Grandma buildings",
-            category: "grandma"
-        },
-        
-        // Farm upgrades
-        { 
-            id: "fertilizer",
-            name: "Fertilizer", 
-            emoji: "💩",
-            cost: 11000, 
-            bought: false, 
-            requirement: { type: "building", buildingId: "farm", value: 1 },
-            effect: () => { getBuildingById("farm").cpsMultiplier = 2; },
-            description: "Double Farm CPS",
-            category: "farm"
-        },
-        { 
-            id: "cookie_trees",
-            name: "Cookie trees", 
-            emoji: "🌳",
-            cost: 55000, 
-            bought: false, 
-            requirement: { type: "building", buildingId: "farm", value: 5 },
-            effect: () => { getBuildingById("farm").cpsMultiplier = 1.5; },
-            description: "+50% Farm CPS",
-            category: "farm"
-        },
-        
-        // Mine upgrades
-        { 
-            id: "sugar_gas",
-            name: "Sugar gas", 
-            emoji: "⛽",
-            cost: 120000, 
-            bought: false, 
-            requirement: { type: "building", buildingId: "mine", value: 1 },
-            effect: () => { getBuildingById("mine").cpsMultiplier = 2; },
-            description: "Double Mine CPS",
-            category: "mine"
-        },
-        { 
-            id: "megadrill",
-            name: "Megadrill", 
-            emoji: "🛠️",
-            cost: 600000, 
-            bought: false, 
-            requirement: { type: "building", buildingId: "mine", value: 5 },
-            effect: () => { getBuildingById("mine").cpsMultiplier = 1.5; },
-            description: "+50% Mine CPS",
-            category: "mine"
-        },
-        
-        // Factory upgrades
-        { 
-            id: "sturdier_conveyor_belts",
-            name: "Sturdier conveyor belts", 
-            emoji: "📦",
-            cost: 1300000, 
-            bought: false, 
-            requirement: { type: "building", buildingId: "factory", value: 1 },
-            effect: () => { getBuildingById("factory").cpsMultiplier = 2; },
-            description: "Double Factory CPS",
-            category: "factory"
-        },
-        
-        // Global upgrades
-        { 
-            id: "vanilla_nerve",
-            name: "Vanilla nerve", 
-            emoji: "🍦",
-            cost: 1000000000, 
-            bought: false, 
-            requirement: { type: "cookies", value: 1000000000 },
-            effect: () => { 
-                buildings.forEach(b => {
-                    b.cpsMultiplier *= 1.01;
-                });
-            },
-            description: "+1% CPS for all buildings",
-            category: "global"
-        },
-        { 
-            id: "eternal_loop",
-            name: "Eternal loop", 
-            emoji: "∞",
-            cost: 1000000000000, 
-            bought: false, 
-            requirement: { type: "cookies", value: 1000000000000 },
-            effect: () => { 
-                buildings.forEach(b => {
-                    b.cpsMultiplier *= 1.02;
-                });
-            },
-            description: "+2% CPS for all buildings",
-            category: "global"
-        }
+        // Click upgrades (10)
+        { id: "reinforced_finger", name: "Reinforced index finger", emoji: "💪", cost: 100, bought: false, requirement: { type: "click", value: 1 }, effect: () => gameState.clickPower += 1, description: "+1 cookie per click", category: "click" },
+        { id: "carpal_tunnel_cream", name: "Carpal tunnel prevention cream", emoji: "💊", cost: 500, bought: false, requirement: { type: "click", value: 50 }, effect: () => gameState.clickPower += 2, description: "+2 cookies per click", category: "click" },
+        { id: "ambidextrous", name: "Ambidextrous", emoji: "🤲", cost: 10000, bought: false, requirement: { type: "click", value: 200 }, effect: () => gameState.clickPower *= 2, description: "Double clicking power", category: "click" },
+        { id: "thousand_fingers", name: "Thousand fingers", emoji: "👐", cost: 100000, bought: false, requirement: { type: "click", value: 1000 }, effect: () => gameState.clickPower += 5, description: "+5 cookies per click", category: "click" },
+        { id: "million_fingers", name: "Million fingers", emoji: "👏", cost: 1000000, bought: false, requirement: { type: "click", value: 10000 }, effect: () => gameState.clickPower *= 1.5, description: "+50% clicking power", category: "click" },
+        { id: "billion_fingers", name: "Billion fingers", emoji: "🙌", cost: 10000000, bought: false, requirement: { type: "click", value: 100000 }, effect: () => gameState.clickPower *= 2, description: "Double clicking power", category: "click" },
+        { id: "trillion_fingers", name: "Trillion fingers", emoji: "👍", cost: 100000000, bought: false, requirement: { type: "click", value: 1000000 }, effect: () => gameState.clickPower *= 3, description: "Triple clicking power", category: "click" },
+        { id: "quadrillion_fingers", name: "Quadrillion fingers", emoji: "👎", cost: 1000000000, bought: false, requirement: { type: "click", value: 10000000 }, effect: () => gameState.clickPower *= 5, description: "5x clicking power", category: "click" },
+        { id: "quintillion_fingers", name: "Quintillion fingers", emoji: "✌️", cost: 10000000000, bought: false, requirement: { type: "click", value: 100000000 }, effect: () => gameState.clickPower *= 10, description: "10x clicking power", category: "click" },
+        { id: "sextillion_fingers", name: "Sextillion fingers", emoji: "🤟", cost: 100000000000, bought: false, requirement: { type: "click", value: 1000000000 }, effect: () => gameState.clickPower *= 20, description: "20x clicking power", category: "click" },
+
+        // Grandma upgrades (5)
+        { id: "forwards_from_grandma", name: "Forwards from grandma", emoji: "📧", cost: 1000, bought: false, requirement: { type: "building", buildingId: "grandma", value: 1 }, effect: () => getBuildingById("grandma").cpsMultiplier = 2, description: "Double Grandma CPS", category: "grandma" },
+        { id: "steel_plated_rolling_pins", name: "Steel-plated rolling pins", emoji: "🥖", cost: 5000, bought: false, requirement: { type: "building", buildingId: "grandma", value: 5 }, effect: () => getBuildingById("grandma").cpsMultiplier = 1.5, description: "+50% Grandma CPS", category: "grandma" },
+        { id: "elder_wrath", name: "Elder wrath", emoji: "👹", cost: 12000, bought: false, requirement: { type: "building", buildingId: "grandma", value: 10 }, effect: () => buildings.forEach(b => { if (b.id !== "grandma") b.cpsMultiplier = 1.1; }), description: "+10% CPS for other buildings", category: "grandma" },
+        { id: "senile_elder_wrath", name: "Senile elder wrath", emoji: "🧓", cost: 50000, bought: false, requirement: { type: "building", buildingId: "grandma", value: 25 }, effect: () => buildings.forEach(b => { if (b.id !== "grandma") b.cpsMultiplier = 1.2; }), description: "+20% CPS for other buildings", category: "grandma" },
+        { id: "ancient_elder_wrath", name: "Ancient elder wrath", emoji: "🧓", cost: 200000, bought: false, requirement: { type: "building", buildingId: "grandma", value: 50 }, effect: () => buildings.forEach(b => { if (b.id !== "grandma") b.cpsMultiplier = 1.5; }), description: "+50% CPS for other buildings", category: "grandma" },
+
+        // Farm upgrades (5)
+        { id: "fertilizer", name: "Fertilizer", emoji: "💩", cost: 11000, bought: false, requirement: { type: "building", buildingId: "farm", value: 1 }, effect: () => getBuildingById("farm").cpsMultiplier = 2, description: "Double Farm CPS", category: "farm" },
+        { id: "cookie_trees", name: "Cookie trees", emoji: "🌳", cost: 55000, bought: false, requirement: { type: "building", buildingId: "farm", value: 5 }, effect: () => getBuildingById("farm").cpsMultiplier = 1.5, description: "+50% Farm CPS", category: "farm" },
+        { id: "genetically_modified_cookies", name: "Genetically modified cookies", emoji: "🧬", cost: 250000, bought: false, requirement: { type: "building", buildingId: "farm", value: 15 }, effect: () => getBuildingById("farm").cpsMultiplier = 2, description: "Double Farm CPS", category: "farm" },
+        { id: "gmo_cookies_plus", name: "GMO cookies plus", emoji: "🧫", cost: 1000000, bought: false, requirement: { type: "building", buildingId: "farm", value: 30 }, effect: () => getBuildingById("farm").cpsMultiplier = 3, description: "Triple Farm CPS", category: "farm" },
+        { id: "vertical_farming", name: "Vertical farming", emoji: "🏢", cost: 5000000, bought: false, requirement: { type: "building", buildingId: "farm", value: 50 }, effect: () => getBuildingById("farm").cpsMultiplier = 5, description: "5x Farm CPS", category: "farm" },
+
+        // Mine upgrades (5)
+        { id: "sugar_gas", name: "Sugar gas", emoji: "⛽", cost: 120000, bought: false, requirement: { type: "building", buildingId: "mine", value: 1 }, effect: () => getBuildingById("mine").cpsMultiplier = 2, description: "Double Mine CPS", category: "mine" },
+        { id: "megadrill", name: "Megadrill", emoji: "🛠️", cost: 600000, bought: false, requirement: { type: "building", buildingId: "mine", value: 5 }, effect: () => getBuildingById("mine").cpsMultiplier = 1.5, description: "+50% Mine CPS", category: "mine" },
+        { id: "ultradrill", name: "Ultradrill", emoji: "⛏️", cost: 2500000, bought: false, requirement: { type: "building", buildingId: "mine", value: 15 }, effect: () => getBuildingById("mine").cpsMultiplier = 2, description: "Double Mine CPS", category: "mine" },
+        { id: "quantum_drill", name: "Quantum drill", emoji: "🔬", cost: 10000000, bought: false, requirement: { type: "building", buildingId: "mine", value: 30 }, effect: () => getBuildingById("mine").cpsMultiplier = 3, description: "Triple Mine CPS", category: "mine" },
+        { id: "singularity_drill", name: "Singularity drill", emoji: "⚫", cost: 50000000, bought: false, requirement: { type: "building", buildingId: "mine", value: 50 }, effect: () => getBuildingById("mine").cpsMultiplier = 5, description: "5x Mine CPS", category: "mine" },
+
+        // Factory upgrades (5)
+        { id: "sturdier_conveyor_belts", name: "Sturdier conveyor belts", emoji: "📦", cost: 1300000, bought: false, requirement: { type: "building", buildingId: "factory", value: 1 }, effect: () => getBuildingById("factory").cpsMultiplier = 2, description: "Double Factory CPS", category: "factory" },
+        { id: "child_labor", name: "Child labor", emoji: "👶", cost: 6500000, bought: false, requirement: { type: "building", buildingId: "factory", value: 5 }, effect: () => getBuildingById("factory").cpsMultiplier = 1.5, description: "+50% Factory CPS", category: "factory" },
+        { id: "sweatshop", name: "Sweatshop", emoji: "🏭", cost: 30000000, bought: false, requirement: { type: "building", buildingId: "factory", value: 15 }, effect: () => getBuildingById("factory").cpsMultiplier = 2, description: "Double Factory CPS", category: "factory" },
+        { id: "robotic_workers", name: "Robotic workers", emoji: "🤖", cost: 150000000, bought: false, requirement: { type: "building", buildingId: "factory", value: 30 }, effect: () => getBuildingById("factory").cpsMultiplier = 3, description: "Triple Factory CPS", category: "factory" },
+        { id: "ai_optimization", name: "AI optimization", emoji: "🧠", cost: 750000000, bought: false, requirement: { type: "building", buildingId: "factory", value: 50 }, effect: () => getBuildingById("factory").cpsMultiplier = 5, description: "5x Factory CPS", category: "factory" },
+
+        // Bank upgrades (5)
+        { id: "taller_tellers", name: "Taller tellers", emoji: "🏦", cost: 14000000, bought: false, requirement: { type: "building", buildingId: "bank", value: 1 }, effect: () => getBuildingById("bank").cpsMultiplier = 2, description: "Double Bank CPS", category: "bank" },
+        { id: "scissor-resistant_credit_cards", name: "Scissor-resistant credit cards", emoji: "💳", cost: 70000000, bought: false, requirement: { type: "building", buildingId: "bank", value: 5 }, effect: () => getBuildingById("bank").cpsMultiplier = 1.5, description: "+50% Bank CPS", category: "bank" },
+        { id: "acid-resistant_credit_cards", name: "Acid-resistant credit cards", emoji: "💳", cost: 350000000, bought: false, requirement: { type: "building", buildingId: "bank", value: 15 }, effect: () => getBuildingById("bank").cpsMultiplier = 2, description: "Double Bank CPS", category: "bank" },
+        { id: "quantum_credit_cards", name: "Quantum credit cards", emoji: "💳", cost: 1750000000, bought: false, requirement: { type: "building", buildingId: "bank", value: 30 }, effect: () => getBuildingById("bank").cpsMultiplier = 3, description: "Triple Bank CPS", category: "bank" },
+        { id: "singularity_credit_cards", name: "Singularity credit cards", emoji: "💳", cost: 8750000000, bought: false, requirement: { type: "building", buildingId: "bank", value: 50 }, effect: () => getBuildingById("bank").cpsMultiplier = 5, description: "5x Bank CPS", category: "bank" },
+
+        // Temple upgrades (5)
+        { id: "golden_idols", name: "Golden idols", emoji: "🗿", cost: 200000000, bought: false, requirement: { type: "building", buildingId: "temple", value: 1 }, effect: () => getBuildingById("temple").cpsMultiplier = 2, description: "Double Temple CPS", category: "temple" },
+        { id: "sacrifices", name: "Sacrifices", emoji: "⚔️", cost: 1000000000, bought: false, requirement: { type: "building", buildingId: "temple", value: 5 }, effect: () => getBuildingById("temple").cpsMultiplier = 1.5, description: "+50% Temple CPS", category: "temple" },
+        { id: "enlarged_sacrifice_altar", name: "Enlarged sacrifice altar", emoji: "⚔️", cost: 5000000000, bought: false, requirement: { type: "building", buildingId: "temple", value: 15 }, effect: () => getBuildingById("temple").cpsMultiplier = 2, description: "Double Temple CPS", category: "temple" },
+        { id: "great_bacon_sacrifice", name: "Great bacon sacrifice", emoji: "🥓", cost: 25000000000, bought: false, requirement: { type: "building", buildingId: "temple", value: 30 }, effect: () => getBuildingById("temple").cpsMultiplier = 3, description: "Triple Temple CPS", category: "temple" },
+        { id: "ultimate_sacrifice", name: "Ultimate sacrifice", emoji: "⚰️", cost: 125000000000, bought: false, requirement: { type: "building", buildingId: "temple", value: 50 }, effect: () => getBuildingById("temple").cpsMultiplier = 5, description: "5x Temple CPS", category: "temple" },
+
+        // Global upgrades (10)
+        { id: "vanilla_nerve", name: "Vanilla nerve", emoji: "🍦", cost: 1000000000, bought: false, requirement: { type: "cookies", value: 1000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 1.01), description: "+1% CPS for all buildings", category: "global" },
+        { id: "eternal_loop", name: "Eternal loop", emoji: "∞", cost: 1000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 1.02), description: "+2% CPS for all buildings", category: "global" },
+        { id: "time_warp", name: "Time warp", emoji: "⏰", cost: 1000000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 1.03), description: "+3% CPS for all buildings", category: "global" },
+        { id: "dimensional_warp", name: "Dimensional warp", emoji: "🌀", cost: 1000000000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 1.05), description: "+5% CPS for all buildings", category: "global" },
+        { id: "reality_warp", name: "Reality warp", emoji: "🌌", cost: 1000000000000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 1.1), description: "+10% CPS for all buildings", category: "global" },
+        { id: "omnipotence", name: "Omnipotence", emoji: "👁️", cost: 1000000000000000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 1.2), description: "+20% CPS for all buildings", category: "global" },
+        { id: "transcendence", name: "Transcendence", emoji: "✨", cost: 1000000000000000000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000000000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 1.5), description: "+50% CPS for all buildings", category: "global" },
+        { id: "divinity", name: "Divinity", emoji: "👼", cost: 1000000000000000000000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000000000000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 2), description: "Double CPS for all buildings", category: "global" },
+        { id: "infinity", name: "Infinity", emoji: "♾️", cost: 1000000000000000000000000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000000000000000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 3), description: "Triple CPS for all buildings", category: "global" },
+        { id: "absolute_infinity", name: "Absolute infinity", emoji: "🔮", cost: 1000000000000000000000000000000000000, bought: false, requirement: { type: "cookies", value: 1000000000000000000000000000000000000 }, effect: () => buildings.forEach(b => b.cpsMultiplier *= 5), description: "5x CPS for all buildings", category: "global" }
     ];
 
     // =============================
-    // Prestige Upgrades
+    // Prestige Upgrades (20 upgrades)
     // =============================
     const prestigeUpgrades = [
-        {
-            id: "heavenly_cookies",
-            name: "Heavenly Cookies",
-            cost: 1,
-            description: "+1% CPS per Heavenly Chip",
-            effect: (chips) => { return 1 + (chips * 0.01); }
-        },
-        {
-            id: "persistent_memory",
-            name: "Persistent Memory",
-            cost: 5,
-            description: "Keep 1 building after prestige",
-            effect: (chips) => { return Math.min(1, Math.floor(chips / 5)); }
-        },
-        {
-            id: "double_cookies",
-            name: "Double Cookies",
-            cost: 25,
-            description: "Double cookie production from clicks",
-            effect: (chips) => { return chips >= 25 ? 2 : 1; }
-        },
-        {
-            id: "lucky_number",
-            name: "Lucky Number",
-            cost: 50,
-            description: "+10% chance for golden cookies",
-            effect: (chips) => { return chips >= 50 ? 1.1 : 1; }
-        },
-        {
-            id: "serendipity",
-            name: "Serendipity",
-            cost: 100,
-            description: "Golden cookies last 50% longer",
-            effect: (chips) => { return chips >= 100 ? 1.5 : 1; }
-        }
+        { id: "heavenly_cookies", name: "Heavenly Cookies", emoji: "🍪", cost: 1, bought: false, effect: (chips) => 1 + (chips * 0.01), description: "+1% CPS per Heavenly Chip", category: "cps" },
+        { id: "persistent_memory", name: "Persistent Memory", emoji: "🧠", cost: 5, bought: false, effect: (chips) => Math.min(1, Math.floor(chips / 5)), description: "Keep 1 building after prestige", category: "building" },
+        { id: "double_cookies", name: "Double Cookies", emoji: "2️⃣", cost: 25, bought: false, effect: (chips) => chips >= 25 ? 2 : 1, description: "Double cookie production from clicks", category: "click" },
+        { id: "lucky_number", name: "Lucky Number", emoji: "🍀", cost: 50, bought: false, effect: (chips) => chips >= 50 ? 1.1 : 1, description: "+10% chance for golden cookies", category: "golden" },
+        { id: "serendipity", name: "Serendipity", emoji: "🎯", cost: 100, bought: false, effect: (chips) => chips >= 100 ? 1.5 : 1, description: "Golden cookies last 50% longer", category: "golden" },
+        { id: "divine_intervention", name: "Divine Intervention", emoji: "👼", cost: 200, bought: false, effect: (chips) => chips >= 200 ? 1.2 : 1, description: "+20% CPS from all sources", category: "cps" },
+        { id: "chronomancy", name: "Chronomancy", emoji: "⏳", cost: 500, bought: false, effect: (chips) => chips >= 500 ? 2 : 1, description: "Double offline production time", category: "offline" },
+        { id: "quantum_entanglement", name: "Quantum Entanglement", emoji: "⚛️", cost: 1000, bought: false, effect: (chips) => chips >= 1000 ? 1.5 : 1, description: "+50% building production", category: "building" },
+        { id: "reality_bending", name: "Reality Bending", emoji: "🌀", cost: 2000, bought: false, effect: (chips) => chips >= 2000 ? 0.9 : 1, description: "-10% building costs", category: "cost" },
+        { id: "multiversal_echo", name: "Multiversal Echo", emoji: "🌌", cost: 5000, bought: false, effect: (chips) => chips >= 5000 ? 1.1 : 1, description: "+10% CPS per building owned", category: "cps" },
+        { id: "temporal_flux", name: "Temporal Flux", emoji: "⏰", cost: 10000, bought: false, effect: (chips) => chips >= 10000 ? 1.25 : 1, description: "+25% golden cookie effect duration", category: "golden" },
+        { id: "cosmic_awareness", name: "Cosmic Awareness", emoji: "👁️", cost: 20000, bought: false, effect: (chips) => chips >= 20000 ? 1.3 : 1, description: "+30% CPS during frenzy", category: "cps" },
+        { id: "dimensional_folding", name: "Dimensional Folding", emoji: "📦", cost: 50000, bought: false, effect: (chips) => chips >= 50000 ? 0.85 : 1, description: "-15% building costs", category: "cost" },
+        { id: "quantum_superposition", name: "Quantum Superposition", emoji: "🔬", cost: 100000, bought: false, effect: (chips) => chips >= 100000 ? 1.4 : 1, description: "+40% building production", category: "building" },
+        { id: "reality_anchor", name: "Reality Anchor", emoji: "⚓", cost: 200000, bought: false, effect: (chips) => chips >= 200000 ? 3 : 1, description: "Triple offline production", category: "offline" },
+        { id: "chronal_acceleration", name: "Chronal Acceleration", emoji: "⚡", cost: 500000, bought: false, effect: (chips) => chips >= 500000 ? 1.5 : 1, description: "+50% CPS from all sources", category: "cps" },
+        { id: "omnidimensional_sight", name: "Omnidimensional Sight", emoji: "👀", cost: 1000000, bought: false, effect: (chips) => chips >= 1000000 ? 0.8 : 1, description: "-20% building costs", category: "cost" },
+        { id: "quantum_causality", name: "Quantum Causality", emoji: "🔗", cost: 2000000, bought: false, effect: (chips) => chips >= 2000000 ? 2 : 1, description: "Double golden cookie spawn rate", category: "golden" },
+        { id: "reality_forging", name: "Reality Forging", emoji: "⚒️", cost: 5000000, bought: false, effect: (chips) => chips >= 5000000 ? 1.75 : 1, description: "+75% building production", category: "building" },
+        { id: "absolute_power", name: "Absolute Power", emoji: "♾️", cost: 10000000, bought: false, effect: (chips) => chips >= 10000000 ? 0.5 : 1, description: "-50% building costs", category: "cost" }
     ];
 
     // =============================
-    // Achievements
+    // Achievements (15 achievements)
     // =============================
     const achievements = [
-        {
-            id: "first_click",
-            name: "First Click!",
-            description: "Click the cookie for the first time",
-            unlocked: false,
-            check: () => gameState.totalClicks >= 1,
-            reward: { type: "cps", value: 0.1 }
-        },
-        {
-            id: "hundred_clicks",
-            name: "Cookie Monster",
-            description: "Reach 100 clicks",
-            unlocked: false,
-            check: () => gameState.totalClicks >= 100,
-            reward: { type: "click", value: 1 }
-        },
-        {
-            id: "thousand_clicks",
-            name: "Clicking Champion",
-            description: "Reach 1,000 clicks",
-            unlocked: false,
-            check: () => gameState.totalClicks >= 1000,
-            reward: { type: "click", value: 2 }
-        },
-        {
-            id: "million_clicks",
-            name: "Clicking Legend",
-            description: "Reach 1,000,000 clicks",
-            unlocked: false,
-            check: () => gameState.totalClicks >= 1000000,
-            reward: { type: "click", value: 5 }
-        },
-        {
-            id: "thousand_cookies",
-            name: "Cookie Collector",
-            description: "Earn 1,000 cookies total",
-            unlocked: false,
-            check: () => gameState.totalCookiesEarned >= 1000,
-            reward: { type: "cps", value: 1 }
-        },
-        {
-            id: "million_cookies",
-            name: "Cookie Millionaire",
-            description: "Earn 1,000,000 cookies total",
-            unlocked: false,
-            check: () => gameState.totalCookiesEarned >= 1000000,
-            reward: { type: "cps", value: 5 }
-        },
-        {
-            id: "billion_cookies",
-            name: "Cookie Billionaire",
-            description: "Earn 1,000,000,000 cookies total",
-            unlocked: false,
-            check: () => gameState.totalCookiesEarned >= 1000000000,
-            reward: { type: "cps", value: 10 }
-        },
-        {
-            id: "first_golden",
-            name: "Golden Touch",
-            description: "Click your first golden cookie",
-            unlocked: false,
-            check: () => gameState.goldenCookiesClicked >= 1,
-            reward: { type: "golden", value: 0.1 }
-        },
-        {
-            id: "golden_expert",
-            name: "Golden Expert",
-            description: "Click 10 golden cookies",
-            unlocked: false,
-            check: () => gameState.goldenCookiesClicked >= 10,
-            reward: { type: "golden", value: 0.2 }
-        },
-        {
-            id: "first_building",
-            name: "Real Estate",
-            description: "Buy your first building",
-            unlocked: false,
-            check: () => buildings.some(b => b.count > 0),
-            reward: { type: "discount", value: 0.05 }
-        },
-        {
-            id: "building_collector",
-            name: "Building Collector",
-            description: "Own 10 of each building",
-            unlocked: false,
-            check: () => buildings.every(b => b.count >= 10),
-            reward: { type: "cps", value: 15 }
-        },
-        {
-            id: "first_prestige",
-            name: "Rebirth",
-            description: "Prestige for the first time",
-            unlocked: false,
-            check: () => gameState.prestigeCount >= 1,
-            reward: { type: "prestige", value: 0.1 }
-        },
-        {
-            id: "prestige_master",
-            name: "Prestige Master",
-            description: "Prestige 10 times",
-            unlocked: false,
-            check: () => gameState.prestigeCount >= 10,
-            reward: { type: "prestige", value: 0.5 }
-        },
-        {
-            id: "upgrade_hunter",
-            name: "Upgrade Hunter",
-            description: "Buy 25 upgrades",
-            unlocked: false,
-            check: () => upgrades.filter(u => u.bought).length >= 25,
-            reward: { type: "cps", value: 20 }
-        },
-        {
-            id: "completionist",
-            name: "Completionist",
-            description: "Unlock all achievements",
-            unlocked: false,
-            check: () => achievements.filter(a => a.unlocked).length >= achievements.length - 1,
-            reward: { type: "global", value: 2 }
-        }
+        { id: "first_click", name: "First Click!", description: "Click the cookie for the first time", unlocked: false, check: () => gameState.totalClicks >= 1, reward: { type: "cps", value: 0.1 } },
+        { id: "hundred_clicks", name: "Cookie Monster", description: "Reach 100 clicks", unlocked: false, check: () => gameState.totalClicks >= 100, reward: { type: "click", value: 1 } },
+        { id: "thousand_clicks", name: "Clicking Champion", description: "Reach 1,000 clicks", unlocked: false, check: () => gameState.totalClicks >= 1000, reward: { type: "click", value: 2 } },
+        { id: "million_clicks", name: "Clicking Legend", description: "Reach 1,000,000 clicks", unlocked: false, check: () => gameState.totalClicks >= 1000000, reward: { type: "click", value: 5 } },
+        { id: "thousand_cookies", name: "Cookie Collector", description: "Earn 1,000 cookies total", unlocked: false, check: () => gameState.totalCookiesEarned >= 1000, reward: { type: "cps", value: 1 } },
+        { id: "million_cookies", name: "Cookie Millionaire", description: "Earn 1,000,000 cookies total", unlocked: false, check: () => gameState.totalCookiesEarned >= 1000000, reward: { type: "cps", value: 5 } },
+        { id: "billion_cookies", name: "Cookie Billionaire", description: "Earn 1,000,000,000 cookies total", unlocked: false, check: () => gameState.totalCookiesEarned >= 1000000000, reward: { type: "cps", value: 10 } },
+        { id: "first_golden", name: "Golden Touch", description: "Click your first golden cookie", unlocked: false, check: () => gameState.goldenCookiesClicked >= 1, reward: { type: "golden", value: 0.1 } },
+        { id: "golden_expert", name: "Golden Expert", description: "Click 10 golden cookies", unlocked: false, check: () => gameState.goldenCookiesClicked >= 10, reward: { type: "golden", value: 0.2 } },
+        { id: "first_building", name: "Real Estate", description: "Buy your first building", unlocked: false, check: () => buildings.some(b => b.count > 0), reward: { type: "discount", value: 0.05 } },
+        { id: "building_collector", name: "Building Collector", description: "Own 10 of each building", unlocked: false, check: () => buildings.every(b => b.count >= 10), reward: { type: "cps", value: 15 } },
+        { id: "first_prestige", name: "Rebirth", description: "Prestige for the first time", unlocked: false, check: () => gameState.prestigeCount >= 1, reward: { type: "prestige", value: 0.1 } },
+        { id: "prestige_master", name: "Prestige Master", description: "Prestige 10 times", unlocked: false, check: () => gameState.prestigeCount >= 10, reward: { type: "prestige", value: 0.5 } },
+        { id: "upgrade_hunter", name: "Upgrade Hunter", description: "Buy 25 upgrades", unlocked: false, check: () => upgrades.filter(u => u.bought).length >= 25, reward: { type: "cps", value: 20 } },
+        { id: "completionist", name: "Completionist", description: "Unlock all achievements", unlocked: false, check: () => achievements.filter(a => a.unlocked).length >= achievements.length - 1, reward: { type: "global", value: 2 } }
     ];
 
     // =============================
@@ -1416,6 +1197,10 @@
         return upgrades.find(u => u.id === id);
     }
 
+    function getPrestigeUpgradeById(id) {
+        return prestigeUpgrades.find(pu => pu.id === id);
+    }
+
     function formatNumber(num) {
         if (num >= 1e15) return (num / 1e15).toFixed(2) + 'Qa';
         if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
@@ -1426,13 +1211,13 @@
     }
 
     function formatTime(seconds) {
+        if (seconds < 60) return `${Math.floor(seconds)}s`;
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         const secs = Math.floor(seconds % 60);
         
         if (hours > 0) return `${hours}h ${minutes}m ${secs}s`;
-        if (minutes > 0) return `${minutes}m ${secs}s`;
-        return `${secs}s`;
+        return `${minutes}m ${secs}s`;
     }
 
     // Initialize building multipliers
@@ -1452,13 +1237,16 @@
         goldenCookiesClicked: 0,
         playTime: 0,
         heavenlyChips: 0,
+        prestigePoints: 0,
         prestigeCount: 0,
         isFrenzyActive: false,
         frenzyTimeLeft: 0,
         lastSave: Date.now(),
+        lastUpdate: Date.now(),
+        lastOfflineTime: Date.now(),
         notificationsEnabled: true,
         animationsEnabled: true,
-        lastUpdate: Date.now(),
+        offlineProgressEnabled: true,
         version: CONFIG.VERSION
     };
 
@@ -1469,11 +1257,14 @@
     const cookiesEl = document.getElementById('cookies');
     const cpsEl = document.getElementById('cps');
     const heavenlyChipsEl = document.getElementById('heavenly-chips');
+    const prestigePointsEl = document.getElementById('prestige-points');
     const buildingsEl = document.getElementById('buildings');
     const upgradesEl = document.getElementById('upgrades');
+    const prestigeUpgradesEl = document.getElementById('prestige-upgrades-list');
     const achievementsEl = document.getElementById('achievements-list');
+    const gameStatsEl = document.getElementById('game-stats');
+    const offlineStatsEl = document.getElementById('offline-stats');
     const prestigeBtn = document.getElementById('prestige-btn');
-    const lotteryBtn = document.getElementById('lottery-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const saveBtn = document.getElementById('save-btn');
     const loadBtn = document.getElementById('load-btn');
@@ -1487,6 +1278,7 @@
         loadGame();
         setupEventListeners();
         createMilkBubbles();
+        calculateOfflineProgress();
         updateUI();
         startGameLoop();
         
@@ -1511,9 +1303,6 @@
         // Prestige button
         prestigeBtn.addEventListener('click', showPrestigeModal);
         
-        // Lottery button
-        lotteryBtn.addEventListener('click', playLottery);
-        
         // Settings buttons
         settingsBtn.addEventListener('click', () => toggleModal(settingsModal));
         saveBtn.addEventListener('click', manualSave);
@@ -1535,6 +1324,7 @@
         // Settings toggles
         document.getElementById('notifications-toggle').addEventListener('change', toggleNotifications);
         document.getElementById('animations-toggle').addEventListener('change', toggleAnimations);
+        document.getElementById('offline-progress-toggle').addEventListener('change', toggleOfflineProgress);
         
         // Cancel buttons
         document.querySelectorAll('.modal-btn.cancel').forEach(btn => {
@@ -1560,12 +1350,17 @@
         
         document.getElementById(tabName).classList.add('active');
         document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
+        
+        if (tabName === 'stats') {
+            updateStatsTab();
+        }
     }
 
     function updateUI() {
         updateStats();
         updateBuildings();
         updateUpgrades();
+        updatePrestigeUpgrades();
         updateAchievements();
         updatePrestigeButton();
     }
@@ -1574,6 +1369,7 @@
         cookiesEl.textContent = formatNumber(gameState.cookies);
         cpsEl.textContent = formatNumber(gameState.cps);
         heavenlyChipsEl.textContent = formatNumber(gameState.heavenlyChips);
+        prestigePointsEl.textContent = formatNumber(gameState.prestigePoints);
         
         // Update multiplier display
         const multiplierDisplay = document.getElementById('cookie-multiplier');
@@ -1606,7 +1402,7 @@
                     </div>
                     <div class="building-stats">
                         <span>${formatNumber(getBuildingCPS(b))} CPS</span>
-                        <span>Cost: ${formatNumber(cost)} cookies</span>
+                        <span>Cost: ${formatNumber(cost)}</span>
                     </div>
                 `;
                 
@@ -1639,7 +1435,7 @@
                         </div>
                     </div>
                     <div class="upgrade-stats">
-                        <span>Cost: ${formatNumber(u.cost)} cookies</span>
+                        <span>Cost: ${formatNumber(u.cost)}</span>
                     </div>
                 `;
                 
@@ -1655,6 +1451,44 @@
         
         if (availableUpgrades === 0) {
             upgradesEl.innerHTML += '<p>No upgrades available. Keep playing to unlock more!</p>';
+        }
+    }
+
+    function updatePrestigeUpgrades() {
+        prestigeUpgradesEl.innerHTML = '';
+        let availableUpgrades = 0;
+        
+        prestigeUpgrades.forEach((pu, i) => {
+            if (!pu.bought && gameState.prestigePoints >= pu.cost) {
+                availableUpgrades++;
+                const upgradeDiv = document.createElement('div');
+                upgradeDiv.className = 'prestige-upgrade-item';
+                upgradeDiv.innerHTML = `
+                    <div class="prestige-upgrade-header">
+                        <span class="prestige-upgrade-emoji">${pu.emoji}</span>
+                        <div class="prestige-upgrade-info">
+                            <div class="prestige-upgrade-name">${pu.name}</div>
+                            <div class="prestige-upgrade-desc">${pu.description}</div>
+                        </div>
+                    </div>
+                    <div class="prestige-upgrade-stats">
+                        <span>Cost: ${formatNumber(pu.cost)} prestige points</span>
+                    </div>
+                `;
+                
+                const btn = document.createElement('button');
+                btn.className = 'prestige-upgrade-btn';
+                btn.textContent = 'Buy Upgrade';
+                btn.disabled = gameState.prestigePoints < pu.cost;
+                btn.addEventListener('click', () => buyPrestigeUpgrade(i));
+                upgradeDiv.appendChild(btn);
+                
+                prestigeUpgradesEl.appendChild(upgradeDiv);
+            }
+        });
+        
+        if (availableUpgrades === 0) {
+            prestigeUpgradesEl.innerHTML = '<p>No prestige upgrades available. Prestige to earn more points!</p>';
         }
     }
 
@@ -1684,10 +1518,28 @@
         });
     }
 
+    function updateStatsTab() {
+        // Game statistics
+        gameStatsEl.innerHTML = `
+            <p>Total Clicks: ${formatNumber(gameState.totalClicks)}</p>
+            <p>Total Play Time: ${formatTime(gameState.playTime)}</p>
+            <p>Golden Cookies Clicked: ${formatNumber(gameState.goldenCookiesClicked)}</p>
+            <p>Prestige Count: ${formatNumber(gameState.prestigeCount)}</p>
+            <p>Total Cookies Earned: ${formatNumber(gameState.totalCookiesEarned)}</p>
+        `;
+        
+        // Offline statistics
+        offlineStatsEl.innerHTML = `
+            <p>Offline Progress: ${gameState.offlineProgressEnabled ? 'Enabled' : 'Disabled'}</p>
+            <p>Last Offline Calculation: ${new Date(gameState.lastOfflineTime).toLocaleTimeString()}</p>
+        `;
+    }
+
     function updatePrestigeButton() {
         const chipsGained = calculateHeavenlyChips();
-        prestigeBtn.textContent = `Prestige (${formatNumber(chipsGained)})`;
-        prestigeBtn.disabled = chipsGained <= 0;
+        const pointsGained = calculatePrestigePoints();
+        prestigeBtn.textContent = `Prestige (${formatNumber(chipsGained)} chips + ${formatNumber(pointsGained)} points)`;
+        prestigeBtn.disabled = chipsGained <= 0 && pointsGained <= 0;
     }
 
     // =============================
@@ -1699,26 +1551,67 @@
             totalCPS += b.count * b.baseCps * b.cpsMultiplier;
         });
         
-        // Apply prestige bonus
-        const prestigeBonus = 1 + (gameState.heavenlyChips * 0.01);
-        totalCPS *= prestigeBonus;
+        // Apply prestige bonuses
+        const heavenlyBonus = 1 + (gameState.heavenlyChips * 0.01);
+        totalCPS *= heavenlyBonus;
+        
+        // Apply prestige upgrades
+        prestigeUpgrades.forEach(pu => {
+            if (pu.bought) {
+                switch (pu.category) {
+                    case "cps":
+                        totalCPS *= pu.effect(gameState.heavenlyChips);
+                        break;
+                    case "building":
+                        // Building bonuses are applied in getBuildingCPS
+                        break;
+                }
+            }
+        });
         
         // Apply frenzy multiplier
         if (gameState.isFrenzyActive) {
-            totalCPS *= CONFIG.FRENZY_MULTIPLIER;
+            const frenzyMultiplier = prestigeUpgrades.find(pu => pu.id === "cosmic_awareness" && pu.bought) 
+                ? CONFIG.FRENZY_MULTIPLIER * 1.3 
+                : CONFIG.FRENZY_MULTIPLIER;
+            totalCPS *= frenzyMultiplier;
         }
         
         gameState.cps = totalCPS;
     }
 
     function calculateBuildingCost(building) {
-        return Math.floor(building.baseCost * Math.pow(1.15, building.count));
+        let cost = building.baseCost * Math.pow(1.15, building.count);
+        
+        // Apply cost reduction from prestige upgrades
+        prestigeUpgrades.forEach(pu => {
+            if (pu.bought && pu.category === "cost") {
+                cost *= pu.effect(gameState.heavenlyChips);
+            }
+        });
+        
+        // Apply achievement discounts
+        achievements.forEach(a => {
+            if (a.unlocked && a.reward.type === "discount") {
+                cost *= (1 - a.reward.value);
+            }
+        });
+        
+        return Math.floor(cost);
     }
 
     function getBuildingCPS(building) {
         let cps = building.count * building.baseCps * building.cpsMultiplier;
-        const prestigeBonus = 1 + (gameState.heavenlyChips * 0.01);
-        return cps * prestigeBonus;
+        
+        // Apply building-specific prestige bonuses
+        prestigeUpgrades.forEach(pu => {
+            if (pu.bought && pu.category === "building") {
+                cps *= pu.effect(gameState.heavenlyChips);
+            }
+        });
+        
+        const heavenlyBonus = 1 + (gameState.heavenlyChips * 0.01);
+        return cps * heavenlyBonus;
     }
 
     function isUpgradeAvailable(upgrade) {
@@ -1761,6 +1654,21 @@
         }
     }
 
+    function buyPrestigeUpgrade(index) {
+        const pu = prestigeUpgrades[index];
+        if (gameState.prestigePoints >= pu.cost && !pu.bought) {
+            gameState.prestigePoints -= pu.cost;
+            pu.bought = true;
+            calculateCPS(); // Recalculate CPS as some upgrades affect it
+            updatePrestigeUpgrades();
+            updateUI();
+            
+            if (gameState.notificationsEnabled) {
+                showNotification(`Prestige upgrade purchased: ${pu.name}!`);
+            }
+        }
+    }
+
     function applyAchievementReward(achievement) {
         switch (achievement.reward.type) {
             case "cps":
@@ -1770,21 +1678,16 @@
                 gameState.clickPower += achievement.reward.value;
                 break;
             case "discount":
-                // Apply discount to all buildings
-                buildings.forEach(b => {
-                    b.baseCost *= (1 - achievement.reward.value);
-                });
+                // Discount is applied in calculateBuildingCost
                 break;
             case "golden":
-                // Golden cookie chance bonus
                 CONFIG.GOLDEN_COOKIE_CHANCE += achievement.reward.value;
                 break;
             case "prestige":
-                // Prestige bonus
                 gameState.heavenlyChips += achievement.reward.value;
+                calculateCPS();
                 break;
             case "global":
-                // Global multiplier
                 buildings.forEach(b => {
                     b.cpsMultiplier *= achievement.reward.value;
                 });
@@ -1801,6 +1704,13 @@
         const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
         
         let clickValue = gameState.clickPower;
+        
+        // Apply click bonuses from prestige upgrades
+        const clickMultiplier = prestigeUpgrades.find(pu => pu.id === "double_cookies" && pu.bought) 
+            ? getPrestigeUpgradeById("double_cookies").effect(gameState.heavenlyChips) 
+            : 1;
+        clickValue *= clickMultiplier;
+        
         if (gameState.isFrenzyActive) {
             clickValue *= CONFIG.FRENZY_MULTIPLIER;
         }
@@ -1847,7 +1757,7 @@
         
         document.getElementById('golden-cookie-container').appendChild(goldenCookie);
         
-        // Remove after 15 seconds
+        // Remove after duration
         setTimeout(() => {
             if (goldenCookie.parentNode) {
                 goldenCookie.remove();
@@ -1866,36 +1776,7 @@
             }
         }
         
-        return goldenCookieEffects[0]; // Fallback
-    }
-
-    // =============================
-    // Mini-games
-    // =============================
-    function playLottery() {
-        if (gameState.cookies >= 100) {
-            gameState.cookies -= 100;
-            const win = Math.random() < 0.3; // 30% chance to win
-            const prize = win ? Math.floor(Math.random() * 1000) + 500 : 0;
-            
-            const resultEl = document.getElementById('lottery-result');
-            if (win) {
-                gameState.cookies += prize;
-                resultEl.innerHTML = `<span style="color: #4CAF50">🎉 You won ${formatNumber(prize)} cookies!</span>`;
-                if (gameState.notificationsEnabled) {
-                    showNotification(`🎉 You won ${prize} cookies!`);
-                }
-            } else {
-                resultEl.innerHTML = '<span style="color: #ff6b6b">😢 Better luck next time!</span>';
-            }
-            
-            updateUI();
-            
-            // Clear result after 3 seconds
-            setTimeout(() => {
-                resultEl.innerHTML = '';
-            }, 3000);
-        }
+        return goldenCookieEffects[0];
     }
 
     // =============================
@@ -1905,36 +1786,33 @@
         return Math.max(0, Math.floor(Math.sqrt(gameState.totalCookiesEarned / CONFIG.PRESTIGE_BASE) * 10) - gameState.heavenlyChips);
     }
 
+    function calculatePrestigePoints() {
+        return Math.max(0, Math.floor(Math.pow(gameState.totalCookiesEarned / CONFIG.PRESTIGE_BASE, 0.25) * CONFIG.PRESTIGE_POINTS_MULTIPLIER) - gameState.prestigePoints);
+    }
+
     function showPrestigeModal() {
         const chipsGained = calculateHeavenlyChips();
-        if (chipsGained <= 0) return;
+        const pointsGained = calculatePrestigePoints();
+        
+        if (chipsGained <= 0 && pointsGained <= 0) return;
         
         document.getElementById('chips-gain').textContent = formatNumber(chipsGained);
+        document.getElementById('points-gain').textContent = formatNumber(pointsGained);
         document.getElementById('cps-boost').textContent = `${chipsGained}%`;
-        
-        // Update prestige rewards
-        const rewardsList = document.getElementById('prestige-rewards-list');
-        rewardsList.innerHTML = '';
-        
-        prestigeUpgrades.forEach(upgrade => {
-            const rewardDiv = document.createElement('div');
-            rewardDiv.innerHTML = `
-                <div>${upgrade.name} - ${upgrade.description}</div>
-                <small>Cost: ${upgrade.cost} chips</small>
-            `;
-            rewardsList.appendChild(rewardDiv);
-        });
         
         toggleModal(prestigeModal);
     }
 
     function doPrestige() {
         const chipsGained = calculateHeavenlyChips();
+        const pointsGained = calculatePrestigePoints();
+        
         gameState.heavenlyChips += chipsGained;
+        gameState.prestigePoints += pointsGained;
         gameState.prestigeCount++;
         
         if (gameState.notificationsEnabled) {
-            showNotification(`Prestiged! Gained ${formatNumber(chipsGained)} Heavenly Chips!`);
+            showNotification(`Ascended! Gained ${formatNumber(chipsGained)} Heavenly Chips and ${formatNumber(pointsGained)} Prestige Points!`);
         }
         
         resetGameState();
@@ -1962,12 +1840,41 @@
             b.cpsMultiplier = 1;
         });
         
-        // Reset upgrades
+        // Reset upgrades (keep prestige upgrades)
         upgrades.forEach(u => u.bought = false);
         
         calculateCPS();
         saveGame();
         updateUI();
+    }
+
+    // =============================
+    // Offline Progress
+    // =============================
+    function calculateOfflineProgress() {
+        if (!gameState.offlineProgressEnabled) return;
+        
+        const now = Date.now();
+        const offlineTime = Math.min((now - gameState.lastOfflineTime) / 1000, CONFIG.OFFLINE_MAX_TIME);
+        
+        if (offlineTime > 60) { // Only show if offline for more than 1 minute
+            const offlineEarnings = Math.floor(gameState.cps * offlineTime * 0.5); // 50% of online production
+            
+            // Apply offline bonuses from prestige upgrades
+            const offlineMultiplier = prestigeUpgrades.find(pu => pu.id === "chronomancy" && pu.bought) 
+                ? getPrestigeUpgradeById("chronomancy").effect(gameState.heavenlyChips) 
+                : 1;
+            const finalEarnings = Math.floor(offlineEarnings * offlineMultiplier);
+            
+            gameState.cookies += finalEarnings;
+            gameState.totalCookiesEarned += finalEarnings;
+            
+            if (gameState.notificationsEnabled && finalEarnings > 0) {
+                showNotification(`Offline earnings: +${formatNumber(finalEarnings)} cookies!`, 'offline-notification');
+            }
+        }
+        
+        gameState.lastOfflineTime = now;
     }
 
     // =============================
@@ -2016,11 +1923,11 @@
     // =============================
     // Notification System
     // =============================
-    function showNotification(message) {
+    function showNotification(message, className = '') {
         if (!gameState.notificationsEnabled) return;
         
         const notification = document.createElement('div');
-        notification.className = 'notification';
+        notification.className = `notification ${className}`;
         notification.textContent = message;
         
         document.getElementById('notification-container').appendChild(notification);
@@ -2061,12 +1968,16 @@
         saveGame();
         
         if (!gameState.animationsEnabled) {
-            // Remove all animations
             document.querySelectorAll('.golden-cookie, .floating-text, .milk-bubble').forEach(el => el.remove());
         } else {
-            // Restore animations
             createMilkBubbles();
         }
+    }
+
+    function toggleOfflineProgress(e) {
+        gameState.offlineProgressEnabled = e.target.checked;
+        gameState.lastOfflineTime = Date.now();
+        saveGame();
     }
 
     function manualSave() {
@@ -2141,11 +2052,14 @@
             goldenCookiesClicked: gameState.goldenCookiesClicked,
             playTime: gameState.playTime,
             heavenlyChips: gameState.heavenlyChips,
+            prestigePoints: gameState.prestigePoints,
             prestigeCount: gameState.prestigeCount,
             isFrenzyActive: gameState.isFrenzyActive,
             frenzyTimeLeft: gameState.frenzyTimeLeft,
+            lastOfflineTime: gameState.lastOfflineTime,
             notificationsEnabled: gameState.notificationsEnabled,
             animationsEnabled: gameState.animationsEnabled,
+            offlineProgressEnabled: gameState.offlineProgressEnabled,
             version: CONFIG.VERSION,
             buildings: buildings.map(b => ({ 
                 id: b.id, 
@@ -2156,6 +2070,10 @@
             upgrades: upgrades.map(u => ({ 
                 id: u.id, 
                 bought: u.bought 
+            })),
+            prestigeUpgrades: prestigeUpgrades.map(pu => ({ 
+                id: pu.id, 
+                bought: pu.bought 
             })),
             achievements: achievements.map(a => ({ 
                 id: a.id, 
@@ -2173,11 +2091,14 @@
         gameState.goldenCookiesClicked = saveData.goldenCookiesClicked || 0;
         gameState.playTime = saveData.playTime || 0;
         gameState.heavenlyChips = saveData.heavenlyChips || 0;
+        gameState.prestigePoints = saveData.prestigePoints || 0;
         gameState.prestigeCount = saveData.prestigeCount || 0;
         gameState.isFrenzyActive = saveData.isFrenzyActive || false;
         gameState.frenzyTimeLeft = saveData.frenzyTimeLeft || 0;
+        gameState.lastOfflineTime = saveData.lastOfflineTime || Date.now();
         gameState.notificationsEnabled = saveData.notificationsEnabled !== undefined ? saveData.notificationsEnabled : true;
         gameState.animationsEnabled = saveData.animationsEnabled !== undefined ? saveData.animationsEnabled : true;
+        gameState.offlineProgressEnabled = saveData.offlineProgressEnabled !== undefined ? saveData.offlineProgressEnabled : true;
         
         // Buildings
         if (saveData.buildings) {
@@ -2197,6 +2118,16 @@
                 const upgrade = upgrades.find(u => u.id === savedUpgrade.id);
                 if (upgrade) {
                     upgrade.bought = savedUpgrade.bought || false;
+                }
+            });
+        }
+        
+        // Prestige Upgrades
+        if (saveData.prestigeUpgrades) {
+            saveData.prestigeUpgrades.forEach(savedPrestigeUpgrade => {
+                const prestigeUpgrade = prestigeUpgrades.find(pu => pu.id === savedPrestigeUpgrade.id);
+                if (prestigeUpgrade) {
+                    prestigeUpgrade.bought = savedPrestigeUpgrade.bought || false;
                 }
             });
         }
@@ -2243,7 +2174,7 @@
         
         function gameLoop() {
             const currentTime = Date.now();
-            const deltaTime = (currentTime - lastTime) / 1000; // in seconds
+            const deltaTime = (currentTime - lastTime) / 1000;
             lastTime = currentTime;
             
             // Update cookies based on CPS and delta time
@@ -2267,7 +2198,7 @@
             }
             
             // Update UI with throttling
-            if (currentTime - gameState.lastUpdate > 100) { // Update every 100ms
+            if (currentTime - gameState.lastUpdate > 100) {
                 updateUI();
                 gameState.lastUpdate = currentTime;
             }
