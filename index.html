@@ -5,76 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mini Cookie Clicker</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f5f5dc;
-    margin: 0;
-    padding: 20px;
-  }
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-color: #f5f5dc;
+  margin: 0;
+  padding: 20px;
+}
+h1 { margin-bottom: 10px; }
+#cookie {
+  width: 200px; height: 200px;
+  background: url('https://i.imgur.com/6d1ZWYw.png') no-repeat center center;
+  background-size: contain;
+  margin: 20px auto;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+#cookie:active { transform: scale(1.1); }
 
-  h1 {
-    margin-bottom: 10px;
-  }
-
-  #cookie {
-    width: 200px;
-    height: 200px;
-    background: url('https://i.imgur.com/6d1ZWYw.png') no-repeat center center;
-    background-size: contain;
-    margin: 20px auto;
-    cursor: pointer;
-    transition: transform 0.1s;
-  }
-
-  #cookie:active {
-    transform: scale(1.1);
-  }
-
-  #stats {
-    margin: 20px 0;
-  }
-
-  .section {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 10px;
-    margin: 10px auto;
-    max-width: 400px;
-    background-color: #fff8dc;
-  }
-
-  .object, .upgrade {
-    display: flex;
-    justify-content: space-between;
-    margin: 5px 0;
-  }
-
-  button {
-    padding: 5px 10px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    background-color: #deb887;
-    color: #fff;
-  }
-
-  button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
+.section {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px auto;
+  max-width: 400px;
+  background-color: #fff8dc;
+}
+.object, .upgrade {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+}
+button {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  background-color: #deb887;
+  color: #fff;
+}
+button:disabled { background-color: #ccc; cursor: not-allowed; }
 </style>
 </head>
 <body>
 
 <h1>Mini Cookie Clicker</h1>
-
 <div id="cookie"></div>
 
 <div id="stats">
   <p>Печеньки: <span id="cookies">0</span></p>
   <p>Печеньки в секунду: <span id="cps">0</span></p>
   <p>Общее количество кликов: <span id="clicks">0</span></p>
+  <p>Очки престижа: <span id="prestige">0</span></p>
 </div>
 
 <div class="section" id="objects-section">
@@ -87,14 +69,13 @@
   <div id="upgrades"></div>
 </div>
 
-</body>
-</html>
-
+<button id="prestigeBtn">Престиж</button>
 
 <script>
-/* ======= ДАННЫЕ И ОБЪЕКТЫ ======= */
+/* ======== ДАННЫЕ ======== */
 let cookies = 0;
 let totalClicks = 0;
+let clickPower = 1;
 let cps = 0;
 let prestigePoints = 0;
 let prestigeMultiplier = 1;
@@ -111,24 +92,37 @@ const upgradesData = [
   { name: 'Эффективная Ферма', cost: 500, type: 'object', target: 'Ферма', multiplier: 2, purchased: false }
 ];
 
-/* ======= ЭЛЕМЕНТЫ ======= */
+/* ======== ЭЛЕМЕНТЫ ======== */
 const cookieBtn = document.getElementById('cookie');
 const cookiesDisplay = document.getElementById('cookies');
 const clicksDisplay = document.getElementById('clicks');
 const cpsDisplay = document.getElementById('cps');
+const prestigeDisplay = document.getElementById('prestige');
 const objectsContainer = document.getElementById('objects');
 const upgradesContainer = document.getElementById('upgrades');
+const prestigeBtn = document.getElementById('prestigeBtn');
 
-/* ======= ИНИЦИАЛИЗАЦИЯ ======= */
+/* ======== ФУНКЦИИ ======== */
+function updateStats() {
+  cookiesDisplay.textContent = Math.floor(cookies);
+  clicksDisplay.textContent = totalClicks;
+  cpsDisplay.textContent = (cps * prestigeMultiplier).toFixed(1);
+  prestigeDisplay.textContent = prestigePoints;
+}
+
+function calculateCPS() {
+  cps = 0;
+  objectsData.forEach(obj => cps += obj.cps * obj.amount);
+}
+
 function initObjects() {
   objectsContainer.innerHTML = '';
   objectsData.forEach((obj, index) => {
+    const cost = Math.floor(obj.baseCost * Math.pow(1.15, obj.amount));
     const div = document.createElement('div');
     div.className = 'object';
-    div.innerHTML = `
-      <span>${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>
-      <button id="buy-object-${index}">Купить (${Math.floor(obj.baseCost * Math.pow(1.15, obj.amount))})</button>
-    `;
+    div.innerHTML = `<span>${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>
+                     <button ${cookies >= cost ? '' : 'disabled'} id="buy-object-${index}">Купить (${cost})</button>`;
     objectsContainer.appendChild(div);
     document.getElementById(`buy-object-${index}`).addEventListener('click', () => buyObject(index));
   });
@@ -137,31 +131,15 @@ function initObjects() {
 function initUpgrades() {
   upgradesContainer.innerHTML = '';
   upgradesData.forEach((upg, index) => {
+    const btnDisabled = (upg.purchased || cookies < upg.cost) ? 'disabled' : '';
     const div = document.createElement('div');
     div.className = 'upgrade';
-    const disabled = upg.purchased ? 'disabled' : '';
-    div.innerHTML = `
-      <span>${upg.name} (${upg.cost} печенек)</span>
-      <button id="buy-upgrade-${index}" ${disabled}>Купить</button>
-    `;
+    div.innerHTML = `<span>${upg.name} (${upg.cost})</span>
+                     <button id="buy-upgrade-${index}" ${btnDisabled}>Купить</button>`;
     upgradesContainer.appendChild(div);
     if (!upg.purchased) {
       document.getElementById(`buy-upgrade-${index}`).addEventListener('click', () => buyUpgrade(index));
     }
-  });
-}
-
-/* ======= ФУНКЦИИ ======= */
-function updateStats() {
-  cookiesDisplay.textContent = Math.floor(cookies);
-  clicksDisplay.textContent = totalClicks;
-  cpsDisplay.textContent = (cps * prestigeMultiplier).toFixed(1);
-}
-
-function calculateCPS() {
-  cps = 0;
-  objectsData.forEach(obj => {
-    cps += obj.cps * obj.amount;
   });
 }
 
@@ -174,6 +152,7 @@ function buyObject(index) {
     calculateCPS();
     initObjects();
     updateStats();
+    saveGame();
   }
 }
 
@@ -182,35 +161,37 @@ function buyUpgrade(index) {
   if (cookies >= upg.cost && !upg.purchased) {
     cookies -= upg.cost;
     upg.purchased = true;
-    if (upg.type === 'click') {
-      clickPower *= upg.multiplier;
-    } else if (upg.type === 'object') {
+    if (upg.type === 'click') clickPower *= upg.multiplier;
+    else if (upg.type === 'object') {
       const obj = objectsData.find(o => o.name === upg.target);
       obj.cps *= upg.multiplier;
+      calculateCPS();
     }
     initUpgrades();
-    calculateCPS();
     updateStats();
+    saveGame();
   }
 }
 
-/* ======= КЛИК ПО ПЕЧЕНЬКЕ ======= */
-let clickPower = 1;
+/* ======== КЛИК ПО ПЕЧЕНЬКЕ ======== */
 cookieBtn.addEventListener('click', () => {
   cookies += clickPower * prestigeMultiplier;
   totalClicks++;
   updateStats();
+  initUpgrades();
 });
 
-/* ======= АВТОПРОИЗВОДСТВО ======= */
+/* ======== АВТОПРОИЗВОДСТВО ======== */
 setInterval(() => {
-  cookies += cps * prestigeMultiplier / 10;
+  cookies += cps * prestigeMultiplier / 10; // добавляем 1/10 CPS каждые 100ms
   updateStats();
+  initObjects();
+  initUpgrades();
 }, 100);
 
-/* ======= СИСТЕМА ПРЕСТИЖА ======= */
-function prestige() {
-  if (cookies >= 10000) { // порог для престижа
+/* ======== СИСТЕМА ПРЕСТИЖА ======== */
+prestigeBtn.addEventListener('click', () => {
+  if (cookies >= 10000) {
     const gained = Math.floor(cookies / 10000);
     prestigePoints += gained;
     prestigeMultiplier = 1 + prestigePoints * 0.1;
@@ -221,25 +202,18 @@ function prestige() {
     calculateCPS();
     initObjects();
     initUpgrades();
-    alert(`Вы получили ${gained} очков престижа! Множитель производства: x${prestigeMultiplier.toFixed(1)}`);
     updateStats();
     saveGame();
+    alert(`Вы получили ${gained} очков престижа! Множитель: x${prestigeMultiplier.toFixed(1)}`);
   } else {
-    alert('Недостаточно печенек для престижа (не менее 10000)');
+    alert('Недостаточно печенек для престижа (10000+).');
   }
-}
+});
 
-/* Добавим кнопку престижа */
-const prestigeBtn = document.createElement('button');
-prestigeBtn.textContent = 'Престиж';
-prestigeBtn.style.marginTop = '10px';
-prestigeBtn.addEventListener('click', prestige);
-document.body.appendChild(prestigeBtn);
-
-/* ======= СОХРАНЕНИЕ И ЗАГРУЗКА ======= */
+/* ======== СОХРАНЕНИЕ ======== */
 function saveGame() {
   const save = {
-    cookies, totalClicks, cps, clickPower, prestigePoints, prestigeMultiplier,
+    cookies, totalClicks, clickPower, prestigePoints, prestigeMultiplier,
     objects: objectsData.map(obj => obj.amount),
     upgrades: upgradesData.map(upg => upg.purchased)
   };
@@ -263,9 +237,8 @@ function loadGame() {
   updateStats();
 }
 
-/* Автосохранение каждые 10 секунд */
-setInterval(saveGame, 10000);
-
-/* ИНИЦИАЛИЗАЦИЯ */
 loadGame();
+setInterval(saveGame, 10000);
 </script>
+</body>
+</html>
