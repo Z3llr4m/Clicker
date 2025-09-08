@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie Clicker Clone Dark</title>
 <style>
 body {
   margin: 0;
@@ -42,7 +48,6 @@ header p { margin: 5px; font-weight: bold; font-size: 1rem; }
   padding: 0 10px;
   box-sizing: border-box;
 }
-
 #cookie-container {
   position: relative;
   width: 160px;
@@ -68,7 +73,6 @@ header p { margin: 5px; font-weight: bold; font-size: 1rem; }
 #cookie:hover { filter: brightness(1.2); }
 #cookie:active { transform: scale(1.2); filter: brightness(0.8); }
 
-/* Секции объектов и апгрейдов */
 .section {
   width: 100%;
   background-color: #2c2c2c;
@@ -105,7 +109,6 @@ button {
 button:hover { background-color: #5555cc; transform: scale(1.05); }
 button:disabled { background-color: #333; cursor: not-allowed; }
 
-/* Анимации +1 и летящей печеньки */
 .plus-one {
   position: absolute;
   color: gold;
@@ -129,13 +132,21 @@ button:disabled { background-color: #333; cursor: not-allowed; }
   0% { transform: translateY(0) scale(1); opacity: 1; }
   100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
 }
-
-/* Адаптация под мобильные */
 @media (max-width: 768px) {
   #cookie { font-size: 120px; }
   header p { font-size: 0.9rem; }
 }
 </style>
+</head>
+<body>
+
+<header>
+  <p>Печеньки: <span id="cookies">0</span></p>
+  <p>CPS: <span id="cps">0</span></p>
+  <p>Клики: <span id="clicks">0</span></p>
+  <p>Престиж: <span id="prestige">0</span></p>
+  <button id="prestigeBtn">Престиж</button>
+</header>
 
 <div id="main">
   <div id="cookie-container">
@@ -262,48 +273,48 @@ function buyUpgrade(index){
     updateStats();
     initObjects();
     initUpgrades();
-    flyingCookieEffect(cookieBtn);
     saveGame();
   }
 }
 
-/* ===== Анимации ===== */
-function plusOneEffect(){
-  const span = document.createElement('span');
-  span.className='plus-one';
-  span.textContent = `+${clickPower}`;
-  document.body.appendChild(span);
-  const rect = cookieBtn.getBoundingClientRect();
-  span.style.left = rect.left + rect.width/2 + 'px';
-  span.style.top = rect.top + 'px';
-  setTimeout(()=>span.remove(),800);
-}
-
-function flyingCookieEffect(target){
-  const span = document.createElement('span');
-  span.className='flying-cookie';
-  span.textContent='🍪';
-  document.body.appendChild(span);
-  const rect = target.getBoundingClientRect();
-  span.style.left = rect.left + Math.random()*50 + 'px';
-  span.style.top = rect.top + 'px';
-  setTimeout(()=>span.remove(),1000);
-}
-
-/* ===== Клик по печеньке ===== */
-cookieBtn.addEventListener('pointerdown',()=>{
-  cookies += clickPower*prestigeMultiplier;
+function clickCookie(){
+  cookies += clickPower;
   totalClicks++;
+  showPlusOne();
   updateStats();
-  plusOneEffect();
+  initObjects();
+  initUpgrades();
   saveGame();
-});
+}
 
-/* ===== Автосчёт CPS ===== */
+cookieBtn.addEventListener('pointerdown',clickCookie);
+
 setInterval(()=>{
   cookies += cps*prestigeMultiplier/10;
   updateStats();
+  initObjects();
+  initUpgrades();
 },100);
+
+/* ===== Анимации ===== */
+function showPlusOne(){
+  const plus = document.createElement('div');
+  plus.className='plus-one';
+  plus.textContent='+1';
+  plus.style.left = (cookieBtn.offsetLeft + 60 + Math.random()*40)+'px';
+  plus.style.top = (cookieBtn.offsetTop + 20 + Math.random()*40)+'px';
+  document.body.appendChild(plus);
+  setTimeout(()=>plus.remove(),800);
+}
+function flyingCookieEffect(target){
+  const f = document.createElement('div');
+  f.className='flying-cookie';
+  f.textContent='🍪';
+  f.style.left = (target.offsetLeft+50+Math.random()*50)+'px';
+  f.style.top = (target.offsetTop+30+Math.random()*30)+'px';
+  document.body.appendChild(f);
+  setTimeout(()=>f.remove(),1000);
+}
 
 /* ===== Престиж ===== */
 prestigeBtn.addEventListener('pointerdown',()=>{
