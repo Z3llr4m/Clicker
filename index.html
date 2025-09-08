@@ -233,27 +233,32 @@ function initObjects() {
   objectsContainer.innerHTML = '';
   objectsData.forEach((obj, index) => {
     const cost = Math.floor(obj.baseCost * Math.pow(1.15, obj.amount));
-    const div = document.createElement('div');
+    let button = document.createElement('button');
+    button.textContent = `Купить (${cost})`;
+    button.disabled = cookies < cost;
+    button.addEventListener('pointerdown', () => buyObject(index));
+    
+    let div = document.createElement('div');
     div.className = 'object';
-    div.innerHTML = `<span>${obj.emoji} ${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>
-                     <button ${cookies >= cost ? '' : 'disabled'} id="buy-object-${index}">Купить (${cost})</button>`;
+    div.innerHTML = `<span>${obj.emoji} ${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>`;
+    div.appendChild(button);
     objectsContainer.appendChild(div);
-    document.getElementById(`buy-object-${index}`).addEventListener('click', () => buyObject(index));
   });
 }
 
 function initUpgrades() {
   upgradesContainer.innerHTML = '';
   upgradesData.forEach((upg, index) => {
-    const btnDisabled = (upg.purchased || cookies < upg.cost) ? 'disabled' : '';
-    const div = document.createElement('div');
+    let button = document.createElement('button');
+    button.textContent = `Купить (${upg.cost})`;
+    button.disabled = upg.purchased || cookies < upg.cost;
+    button.addEventListener('pointerdown', () => buyUpgrade(index));
+
+    let div = document.createElement('div');
     div.className = 'upgrade';
-    div.innerHTML = `<span>${upg.name} (${upg.cost})</span>
-                     <button id="buy-upgrade-${index}" ${btnDisabled}>Купить</button>`;
+    div.innerHTML = `<span>${upg.name}</span>`;
+    div.appendChild(button);
     upgradesContainer.appendChild(div);
-    if (!upg.purchased) {
-      document.getElementById(`buy-upgrade-${index}`).addEventListener('click', () => buyUpgrade(index));
-    }
   });
 }
 
