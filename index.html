@@ -89,3 +89,183 @@
 
 </body>
 </html>
+
+
+<script>
+/* ======= ДАННЫЕ И ОБЪЕКТЫ ======= */
+let cookies = 0;
+let totalClicks = 0;
+let cps = 0;
+let prestigePoints = 0;
+let prestigeMultiplier = 1;
+
+const objectsData = [
+  { name: 'Пекарь', baseCost: 10, cps: 1, amount: 0 },
+  { name: 'Ферма', baseCost: 100, cps: 10, amount: 0 },
+  { name: 'Завод', baseCost: 1000, cps: 100, amount: 0 }
+];
+
+const upgradesData = [
+  { name: 'Сильный клик', cost: 50, type: 'click', multiplier: 2, purchased: false },
+  { name: 'Эффективные Пекари', cost: 200, type: 'object', target: 'Пекарь', multiplier: 2, purchased: false },
+  { name: 'Эффективная Ферма', cost: 500, type: 'object', target: 'Ферма', multiplier: 2, purchased: false }
+];
+
+/* ======= ЭЛЕМЕНТЫ ======= */
+const cookieBtn = document.getElementById('cookie');
+const cookiesDisplay = document.getElementById('cookies');
+const clicksDisplay = document.getElementById('clicks');
+const cpsDisplay = document.getElementById('cps');
+const objectsContainer = document.getElementById('objects');
+const upgradesContainer = document.getElementById('upgrades');
+
+/* ======= ИНИЦИАЛИЗАЦИЯ ======= */
+function initObjects() {
+  objectsContainer.innerHTML = '';
+  objectsData.forEach((obj, index) => {
+    const div = document.createElement('div');
+    div.className = 'object';
+    div.innerHTML = `
+      <span>${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>
+      <button id="buy-object-${index}">Купить (${Math.floor(obj.baseCost * Math.pow(1.15, obj.amount))})</button>
+    `;
+    objectsContainer.appendChild(div);
+    document.getElementById(`buy-object-${index}`).addEventListener('click', () => buyObject(index));
+  });
+}
+
+function initUpgrades() {
+  upgradesContainer.innerHTML = '';
+  upgradesData.forEach((upg, index) => {
+    const div = document.createElement('div');
+    div.className = 'upgrade';
+    const disabled = upg.purchased ? 'disabled' : '';
+    div.innerHTML = `
+      <span>${upg.name} (${upg.cost} печенек)</span>
+      <button id="buy-upgrade-${index}" ${disabled}>Купить</button>
+    `;
+    upgradesContainer.appendChild(div);
+    if (!upg.purchased) {
+      document.getElementById(`buy-upgrade-${index}`).addEventListener('click', () => buyUpgrade(index));
+    }
+  });
+}
+
+/* ======= ФУНКЦИИ ======= */
+function updateStats() {
+  cookiesDisplay.textContent = Math.floor(cookies);
+  clicksDisplay.textContent = totalClicks;
+  cpsDisplay.textContent = (cps * prestigeMultiplier).toFixed(1);
+}
+
+function calculateCPS() {
+  cps = 0;
+  objectsData.forEach(obj => {
+    cps += obj.cps * obj.amount;
+  });
+}
+
+function buyObject(index) {
+  const obj = objectsData[index];
+  const cost = Math.floor(obj.baseCost * Math.pow(1.15, obj.amount));
+  if (cookies >= cost) {
+    cookies -= cost;
+    obj.amount++;
+    calculateCPS();
+    initObjects();
+    updateStats();
+  }
+}
+
+function buyUpgrade(index) {
+  const upg = upgradesData[index];
+  if (cookies >= upg.cost && !upg.purchased) {
+    cookies -= upg.cost;
+    upg.purchased = true;
+    if (upg.type === 'click') {
+      clickPower *= upg.multiplier;
+    } else if (upg.type === 'object') {
+      const obj = objectsData.find(o => o.name === upg.target);
+      obj.cps *= upg.multiplier;
+    }
+    initUpgrades();
+    calculateCPS();
+    updateStats();
+  }
+}
+
+/* ======= КЛИК ПО ПЕЧЕНЬКЕ ======= */
+let clickPower = 1;
+cookieBtn.addEventListener('click', () => {
+  cookies += clickPower * prestigeMultiplier;
+  totalClicks++;
+  updateStats();
+});
+
+/* ======= АВТОПРОИЗВОДСТВО ======= */
+setInterval(() => {
+  cookies += cps * prestigeMultiplier / 10;
+  updateStats();
+}, 100);
+
+/* ======= СИСТЕМА ПРЕСТИЖА ======= */
+function prestige() {
+  if (cookies >= 10000) { // порог для престижа
+    const gained = Math.floor(cookies / 10000);
+    prestigePoints += gained;
+    prestigeMultiplier = 1 + prestigePoints * 0.1;
+    cookies = 0;
+    totalClicks = 0;
+    objectsData.forEach(obj => obj.amount = 0);
+    upgradesData.forEach(upg => upg.purchased = false);
+    calculateCPS();
+    initObjects();
+    initUpgrades();
+    alert(`Вы получили ${gained} очков престижа! Множитель производства: x${prestigeMultiplier.toFixed(1)}`);
+    updateStats();
+    saveGame();
+  } else {
+    alert('Недостаточно печенек для престижа (не менее 10000)');
+  }
+}
+
+/* Добавим кнопку престижа */
+const prestigeBtn = document.createElement('button');
+prestigeBtn.textContent = 'Престиж';
+prestigeBtn.style.marginTop = '10px';
+prestigeBtn.addEventListener('click', prestige);
+document.body.appendChild(prestigeBtn);
+
+/* ======= СОХРАНЕНИЕ И ЗАГРУЗКА ======= */
+function saveGame() {
+  const save = {
+    cookies, totalClicks, cps, clickPower, prestigePoints, prestigeMultiplier,
+    objects: objectsData.map(obj => obj.amount),
+    upgrades: upgradesData.map(upg => upg.purchased)
+  };
+  localStorage.setItem('cookieClickerSave', JSON.stringify(save));
+}
+
+function loadGame() {
+  const save = JSON.parse(localStorage.getItem('cookieClickerSave'));
+  if (save) {
+    cookies = save.cookies;
+    totalClicks = save.totalClicks;
+    clickPower = save.clickPower;
+    prestigePoints = save.prestigePoints;
+    prestigeMultiplier = save.prestigeMultiplier;
+    objectsData.forEach((obj, i) => obj.amount = save.objects[i]);
+    upgradesData.forEach((upg, i) => upg.purchased = save.upgrades[i]);
+    calculateCPS();
+  }
+  initObjects();
+  initUpgrades();
+  updateStats();
+}
+
+/* Автосохранение каждые 10 секунд */
+setInterval(saveGame, 10000);
+
+/* ИНИЦИАЛИЗАЦИЯ */
+loadGame();
+</script>
