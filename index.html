@@ -4,7 +4,722 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cookie Clicker Deluxe</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    :root {
+      --primary-color: #ffcc66;
+      --secondary-color: #4CAF50;
+      --danger-color: #ff6b6b;
+      --background-dark: #1e1e1e;
+      --background-medium: #2d2d2d;
+      --background-light: #333;
+      --text-color: #fff;
+      --text-secondary: #ccc;
+      --border-radius: 12px;
+      --transition-speed: 0.3s;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-medium) 100%);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    /* Header */
+    header {
+      padding: 12px 15px;
+      background: var(--background-medium);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background var(--transition-speed);
+    }
+
+    .icon-btn:active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Stats */
+    #stats-container {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px;
+      background: var(--background-light);
+      border-bottom: 1px solid #444;
+      flex-shrink: 0;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px;
+      font-size: 14px;
+    }
+
+    .stat-icon {
+      font-size: 18px;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      color: var(--primary-color);
+      font-size: 16px;
+    }
+
+    /* Main content with scrolling */
+    #main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Cookie section */
+    #cookie-section {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      background: linear-gradient(135deg, #87CEEB 0%, #ADD8E6 100%);
+      margin: 10px;
+      border-radius: var(--border-radius);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .milk-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, rgba(173, 216, 230, 0.05) 70%, transparent 100%);
+      border-radius: var(--border-radius);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .milk-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: floatBubble 8s infinite ease-in-out;
+    }
+
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
+      50% { transform: translateY(-20px) scale(1.1); opacity: 0.9; }
+    }
+
+    .cookie {
+      font-size: 120px;
+      cursor: pointer;
+      transition: transform 0.1s;
+      z-index: 2;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .cookie:active {
+      transform: scale(0.9);
+    }
+
+    .cookie.shake {
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+    }
+
+    .multiplier-display {
+      position: absolute;
+      bottom: 70px;
+      background: rgba(0, 0, 0, 0.7);
+      color: var(--primary-color);
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+      z-index: 3;
+    }
+
+    .prestige-button {
+      background: linear-gradient(135deg, var(--danger-color) 0%, #ee5a24 100%);
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      color: white;
+      margin-top: 15px;
+      z-index: 2;
+      cursor: pointer;
+      transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .prestige-button:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    .prestige-button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+
+    /* Tabs */
+    .tab-buttons {
+      display: flex;
+      background: var(--background-light);
+      border-bottom: 1px solid #444;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--background-medium);
+      border: none;
+      border-right: 1px solid #444;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-color);
+      min-height: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: background var(--transition-speed);
+    }
+
+    .tab-btn.active {
+      background: var(--background-light);
+      border-bottom: 3px solid var(--primary-color);
+    }
+
+    .tab-emoji {
+      font-size: 18px;
+    }
+
+    .tab-text {
+      font-size: 12px;
+    }
+
+    /* Tab content */
+    .tab-content {
+      display: none;
+      padding: 15px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-title {
+      margin-bottom: 15px;
+      color: var(--primary-color);
+      font-size: 20px;
+    }
+
+    /* Buildings and Upgrades */
+    .building-item, .upgrade-item {
+      background: var(--background-light);
+      margin-bottom: 12px;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      border-left: 4px solid var(--primary-color);
+      transition: transform var(--transition-speed);
+    }
+
+    .building-item:active, .upgrade-item:active {
+      transform: scale(0.98);
+    }
+
+    .building-header, .upgrade-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .building-emoji, .upgrade-emoji {
+      font-size: 28px;
+      margin-right: 15px;
+      min-width: 35px;
+      text-align: center;
+    }
+
+    .building-info, .upgrade-info {
+      flex: 1;
+    }
+
+    .building-name, .upgrade-name {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .building-desc, .upgrade-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .building-stats, .upgrade-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #444 0%, #333 100%);
+      color: white;
+      border: none;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      width: 100%;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      min-height: 44px;
+      transition: transform var(--transition-speed), opacity var(--transition-speed);
+    }
+
+    button:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      background: #222;
+      color: #777;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    /* Golden Cookie */
+    .golden-cookie {
+      position: fixed;
+      font-size: 40px;
+      cursor: pointer;
+      z-index: 1000;
+      animation: float 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+      transition: transform 0.2s;
+    }
+
+    .golden-cookie:active {
+      transform: scale(1.2);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
+      to { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9)); }
+    }
+
+    /* Floating Text */
+    .floating-text {
+      position: fixed;
+      color: var(--primary-color);
+      font-weight: bold;
+      pointer-events: none;
+      z-index: 1001;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+      animation: floatUp 1.5s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(1.2);
+      }
+    }
+
+    /* Animations */
+    @keyframes frenzyPulse {
+      0%, 100% { 
+        text-shadow: 0 0 20px rgba(255, 204, 102, 0.5);
+        transform: scale(1);
+      }
+      50% { 
+        text-shadow: 0 0 30px rgba(255, 50, 50, 0.8);
+        transform: scale(1.05);
+      }
+    }
+
+    .frenzy-active {
+      animation: frenzyPulse 0.5s infinite;
+    }
+
+    /* Save Notification */
+    .save-notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--secondary-color);
+      padding: 12px 18px;
+      border-radius: var(--border-radius);
+      opacity: 0;
+      transition: opacity var(--transition-speed);
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Achievements */
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+    }
+
+    .achievement {
+      background: var(--background-light);
+      padding: 15px;
+      border-radius: var(--border-radius);
+      border-left: 4px solid var(--primary-color);
+      transition: transform var(--transition-speed);
+    }
+
+    .achievement.locked {
+      opacity: 0.6;
+      border-left: 4px solid #555;
+    }
+
+    .achievement-icon {
+      font-size: 24px;
+      margin-right: 12px;
+      float: left;
+    }
+
+    .achievement-info {
+      overflow: hidden;
+    }
+
+    .achievement-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .achievement-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .achievement-status {
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    /* Mini-games */
+    .minigame-container {
+      background: var(--background-light);
+      padding: 15px;
+      border-radius: var(--border-radius);
+      margin-bottom: 15px;
+    }
+
+    .minigame-button {
+      background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+    }
+
+    .lottery-result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      text-align: center;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Notifications */
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--secondary-color);
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--border-radius);
+      z-index: 1000;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+    }
+
+    @keyframes slideIn {
+      from { transform: translate(-50%, -100px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--background-medium);
+      border-radius: var(--border-radius);
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+      animation: modalFadeIn 0.3s ease;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      color: var(--primary-color);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--text-color);
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 15px 20px;
+      border-top: 1px solid #444;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      min-width: 100px;
+    }
+
+    .modal-btn.confirm {
+      background: var(--secondary-color);
+      color: white;
+    }
+
+    .modal-btn.cancel {
+      background: #666;
+      color: white;
+    }
+
+    .modal-btn.danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .setting-group {
+      margin-bottom: 20px;
+    }
+
+    .setting-group h3 {
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+
+    .settings-btn {
+      width: 100%;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .switch {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .switch input {
+      display: none;
+    }
+
+    .slider {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: #666;
+      border-radius: 24px;
+      margin-right: 10px;
+      transition: background var(--transition-speed);
+    }
+
+    .slider:before {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: transform var(--transition-speed);
+    }
+
+    input:checked + .slider {
+      background: var(--secondary-color);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .switch-label {
+      font-size: 16px;
+    }
+
+    .prestige-rewards {
+      margin-top: 15px;
+    }
+
+    .prestige-rewards h3 {
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+
+    .highlight {
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+
+    /* Responsive */
+    @media (max-height: 700px) {
+      .cookie {
+        font-size: 100px;
+      }
+      #cookie-section {
+        min-height: 220px;
+        padding: 15px;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .cookie {
+        font-size: 80px;
+      }
+      #cookie-section {
+        min-height: 200px;
+        padding: 10px;
+      }
+      .multiplier-display {
+        bottom: 60px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .tab-text {
+        display: none;
+      }
+      .tab-btn {
+        padding: 10px 5px;
+      }
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -145,1834 +860,1120 @@
     </div>
   </div>
 
-  <script src="game-data.js"></script>
-  <script src="game-engine.js"></script>
-</body>
-</html>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-:root {
-  --primary-color: #ffcc66;
-  --secondary-color: #4CAF50;
-  --danger-color: #ff6b6b;
-  --background-dark: #1e1e1e;
-  --background-medium: #2d2d2d;
-  --background-light: #333;
-  --text-color: #fff;
-  --text-secondary: #ccc;
-  --border-radius: 12px;
-  --transition-speed: 0.3s;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-medium) 100%);
-  color: var(--text-color);
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-  touch-action: manipulation;
-}
-
-/* Header */
-header {
-  padding: 12px 15px;
-  background: var(--background-medium);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  flex-shrink: 0;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-header h1 {
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.header-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.icon-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background var(--transition-speed);
-}
-
-.icon-btn:active {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Stats */
-#stats-container {
-  display: flex;
-  justify-content: space-around;
-  padding: 12px;
-  background: var(--background-light);
-  border-bottom: 1px solid #444;
-  flex-shrink: 0;
-}
-
-.stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px;
-  font-size: 14px;
-}
-
-.stat-icon {
-  font-size: 18px;
-}
-
-.stat-value {
-  font-weight: bold;
-  color: var(--primary-color);
-  font-size: 16px;
-}
-
-/* Main content with scrolling */
-#main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Cookie section */
-#cookie-section {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 280px;
-  background: linear-gradient(135deg, #87CEEB 0%, #ADD8E6 100%);
-  margin: 10px;
-  border-radius: var(--border-radius);
-  position: relative;
-  flex-shrink: 0;
-}
-
-.milk-effect {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, rgba(173, 216, 230, 0.05) 70%, transparent 100%);
-  border-radius: var(--border-radius);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.milk-bubble {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  animation: floatBubble 8s infinite ease-in-out;
-}
-
-@keyframes floatBubble {
-  0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
-  50% { transform: translateY(-20px) scale(1.1); opacity: 0.9; }
-}
-
-.cookie {
-  font-size: 120px;
-  cursor: pointer;
-  transition: transform 0.1s;
-  z-index: 2;
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-  position: relative;
-}
-
-.cookie:active {
-  transform: scale(0.9);
-}
-
-.cookie.shake {
-  animation: shake 0.5s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-5deg); }
-  75% { transform: rotate(5deg); }
-}
-
-.multiplier-display {
-  position: absolute;
-  bottom: 70px;
-  background: rgba(0, 0, 0, 0.7);
-  color: var(--primary-color);
-  padding: 4px 8px;
-  border-radius: 10px;
-  font-weight: bold;
-  z-index: 3;
-}
-
-.prestige-button {
-  background: linear-gradient(135deg, var(--danger-color) 0%, #ee5a24 100%);
-  padding: 12px 20px;
-  border-radius: 25px;
-  font-weight: bold;
-  font-size: 16px;
-  border: none;
-  color: white;
-  margin-top: 15px;
-  z-index: 2;
-  cursor: pointer;
-  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.prestige-button:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-.prestige-button:disabled {
-  background: #666;
-  cursor: not-allowed;
-}
-
-/* Tabs */
-.tab-buttons {
-  display: flex;
-  background: var(--background-light);
-  border-bottom: 1px solid #444;
-  flex-shrink: 0;
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 12px;
-  background: var(--background-medium);
-  border: none;
-  border-right: 1px solid #444;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text-color);
-  min-height: 50px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  transition: background var(--transition-speed);
-}
-
-.tab-btn.active {
-  background: var(--background-light);
-  border-bottom: 3px solid var(--primary-color);
-}
-
-.tab-emoji {
-  font-size: 18px;
-}
-
-.tab-text {
-  font-size: 12px;
-}
-
-/* Tab content */
-.tab-content {
-  display: none;
-  padding: 15px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.tab-content.active {
-  display: block;
-}
-
-.tab-title {
-  margin-bottom: 15px;
-  color: var(--primary-color);
-  font-size: 20px;
-}
-
-/* Buildings and Upgrades */
-.building-item, .upgrade-item {
-  background: var(--background-light);
-  margin-bottom: 12px;
-  padding: 15px;
-  border-radius: var(--border-radius);
-  border-left: 4px solid var(--primary-color);
-  transition: transform var(--transition-speed);
-}
-
-.building-item:active, .upgrade-item:active {
-  transform: scale(0.98);
-}
-
-.building-header, .upgrade-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.building-emoji, .upgrade-emoji {
-  font-size: 28px;
-  margin-right: 15px;
-  min-width: 35px;
-  text-align: center;
-}
-
-.building-info, .upgrade-info {
-  flex: 1;
-}
-
-.building-name, .upgrade-name {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 4px;
-}
-
-.building-desc, .upgrade-desc {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.building-stats, .upgrade-stats {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  font-size: 14px;
-}
-
-button {
-  background: linear-gradient(135deg, #444 0%, #333 100%);
-  color: white;
-  border: none;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 8px;
-  width: 100%;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 14px;
-  min-height: 44px;
-  transition: transform var(--transition-speed), opacity var(--transition-speed);
-}
-
-button:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-button:disabled {
-  background: #222;
-  color: #777;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* Golden Cookie */
-.golden-cookie {
-  position: fixed;
-  font-size: 40px;
-  cursor: pointer;
-  z-index: 1000;
-  animation: float 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-  transition: transform 0.2s;
-}
-
-.golden-cookie:active {
-  transform: scale(1.2);
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes glow {
-  from { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
-  to { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9)); }
-}
-
-/* Floating Text */
-.floating-text {
-  position: fixed;
-  color: var(--primary-color);
-  font-weight: bold;
-  pointer-events: none;
-  z-index: 1001;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  animation: floatUp 1.5s ease-out forwards;
-}
-
-@keyframes floatUp {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-50px) scale(1.2);
-  }
-}
-
-/* Animations */
-@keyframes frenzyPulse {
-  0%, 100% { 
-    text-shadow: 0 0 20px rgba(255, 204, 102, 0.5);
-    transform: scale(1);
-  }
-  50% { 
-    text-shadow: 0 0 30px rgba(255, 50, 50, 0.8);
-    transform: scale(1.05);
-  }
-}
-
-.frenzy-active {
-  animation: frenzyPulse 0.5s infinite;
-}
-
-/* Save Notification */
-.save-notification {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: var(--secondary-color);
-  padding: 12px 18px;
-  border-radius: var(--border-radius);
-  opacity: 0;
-  transition: opacity var(--transition-speed);
-  z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Achievements */
-.achievements-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
-}
-
-.achievement {
-  background: var(--background-light);
-  padding: 15px;
-  border-radius: var(--border-radius);
-  border-left: 4px solid var(--primary-color);
-  transition: transform var(--transition-speed);
-}
-
-.achievement.locked {
-  opacity: 0.6;
-  border-left: 4px solid #555;
-}
-
-.achievement-icon {
-  font-size: 24px;
-  margin-right: 12px;
-  float: left;
-}
-
-.achievement-info {
-  overflow: hidden;
-}
-
-.achievement-name {
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-.achievement-desc {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-.achievement-status {
-  font-size: 12px;
-  font-style: italic;
-}
-
-/* Mini-games */
-.minigame-container {
-  background: var(--background-light);
-  padding: 15px;
-  border-radius: var(--border-radius);
-  margin-bottom: 15px;
-}
-
-.minigame-button {
-  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-}
-
-.lottery-result {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  text-align: center;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Notifications */
-.notification {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--secondary-color);
-  color: white;
-  padding: 12px 20px;
-  border-radius: var(--border-radius);
-  z-index: 1000;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
-}
-
-@keyframes slideIn {
-  from { transform: translate(-50%, -100px); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-/* Modal */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 2000;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal.active {
-  display: flex;
-}
-
-.modal-content {
-  background: var(--background-medium);
-  border-radius: var(--border-radius);
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-  animation: modalFadeIn 0.3s ease;
-}
-
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.modal-header {
-  padding: 20px;
-  border-bottom: 1px solid #444;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h2 {
-  color: var(--primary-color);
-}
-
-.close-modal {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: var(--text-color);
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-body {
-  padding: 20px;
-}
-
-.modal-footer {
-  padding: 15px 20px;
-  border-top: 1px solid #444;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.modal-btn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  min-width: 100px;
-}
-
-.modal-btn.confirm {
-  background: var(--secondary-color);
-  color: white;
-}
-
-.modal-btn.cancel {
-  background: #666;
-  color: white;
-}
-
-.modal-btn.danger {
-  background: var(--danger-color);
-  color: white;
-}
-
-.setting-group {
-  margin-bottom: 20px;
-}
-
-.setting-group h3 {
-  margin-bottom: 10px;
-  color: var(--primary-color);
-}
-
-.settings-btn {
-  width: 100%;
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-.switch {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.switch input {
-  display: none;
-}
-
-.slider {
-  position: relative;
-  width: 50px;
-  height: 24px;
-  background: #666;
-  border-radius: 24px;
-  margin-right: 10px;
-  transition: background var(--transition-speed);
-}
-
-.slider:before {
-  content: "";
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: white;
-  top: 2px;
-  left: 2px;
-  transition: transform var(--transition-speed);
-}
-
-input:checked + .slider {
-  background: var(--secondary-color);
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
-
-.switch-label {
-  font-size: 16px;
-}
-
-.prestige-rewards {
-  margin-top: 15px;
-}
-
-.prestige-rewards h3 {
-  margin-bottom: 10px;
-  color: var(--primary-color);
-}
-
-.highlight {
-  color: var(--primary-color);
-  font-weight: bold;
-}
-
-/* Responsive */
-@media (max-height: 700px) {
-  .cookie {
-    font-size: 100px;
-  }
-  #cookie-section {
-    min-height: 220px;
-    padding: 15px;
-  }
-}
-
-@media (max-height: 600px) {
-  .cookie {
-    font-size: 80px;
-  }
-  #cookie-section {
-    min-height: 200px;
-    padding: 10px;
-  }
-  .multiplier-display {
-    bottom: 60px;
-  }
-}
-
-@media (max-width: 400px) {
-  .tab-text {
-    display: none;
-  }
-  .tab-btn {
-    padding: 10px 5px;
-  }
-}
-// =============================
-// Game Data
-// =============================
-
-// Game Configuration
-const CONFIG = {
-    VERSION: '1.1.0',
-    SAVE_INTERVAL: 30000, // 30 seconds
-    GOLDEN_COOKIE_CHANCE: 0.005, // 0.5% chance per second
-    GOLDEN_COOKIE_DURATION: 15, // 15 seconds
-    FRENZY_MULTIPLIER: 7,
-    NOTIFICATION_DURATION: 3000,
-    PRESTIGE_BASE: 1000000
-};
-
-// =============================
-// Buildings with emojis and metadata
-// =============================
-const buildings = [
-    { 
-        id: "cursor",
-        name: "Cursor", 
-        emoji: "👆", 
-        baseCost: 15, 
-        count: 0, 
-        baseCps: 0.1, 
-        unlocked: true,
-        description: "Autoclicks once every 10 seconds"
-    },
-    { 
-        id: "grandma",
-        name: "Grandma", 
-        emoji: "👵", 
-        baseCost: 100, 
-        count: 0, 
-        baseCps: 1, 
-        unlocked: true,
-        description: "A nice grandma to bake more cookies"
-    },
-    { 
-        id: "farm",
-        name: "Farm", 
-        emoji: "🚜", 
-        baseCost: 1100, 
-        count: 0, 
-        baseCps: 8, 
-        unlocked: false,
-        description: "Grows cookie plants in the field"
-    },
-    { 
-        id: "factory",
-        name: "Factory", 
-        emoji: "🏭", 
-        baseCost: 13000, 
-        count: 0, 
-        baseCps: 47, 
-        unlocked: false,
-        description: "Produces cookies at an industrial rate"
-    },
-    { 
-        id: "mine",
-        name: "Mine", 
-        emoji: "⛏️", 
-        baseCost: 120000, 
-        count: 0, 
-        baseCps: 260, 
-        unlocked: false,
-        description: "Mines cookie dough and chocolate chips"
-    },
-    { 
-        id: "bank",
-        name: "Bank", 
-        emoji: "🏦", 
-        baseCost: 1400000, 
-        count: 0, 
-        baseCps: 1400, 
-        unlocked: false,
-        description: "Generates cookies from interest"
-    },
-    { 
-        id: "temple",
-        name: "Temple", 
-        emoji: "🛕", 
-        baseCost: 20000000, 
-        count: 0, 
-        baseCps: 7800, 
-        unlocked: false,
-        description: "Magically produces cookies from the cookie gods"
-    }
-];
-
-// =============================
-// Upgrades with emojis and metadata
-// =============================
-const upgrades = [
-    { 
-        id: "reinforced_finger",
-        name: "Reinforced index finger", 
-        emoji: "💪",
-        cost: 100, 
-        bought: false, 
-        requirement: { type: "click", value: 1 },
-        effect: () => { gameState.clickPower += 1; },
-        description: "+1 cookie per click",
-        category: "click"
-    },
-    { 
-        id: "carpal_tunnel_cream",
-        name: "Carpal tunnel prevention cream", 
-        emoji: "💊",
-        cost: 500, 
-        bought: false, 
-        requirement: { type: "click", value: 50 },
-        effect: () => { gameState.clickPower += 2; },
-        description: "+2 cookies per click",
-        category: "click"
-    },
-    { 
-        id: "forwards_from_grandma",
-        name: "Forwards from grandma", 
-        emoji: "📧",
-        cost: 1000, 
-        bought: false, 
-        requirement: { type: "building", buildingId: "grandma", value: 1 },
-        effect: () => { getBuildingById("grandma").cpsMultiplier = 2; },
-        description: "Double Grandma CPS",
-        category: "building"
-    },
-    { 
-        id: "steel_plated_rolling_pins",
-        name: "Steel-plated rolling pins", 
-        emoji: "🥖",
-        cost: 5000, 
-        bought: false, 
-        requirement: { type: "building", buildingId: "grandma", value: 5 },
-        effect: () => { getBuildingById("grandma").cpsMultiplier = 1.5; },
-        description: "+50% Grandma CPS",
-        category: "building"
-    },
-    { 
-        id: "elder_wrath",
-        name: "Elder wrath", 
-        emoji: "👹",
-        cost: 12000, 
-        bought: false, 
-        requirement: { type: "building", buildingId: "grandma", value: 10 },
-        effect: () => { 
-            buildings.forEach(b => {
-                if (b.id !== "grandma") b.cpsMultiplier = 1.1;
-            });
-        },
-        description: "+10% CPS for all non-Grandma buildings",
-        category: "global"
-    }
-];
-
-// =============================
-// Prestige Upgrades
-// =============================
-const prestigeUpgrades = [
-    {
-        id: "heavenly_cookies",
-        name: "Heavenly Cookies",
-        cost: 1,
-        description: "+1% CPS per Heavenly Chip",
-        effect: (chips) => { return 1 + (chips * 0.01); }
-    },
-    {
-        id: "persistent_memory",
-        name: "Persistent Memory",
-        cost: 5,
-        description: "Keep 1 building after prestige",
-        effect: (chips) => { return Math.min(1, Math.floor(chips / 5)); }
-    },
-    {
-        id: "double_cookies",
-        name: "Double Cookies",
-        cost: 25,
-        description: "Double cookie production from clicks",
-        effect: (chips) => { return chips >= 25 ? 2 : 1; }
-    }
-];
-
-// =============================
-// Achievements
-// =============================
-const achievements = [
-    {
-        id: "first_click",
-        name: "First Click!",
-        description: "Click the cookie for the first time",
-        unlocked: false,
-        check: () => gameState.totalClicks >= 1,
-        reward: { type: "cps", value: 0.1 }
-    },
-    {
-        id: "hundred_clicks",
-        name: "Cookie Monster",
-        description: "Reach 100 clicks",
-        unlocked: false,
-        check: () => gameState.totalClicks >= 100,
-        reward: { type: "click", value: 1 }
-    },
-    {
-        id: "thousand_cookies",
-        name: "Cookie Collector",
-        description: "Earn 1,000 cookies total",
-        unlocked: false,
-        check: () => gameState.totalCookiesEarned >= 1000,
-        reward: { type: "cps", value: 1 }
-    },
-    {
-        id: "ten_thousand_cookies",
-        name: "Cookie Tycoon",
-        description: "Earn 10,000 cookies total",
-        unlocked: false,
-        check: () => gameState.totalCookiesEarned >= 10000,
-        reward: { type: "cps", value: 5 }
-    },
-    {
-        id: "first_golden",
-        name: "Golden Touch",
-        description: "Click your first golden cookie",
-        unlocked: false,
-        check: () => gameState.goldenCookiesClicked >= 1,
-        reward: { type: "golden", value: 0.1 }
-    },
-    {
-        id: "first_building",
-        name: "Real Estate",
-        description: "Buy your first building",
-        unlocked: false,
-        check: () => buildings.some(b => b.count > 0),
-        reward: { type: "discount", value: 0.05 }
-    },
-    {
-        id: "first_prestige",
-        name: "Rebirth",
-        description: "Prestige for the first time",
-        unlocked: false,
-        check: () => gameState.prestigeCount >= 1,
-        reward: { type: "prestige", value: 0.1 }
-    }
-];
-
-// =============================
-// Golden Cookie Effects
-// =============================
-const goldenCookieEffects = [
-    {
-        name: "Frenzy",
-        duration: 13,
-        effect: () => {
-            gameState.isFrenzyActive = true;
-            gameState.frenzyTimeLeft = 13;
-            document.getElementById('cookie').classList.add('frenzy-active');
-        },
-        expire: () => {
-            gameState.isFrenzyActive = false;
-            document.getElementById('cookie').classList.remove('frenzy-active');
-        },
-        chance: 0.7
-    },
-    {
-        name: "Lucky",
-        duration: 0,
-        effect: () => {
-            const bonus = Math.floor(gameState.cps * 60 * 0.1); // 10% of 1 minute production
-            gameState.cookies += bonus;
-            showFloatingText(window.innerWidth / 2, 100, `+${formatNumber(bonus)}!`, '#FFD700');
-            showNotification(`Lucky! +${formatNumber(bonus)} cookies!`);
-        },
-        expire: () => {},
-        chance: 0.3
-    }
-];
-
-// =============================
-// Utility Functions
-// =============================
-function getBuildingById(id) {
-    return buildings.find(b => b.id === id);
-}
-
-function getUpgradeById(id) {
-    return upgrades.find(u => u.id === id);
-}
-
-function formatNumber(num) {
-    if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
-    return Math.floor(num).toString();
-}
-
-function formatTime(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    
-    if (hours > 0) return `${hours}h ${minutes}m ${secs}s`;
-    if (minutes > 0) return `${minutes}m ${secs}s`;
-    return `${secs}s`;
-}
-
-// Initialize building multipliers
-buildings.forEach(building => {
-    building.cpsMultiplier = 1;
-});
-// =============================
-// Game State
-// =============================
-const gameState = {
-    cookies: 0,
-    totalCookiesEarned: 0,
-    cps: 0,
-    clickPower: 1,
-    totalClicks: 0,
-    goldenCookiesClicked: 0,
-    playTime: 0,
-    heavenlyChips: 0,
-    prestigeCount: 0,
-    isFrenzyActive: false,
-    frenzyTimeLeft: 0,
-    lastSave: Date.now(),
-    notificationsEnabled: true,
-    animationsEnabled: true,
-    version: CONFIG.VERSION
-};
-
-// =============================
-// DOM Elements
-// =============================
-const cookieEl = document.getElementById('cookie');
-const cookiesEl = document.getElementById('cookies');
-const cpsEl = document.getElementById('cps');
-const heavenlyChipsEl = document.getElementById('heavenly-chips');
-const buildingsEl = document.getElementById('buildings');
-const upgradesEl = document.getElementById('upgrades');
-const achievementsEl = document.getElementById('achievements-list');
-const prestigeBtn = document.getElementById('prestige-btn');
-const lotteryBtn = document.getElementById('lottery-btn');
-const settingsBtn = document.getElementById('settings-btn');
-const saveBtn = document.getElementById('save-btn');
-const loadBtn = document.getElementById('load-btn');
-const settingsModal = document.getElementById('settings-modal');
-const prestigeModal = document.getElementById('prestige-modal');
-
-// =============================
-// Initialization
-// =============================
-function initGame() {
-    loadGame();
-    setupEventListeners();
-    createMilkBubbles();
-    updateUI();
-    startGameLoop();
-    
-    // Show welcome message
-    setTimeout(() => {
-        showNotification('Welcome to Cookie Clicker Deluxe!');
-    }, 1000);
-}
-
-function setupEventListeners() {
-    // Cookie click events
-    cookieEl.addEventListener('click', handleCookieClick);
-    cookieEl.addEventListener('touchstart', handleCookieClick, { passive: false });
-    
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            switchTab(e.currentTarget.dataset.tab);
-        });
-    });
-    
-    // Prestige button
-    prestigeBtn.addEventListener('click', showPrestigeModal);
-    
-    // Lottery button
-    lotteryBtn.addEventListener('click', playLottery);
-    
-    // Settings buttons
-    settingsBtn.addEventListener('click', () => toggleModal(settingsModal));
-    saveBtn.addEventListener('click', manualSave);
-    loadBtn.addEventListener('click', manualLoad);
-    
-    // Modal close buttons
-    document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            toggleModal(e.target.closest('.modal'));
-        });
-    });
-    
-    // Settings modal buttons
-    document.getElementById('export-save').addEventListener('click', exportSave);
-    document.getElementById('import-save').addEventListener('click', importSave);
-    document.getElementById('hard-reset').addEventListener('click', hardReset);
-    document.getElementById('confirm-prestige').addEventListener('click', doPrestige);
-    
-    // Settings toggles
-    document.getElementById('notifications-toggle').addEventListener('change', toggleNotifications);
-    document.getElementById('animations-toggle').addEventListener('change', toggleAnimations);
-    
-    // Cancel buttons
-    document.querySelectorAll('.modal-btn.cancel').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            toggleModal(e.target.closest('.modal'));
-        });
-    });
-    
-    // Close modals when clicking outside
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) toggleModal(modal);
-        });
-    });
-}
-
-// =============================
-// UI Functions
-// =============================
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    document.getElementById(tabName).classList.add('active');
-    document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
-}
-
-function updateUI() {
-    updateStats();
-    updateBuildings();
-    updateUpgrades();
-    updateAchievements();
-    updatePrestigeButton();
-}
-
-function updateStats() {
-    cookiesEl.textContent = formatNumber(gameState.cookies);
-    cpsEl.textContent = formatNumber(gameState.cps);
-    heavenlyChipsEl.textContent = formatNumber(gameState.heavenlyChips);
-    
-    // Update multiplier display
-    const multiplierDisplay = document.getElementById('cookie-multiplier');
-    let multiplier = 1;
-    if (gameState.isFrenzyActive) multiplier *= CONFIG.FRENZY_MULTIPLIER;
-    multiplierDisplay.textContent = `x${multiplier}`;
-}
-
-function updateBuildings() {
-    buildingsEl.innerHTML = '<h3 class="tab-title">🏗️ Buildings</h3>';
-    buildings.forEach((b, i) => {
-        if (!b.unlocked && gameState.cookies >= b.baseCost * 0.5) {
-            b.unlocked = true;
-            if (gameState.notificationsEnabled) {
-                showNotification(`Unlocked: ${b.name}!`);
-            }
-        }
-        
-        if (b.unlocked) {
-            const cost = calculateBuildingCost(b);
-            const buildingDiv = document.createElement('div');
-            buildingDiv.className = 'building-item';
-            buildingDiv.innerHTML = `
-                <div class="building-header">
-                    <span class="building-emoji">${b.emoji}</span>
-                    <div class="building-info">
-                        <div class="building-name">${b.name} (${b.count})</div>
-                        <div class="building-desc">${b.description}</div>
-                    </div>
-                </div>
-                <div class="building-stats">
-                    <span>${formatNumber(getBuildingCPS(b))} CPS</span>
-                    <span>Cost: ${formatNumber(cost)}</span>
-                </div>
-            `;
-            
-            const btn = document.createElement('button');
-            btn.textContent = `Buy ${b.name}`;
-            btn.disabled = gameState.cookies < cost;
-            btn.addEventListener('click', () => buyBuilding(i));
-            buildingDiv.appendChild(btn);
-            
-            buildingsEl.appendChild(buildingDiv);
-        }
-    });
-}
-
-function updateUpgrades() {
-    upgradesEl.innerHTML = '<h3 class="tab-title">⚡ Upgrades</h3>';
-    upgrades.forEach((u, i) => {
-        if (!u.bought && isUpgradeAvailable(u)) {
-            const upgradeDiv = document.createElement('div');
-            upgradeDiv.className = 'upgrade-item';
-            upgradeDiv.innerHTML = `
-                <div class="upgrade-header">
-                    <span class="upgrade-emoji">${u.emoji}</span>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">${u.name}</div>
-                        <div class="upgrade-desc">${u.description}</div>
-                    </div>
-                </div>
-                <div class="upgrade-stats">
-                    <span>Cost: ${formatNumber(u.cost)}</span>
-                </div>
-            `;
-            
-            const btn = document.createElement('button');
-            btn.textContent = 'Buy Upgrade';
-            btn.disabled = gameState.cookies < u.cost;
-            btn.addEventListener('click', () => buyUpgrade(i));
-            upgradeDiv.appendChild(btn);
-            
-            upgradesEl.appendChild(upgradeDiv);
-        }
-    });
-}
-
-function updateAchievements() {
-    achievementsEl.innerHTML = '';
-    achievements.forEach(achievement => {
-        const achieved = achievement.check();
-        if (achieved && !achievement.unlocked) {
-            achievement.unlocked = true;
-            applyAchievementReward(achievement);
-            if (gameState.notificationsEnabled) {
-                showNotification(`Achievement unlocked: ${achievement.name}!`);
-            }
-        }
-        
-        const achievementDiv = document.createElement('div');
-        achievementDiv.className = `achievement ${achievement.unlocked ? '' : 'locked'}`;
-        achievementDiv.innerHTML = `
-            <span class="achievement-icon">${achievement.unlocked ? '🏆' : '🔒'}</span>
-            <div class="achievement-info">
-                <div class="achievement-name">${achievement.name}</div>
-                <div class="achievement-desc">${achievement.description}</div>
-                <div class="achievement-status">${achievement.unlocked ? '✅ Unlocked' : '🔒 Locked'}</div>
-            </div>
-        `;
-        achievementsEl.appendChild(achievementDiv);
-    });
-}
-
-function updatePrestigeButton() {
-    const chips = calculateHeavenlyChips();
-    prestigeBtn.textContent = `Prestige (${formatNumber(chips)})`;
-    prestigeBtn.disabled = chips <= 0;
-}
-
-// =============================
-// Game Mechanics
-// =============================
-function calculateCPS() {
-    let totalCPS = 0;
-    buildings.forEach(b => {
-        totalCPS += b.count * b.baseCps * b.cpsMultiplier;
-    });
-    
-    // Apply prestige bonus
-    const prestigeBonus = 1 + (gameState.heavenlyChips * 0.01);
-    totalCPS *= prestigeBonus;
-    
-    // Apply frenzy multiplier
-    if (gameState.isFrenzyActive) {
-        totalCPS *= CONFIG.FRENZY_MULTIPLIER;
-    }
-    
-    gameState.cps = totalCPS;
-}
-
-function calculateBuildingCost(building) {
-    return Math.floor(building.baseCost * Math.pow(1.15, building.count));
-}
-
-function getBuildingCPS(building) {
-    let cps = building.count * building.baseCps * building.cpsMultiplier;
-    const prestigeBonus = 1 + (gameState.heavenlyChips * 0.01);
-    return cps * prestigeBonus;
-}
-
-function isUpgradeAvailable(upgrade) {
-    switch (upgrade.requirement.type) {
-        case "click":
-            return gameState.totalClicks >= upgrade.requirement.value;
-        case "building":
-            const building = getBuildingById(upgrade.requirement.buildingId);
-            return building && building.count >= upgrade.requirement.value;
-        default:
-            return true;
-    }
-}
-
-function buyBuilding(index) {
-    const b = buildings[index];
-    const cost = calculateBuildingCost(b);
-    if (gameState.cookies >= cost) {
-        gameState.cookies -= cost;
-        b.count++;
-        calculateCPS();
-        updateUI();
-    }
-}
-
-function buyUpgrade(index) {
-    const u = upgrades[index];
-    if (gameState.cookies >= u.cost && !u.bought) {
-        gameState.cookies -= u.cost;
-        u.bought = true;
-        u.effect();
-        calculateCPS();
-        updateUI();
-        
-        if (gameState.notificationsEnabled) {
-            showNotification(`Upgrade purchased: ${u.name}!`);
-        }
-    }
-}
-
-function applyAchievementReward(achievement) {
-    switch (achievement.reward.type) {
-        case "cps":
-            gameState.cps += achievement.reward.value;
-            break;
-        case "click":
-            gameState.clickPower += achievement.reward.value;
-            break;
-        case "discount":
-            // Apply discount to all buildings
-            buildings.forEach(b => {
-                b.baseCost *= (1 - achievement.reward.value);
-            });
-            break;
-    }
-}
-
-// =============================
-// Click Handling
-// =============================
-function handleCookieClick(e) {
-    const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-    
-    let clickValue = gameState.clickPower;
-    if (gameState.isFrenzyActive) {
-        clickValue *= CONFIG.FRENZY_MULTIPLIER;
-    }
-    
-    gameState.cookies += clickValue;
-    gameState.totalCookiesEarned += clickValue;
-    gameState.totalClicks++;
-    
-    // Add click animation
-    if (gameState.animationsEnabled) {
-        cookieEl.classList.add('shake');
-        setTimeout(() => cookieEl.classList.remove('shake'), 500);
-        spawnFloatingText(x, y, `+${formatNumber(clickValue)}`);
-    }
-    
-    updateUI();
-    
-    if (e.type.includes('touch')) e.preventDefault();
-}
-
-// =============================
-// Golden Cookies
-// =============================
-function spawnGoldenCookie() {
-    if (!gameState.animationsEnabled) return;
-    
-    const goldenCookie = document.createElement('div');
-    goldenCookie.className = 'golden-cookie';
-    goldenCookie.textContent = '🍪';
-    goldenCookie.style.left = `${Math.random() * 80 + 10}%`;
-    goldenCookie.style.top = `${Math.random() * 60 + 20}%`;
-    
-    goldenCookie.addEventListener('click', () => {
-        gameState.goldenCookiesClicked++;
-        const effect = getRandomGoldenCookieEffect();
-        effect.effect();
-        
-        if (gameState.notificationsEnabled) {
-            showNotification(`Golden Cookie: ${effect.name}!`);
-        }
-        
-        goldenCookie.remove();
-    });
-    
-    document.getElementById('golden-cookie-container').appendChild(goldenCookie);
-    
-    // Remove after 15 seconds
-    setTimeout(() => {
-        if (goldenCookie.parentNode) {
-            goldenCookie.remove();
-        }
-    }, 15000);
-}
-
-function getRandomGoldenCookieEffect() {
-    const rand = Math.random();
-    let cumulativeChance = 0;
-    
-    for (const effect of goldenCookieEffects) {
-        cumulativeChance += effect.chance;
-        if (rand <= cumulativeChance) {
-            return effect;
-        }
-    }
-    
-    return goldenCookieEffects[0]; // Fallback
-}
-
-// =============================
-// Mini-games
-// =============================
-function playLottery() {
-    if (gameState.cookies >= 100) {
-        gameState.cookies -= 100;
-        const win = Math.random() < 0.3; // 30% chance to win
-        const prize = win ? Math.floor(Math.random() * 1000) + 500 : 0;
-        
-        const resultEl = document.getElementById('lottery-result');
-        if (win) {
-            gameState.cookies += prize;
-            resultEl.innerHTML = `<span style="color: #4CAF50">🎉 You won ${formatNumber(prize)} cookies!</span>`;
-            if (gameState.notificationsEnabled) {
-                showNotification(`🎉 You won ${prize} cookies!`);
-            }
-        } else {
-            resultEl.innerHTML = '<span style="color: #ff6b6b">😢 Better luck next time!</span>';
-        }
-        
-        updateUI();
-        
-        // Clear result after 3 seconds
-        setTimeout(() => {
-            resultEl.innerHTML = '';
-        }, 3000);
-    }
-}
-
-// =============================
-// Prestige System
-// =============================
-function calculateHeavenlyChips() {
-    return Math.max(0, Math.floor(Math.sqrt(gameState.totalCookiesEarned / CONFIG.PRESTIGE_BASE) * 10) - gameState.heavenlyChips);
-}
-
-function showPrestigeModal() {
-    const chipsGained = calculateHeavenlyChips();
-    if (chipsGained <= 0) return;
-    
-    document.getElementById('chips-gain').textContent = formatNumber(chipsGained);
-    document.getElementById('cps-boost').textContent = `${chipsGained}%`;
-    
-    // Update prestige rewards
-    const rewardsList = document.getElementById('prestige-rewards-list');
-    rewardsList.innerHTML = '';
-    
-    prestigeUpgrades.forEach(upgrade => {
-        const rewardDiv = document.createElement('div');
-        rewardDiv.innerHTML = `
-            <div>${upgrade.name} - ${upgrade.description}</div>
-            <small>Cost: ${upgrade.cost} chips</small>
-        `;
-        rewardsList.appendChild(rewardDiv);
-    });
-    
-    toggleModal(prestigeModal);
-}
-
-function doPrestige() {
-    const chipsGained = calculateHeavenlyChips();
-    gameState.heavenlyChips += chipsGained;
-    gameState.prestigeCount++;
-    
-    if (gameState.notificationsEnabled) {
-        showNotification(`Prestiged! Gained ${formatNumber(chipsGained)} Heavenly Chips!`);
-    }
-    
-    resetGameState();
-    toggleModal(prestigeModal);
-}
-
-function resetGameState() {
-    gameState.cookies = 0;
-    gameState.totalClicks = 0;
-    gameState.goldenCookiesClicked = 0;
-    gameState.isFrenzyActive = false;
-    gameState.frenzyTimeLeft = 0;
-    
-    // Reset buildings
-    buildings.forEach(b => {
-        b.count = 0;
-        b.unlocked = b.id === "cursor" || b.id === "grandma";
-        b.cpsMultiplier = 1;
-    });
-    
-    // Reset upgrades
-    upgrades.forEach(u => u.bought = false);
-    
-    calculateCPS();
-    saveGame();
-    updateUI();
-}
-
-// =============================
-// Animation Functions
-// =============================
-function createMilkBubbles() {
-    const milkEffect = document.querySelector('.milk-effect');
-    if (!milkEffect || !gameState.animationsEnabled) return;
-    
-    for (let i = 0; i < 10; i++) {
-        const bubble = document.createElement('div');
-        bubble.className = 'milk-bubble';
-        
-        const size = Math.random() * 15 + 5;
-        const left = Math.random() * 100;
-        const top = Math.random() * 100;
-        const delay = Math.random() * 5;
-        
-        bubble.style.width = size + 'px';
-        bubble.style.height = size + 'px';
-        bubble.style.left = left + '%';
-        bubble.style.top = top + '%';
-        bubble.style.animationDelay = delay + 's';
-        
-        milkEffect.appendChild(bubble);
-    }
-}
-
-function spawnFloatingText(x, y, text, color = '#ffcc66') {
-    if (!gameState.animationsEnabled) return;
-    
-    const floatingText = document.createElement('div');
-    floatingText.className = 'floating-text';
-    floatingText.textContent = text;
-    floatingText.style.color = color;
-    floatingText.style.left = `${x}px`;
-    floatingText.style.top = `${y}px`;
-    
-    document.body.appendChild(floatingText);
-    
-    setTimeout(() => {
-        floatingText.remove();
-    }, 1500);
-}
-
-// =============================
-// Notification System
-// =============================
-function showNotification(message) {
-    if (!gameState.notificationsEnabled) return;
-    
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.textContent = message;
-    
-    document.getElementById('notification-container').appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, CONFIG.NOTIFICATION_DURATION);
-}
-
-function showSaveNotification() {
-    if (!gameState.notificationsEnabled) return;
-    
-    const saveNotification = document.getElementById('save-notification');
-    saveNotification.style.opacity = '1';
-    
-    setTimeout(() => {
-        saveNotification.style.opacity = '0';
-    }, 2000);
-}
-
-// =============================
-// Modal Functions
-// =============================
-function toggleModal(modal) {
-    modal.classList.toggle('active');
-}
-
-// =============================
-// Settings Functions
-// =============================
-function toggleNotifications(e) {
-    gameState.notificationsEnabled = e.target.checked;
-    saveGame();
-}
-
-function toggleAnimations(e) {
-    gameState.animationsEnabled = e.target.checked;
-    saveGame();
-    
-    if (!gameState.animationsEnabled) {
-        // Remove all animations
-        document.querySelectorAll('.golden-cookie, .floating-text, .milk-bubble').forEach(el => el.remove());
-    } else {
-        // Restore animations
-        createMilkBubbles();
-    }
-}
-
-function manualSave() {
-    saveGame();
-    showSaveNotification();
-    showNotification('Game saved successfully!');
-}
-
-function manualLoad() {
-    loadGame();
-    showNotification('Game loaded successfully!');
-    updateUI();
-}
-
-function exportSave() {
-    const saveData = btoa(JSON.stringify(getSaveData()));
-    const blob = new Blob([saveData], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `cookie_clicker_save_${Date.now()}.txt`;
-    a.click();
-    
-    URL.revokeObjectURL(url);
-    showNotification('Save exported successfully!');
-}
-
-function importSave() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.txt';
-    
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const saveData = JSON.parse(atob(event.target.result));
-                loadSaveData(saveData);
-                showNotification('Save imported successfully!');
-                updateUI();
-            } catch (error) {
-                showNotification('Error importing save file!');
-                console.error('Import error:', error);
-            }
-        };
-        reader.readAsText(file);
+  <script>
+    // =============================
+    // Game Data
+    // =============================
+
+    // Game Configuration
+    const CONFIG = {
+        VERSION: '1.1.0',
+        SAVE_INTERVAL: 30000, // 30 seconds
+        GOLDEN_COOKIE_CHANCE: 0.005, // 0.5% chance per second
+        GOLDEN_COOKIE_DURATION: 15, // 15 seconds
+        FRENZY_MULTIPLIER: 7,
+        NOTIFICATION_DURATION: 3000,
+        PRESTIGE_BASE: 1000000
     };
-    
-    input.click();
-}
 
-function hardReset() {
-    if (confirm('Are you sure you want to reset all progress? This cannot be undone!')) {
-        localStorage.removeItem('cookieClickerSave');
-        window.location.reload();
-    }
-}
+    // =============================
+    // Buildings with emojis and metadata
+    // =============================
+    const buildings = [
+        { 
+            id: "cursor",
+            name: "Cursor", 
+            emoji: "👆", 
+            baseCost: 15, 
+            count: 0, 
+            baseCps: 0.1, 
+            unlocked: true,
+            description: "Autoclicks once every 10 seconds"
+        },
+        { 
+            id: "grandma",
+            name: "Grandma", 
+            emoji: "👵", 
+            baseCost: 100, 
+            count: 0, 
+            baseCps: 1, 
+            unlocked: true,
+            description: "A nice grandma to bake more cookies"
+        },
+        { 
+            id: "farm",
+            name: "Farm", 
+            emoji: "🚜", 
+            baseCost: 1100, 
+            count: 0, 
+            baseCps: 8, 
+            unlocked: false,
+            description: "Grows cookie plants in the field"
+        },
+        { 
+            id: "factory",
+            name: "Factory", 
+            emoji: "🏭", 
+            baseCost: 13000, 
+            count: 0, 
+            baseCps: 47, 
+            unlocked: false,
+            description: "Produces cookies at an industrial rate"
+        },
+        { 
+            id: "mine",
+            name: "Mine", 
+            emoji: "⛏️", 
+            baseCost: 120000, 
+            count: 0, 
+            baseCps: 260, 
+            unlocked: false,
+            description: "Mines cookie dough and chocolate chips"
+        },
+        { 
+            id: "bank",
+            name: "Bank", 
+            emoji: "🏦", 
+            baseCost: 1400000, 
+            count: 0, 
+            baseCps: 1400, 
+            unlocked: false,
+            description: "Generates cookies from interest"
+        },
+        { 
+            id: "temple",
+            name: "Temple", 
+            emoji: "🛕", 
+            baseCost: 20000000, 
+            count: 0, 
+            baseCps: 7800, 
+            unlocked: false,
+            description: "Magically produces cookies from the cookie gods"
+        }
+    ];
 
-// =============================
-// Save/Load System
-// =============================
-function getSaveData() {
-    return {
-        cookies: gameState.cookies,
-        totalCookiesEarned: gameState.totalCookiesEarned,
-        clickPower: gameState.clickPower,
-        totalClicks: gameState.totalClicks,
-        goldenCookiesClicked: gameState.goldenCookiesClicked,
-        playTime: gameState.playTime,
-        heavenlyChips: gameState.heavenlyChips,
-        prestigeCount: gameState.prestigeCount,
-        isFrenzyActive: gameState.isFrenzyActive,
-        frenzyTimeLeft: gameState.frenzyTimeLeft,
-        notificationsEnabled: gameState.notificationsEnabled,
-        animationsEnabled: gameState.animationsEnabled,
-        version: CONFIG.VERSION,
-        buildings: buildings.map(b => ({ 
-            id: b.id, 
-            count: b.count, 
-            unlocked: b.unlocked,
-            cpsMultiplier: b.cpsMultiplier 
-        })),
-        upgrades: upgrades.map(u => ({ 
-            id: u.id, 
-            bought: u.bought 
-        })),
-        achievements: achievements.map(a => ({ 
-            id: a.id, 
-            unlocked: a.unlocked 
-        }))
-    };
-}
+    // =============================
+    // Upgrades with emojis and metadata
+    // =============================
+    const upgrades = [
+        { 
+            id: "reinforced_finger",
+            name: "Reinforced index finger", 
+            emoji: "💪",
+            cost: 100, 
+            bought: false, 
+            requirement: { type: "click", value: 1 },
+            effect: () => { gameState.clickPower += 1; },
+            description: "+1 cookie per click",
+            category: "click"
+        },
+        { 
+            id: "carpal_tunnel_cream",
+            name: "Carpal tunnel prevention cream", 
+            emoji: "💊",
+            cost: 500, 
+            bought: false, 
+            requirement: { type: "click", value: 50 },
+            effect: () => { gameState.clickPower += 2; },
+            description: "+2 cookies per click",
+            category: "click"
+        },
+        { 
+            id: "forwards_from_grandma",
+            name: "Forwards from grandma", 
+            emoji: "📧",
+            cost: 1000, 
+            bought: false, 
+            requirement: { type: "building", buildingId: "grandma", value: 1 },
+            effect: () => { getBuildingById("grandma").cpsMultiplier = 2; },
+            description: "Double Grandma CPS",
+            category: "building"
+        },
+        { 
+            id: "steel_plated_rolling_pins",
+            name: "Steel-plated rolling pins", 
+            emoji: "🥖",
+            cost: 5000, 
+            bought: false, 
+            requirement: { type: "building", buildingId: "grandma", value: 5 },
+            effect: () => { getBuildingById("grandma").cpsMultiplier = 1.5; },
+            description: "+50% Grandma CPS",
+            category: "building"
+        },
+        { 
+            id: "elder_wrath",
+            name: "Elder wrath", 
+            emoji: "👹",
+            cost: 12000, 
+            bought: false, 
+            requirement: { type: "building", buildingId: "grandma", value: 10 },
+            effect: () => { 
+                buildings.forEach(b => {
+                    if (b.id !== "grandma") b.cpsMultiplier = 1.1;
+                });
+            },
+            description: "+10% CPS for all non-Grandma buildings",
+            category: "global"
+        }
+    ];
 
-function loadSaveData(saveData) {
-    // Basic game state
-    gameState.cookies = saveData.cookies || 0;
-    gameState.totalCookiesEarned = saveData.totalCookiesEarned || 0;
-    gameState.clickPower = saveData.clickPower || 1;
-    gameState.totalClicks = saveData.totalClicks || 0;
-    gameState.goldenCookiesClicked = saveData.goldenCookiesClicked || 0;
-    gameState.playTime = saveData.playTime || 0;
-    gameState.heavenlyChips = saveData.heavenlyChips || 0;
-    gameState.prestigeCount = saveData.prestigeCount || 0;
-    gameState.isFrenzyActive = saveData.isFrenzyActive || false;
-    gameState.frenzyTimeLeft = saveData.frenzyTimeLeft || 0;
-    gameState.notificationsEnabled = saveData.notificationsEnabled !== undefined ? saveData.notificationsEnabled : true;
-    gameState.animationsEnabled = saveData.animationsEnabled !== undefined ? saveData.animationsEnabled : true;
-    
-    // Buildings
-    if (saveData.buildings) {
-        saveData.buildings.forEach(savedBuilding => {
-            const building = buildings.find(b => b.id === savedBuilding.id);
-            if (building) {
-                building.count = savedBuilding.count || 0;
-                building.unlocked = savedBuilding.unlocked || false;
-                building.cpsMultiplier = savedBuilding.cpsMultiplier || 1;
-            }
-        });
-    }
-    
-    // Upgrades
-    if (saveData.upgrades) {
-        saveData.upgrades.forEach(savedUpgrade => {
-            const upgrade = upgrades.find(u => u.id === savedUpgrade.id);
-            if (upgrade) {
-                upgrade.bought = savedUpgrade.bought || false;
-            }
-        });
-    }
-    
+    // =============================
+    // Prestige Upgrades
+    // =============================
+    const prestigeUpgrades = [
+        {
+            id: "heavenly_cookies",
+            name: "Heavenly Cookies",
+            cost: 1,
+            description: "+1% CPS per Heavenly Chip",
+            effect: (chips) => { return 1 + (chips * 0.01); }
+        },
+        {
+            id: "persistent_memory",
+            name: "Persistent Memory",
+            cost: 5,
+            description: "Keep 1 building after prestige",
+            effect: (chips) => { return Math.min(1, Math.floor(chips / 5)); }
+        },
+        {
+            id: "double_cookies",
+            name: "Double Cookies",
+            cost: 25,
+            description: "Double cookie production from clicks",
+            effect: (chips) => { return chips >= 25 ? 2 : 1; }
+        }
+    ];
+
+    // =============================
     // Achievements
-    if (saveData.achievements) {
-        saveData.achievements.forEach(savedAchievement => {
-            const achievement = achievements.find(a => a.id === savedAchievement.id);
-            if (achievement) {
-                achievement.unlocked = savedAchievement.unlocked || false;
+    // =============================
+    const achievements = [
+        {
+            id: "first_click",
+            name: "First Click!",
+            description: "Click the cookie for the first time",
+            unlocked: false,
+            check: () => gameState.totalClicks >= 1,
+            reward: { type: "cps", value: 0.1 }
+        },
+        {
+            id: "hundred_clicks",
+            name: "Cookie Monster",
+            description: "Reach 100 clicks",
+            unlocked: false,
+            check: () => gameState.totalClicks >= 100,
+            reward: { type: "click", value: 1 }
+        },
+        {
+            id: "thousand_cookies",
+            name: "Cookie Collector",
+            description: "Earn 1,000 cookies total",
+            unlocked: false,
+            check: () => gameState.totalCookiesEarned >= 1000,
+            reward: { type: "cps", value: 1 }
+        },
+        {
+            id: "ten_thousand_cookies",
+            name: "Cookie Tycoon",
+            description: "Earn 10,000 cookies total",
+            unlocked: false,
+            check: () => gameState.totalCookiesEarned >= 10000,
+            reward: { type: "cps", value: 5 }
+        },
+        {
+            id: "first_golden",
+            name: "Golden Touch",
+            description: "Click your first golden cookie",
+            unlocked: false,
+            check: () => gameState.goldenCookiesClicked >= 1,
+            reward: { type: "golden", value: 0.1 }
+        },
+        {
+            id: "first_building",
+            name: "Real Estate",
+            description: "Buy your first building",
+            unlocked: false,
+            check: () => buildings.some(b => b.count > 0),
+            reward: { type: "discount", value: 0.05 }
+        },
+        {
+            id: "first_prestige",
+            name: "Rebirth",
+            description: "Prestige for the first time",
+            unlocked: false,
+            check: () => gameState.prestigeCount >= 1,
+            reward: { type: "prestige", value: 0.1 }
+        }
+    ];
+
+    // =============================
+    // Golden Cookie Effects
+    // =============================
+    const goldenCookieEffects = [
+        {
+            name: "Frenzy",
+            duration: 13,
+            effect: () => {
+                gameState.isFrenzyActive = true;
+                gameState.frenzyTimeLeft = 13;
+                document.getElementById('cookie').classList.add('frenzy-active');
+            },
+            expire: () => {
+                gameState.isFrenzyActive = false;
+                document.getElementById('cookie').classList.remove('frenzy-active');
+            },
+            chance: 0.7
+        },
+        {
+            name: "Lucky",
+            duration: 0,
+            effect: () => {
+                const bonus = Math.floor(gameState.cps * 60 * 0.1); // 10% of 1 minute production
+                gameState.cookies += bonus;
+                showFloatingText(window.innerWidth / 2, 100, `+${formatNumber(bonus)}!`, '#FFD700');
+                showNotification(`Lucky! +${formatNumber(bonus)} cookies!`);
+            },
+            expire: () => {},
+            chance: 0.3
+        }
+    ];
+
+    // =============================
+    // Utility Functions
+    // =============================
+    function getBuildingById(id) {
+        return buildings.find(b => b.id === id);
+    }
+
+    function getUpgradeById(id) {
+        return upgrades.find(u => u.id === id);
+    }
+
+    function formatNumber(num) {
+        if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+        if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+        if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+        return Math.floor(num).toString();
+    }
+
+    function formatTime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        
+        if (hours > 0) return `${hours}h ${minutes}m ${secs}s`;
+        if (minutes > 0) return `${minutes}m ${secs}s`;
+        return `${secs}s`;
+    }
+
+    // Initialize building multipliers
+    buildings.forEach(building => {
+        building.cpsMultiplier = 1;
+    });
+
+    // =============================
+    // Game State
+    // =============================
+    const gameState = {
+        cookies: 0,
+        totalCookiesEarned: 0,
+        cps: 0,
+        clickPower: 1,
+        totalClicks: 0,
+        goldenCookiesClicked: 0,
+        playTime: 0,
+        heavenlyChips: 0,
+        prestigeCount: 0,
+        isFrenzyActive: false,
+        frenzyTimeLeft: 0,
+        lastSave: Date.now(),
+        notificationsEnabled: true,
+        animationsEnabled: true,
+        version: CONFIG.VERSION
+    };
+
+    // =============================
+    // DOM Elements
+    // =============================
+    const cookieEl = document.getElementById('cookie');
+    const cookiesEl = document.getElementById('cookies');
+    const cpsEl = document.getElementById('cps');
+    const heavenlyChipsEl = document.getElementById('heavenly-chips');
+    const buildingsEl = document.getElementById('buildings');
+    const upgradesEl = document.getElementById('upgrades');
+    const achievementsEl = document.getElementById('achievements-list');
+    const prestigeBtn = document.getElementById('prestige-btn');
+    const lotteryBtn = document.getElementById('lottery-btn');
+    const settingsBtn = document.getElementById('settings-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const loadBtn = document.getElementById('load-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const prestigeModal = document.getElementById('prestige-modal');
+
+    // =============================
+    // Initialization
+    // =============================
+    function initGame() {
+        loadGame();
+        setupEventListeners();
+        createMilkBubbles();
+        updateUI();
+        startGameLoop();
+        
+        // Show welcome message
+        setTimeout(() => {
+            showNotification('Welcome to Cookie Clicker Deluxe!');
+        }, 1000);
+    }
+
+    function setupEventListeners() {
+        // Cookie click events
+        cookieEl.addEventListener('click', handleCookieClick);
+        cookieEl.addEventListener('touchstart', handleCookieClick, { passive: false });
+        
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                switchTab(e.currentTarget.dataset.tab);
+            });
+        });
+        
+        // Prestige button
+        prestigeBtn.addEventListener('click', showPrestigeModal);
+        
+        // Lottery button
+        lotteryBtn.addEventListener('click', playLottery);
+        
+        // Settings buttons
+        settingsBtn.addEventListener('click', () => toggleModal(settingsModal));
+        saveBtn.addEventListener('click', manualSave);
+        loadBtn.addEventListener('click', manualLoad);
+        
+        // Modal close buttons
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                toggleModal(e.target.closest('.modal'));
+            });
+        });
+        
+        // Settings modal buttons
+        document.getElementById('export-save').addEventListener('click', exportSave);
+        document.getElementById('import-save').addEventListener('click', importSave);
+        document.getElementById('hard-reset').addEventListener('click', hardReset);
+        document.getElementById('confirm-prestige').addEventListener('click', doPrestige);
+        
+        // Settings toggles
+        document.getElementById('notifications-toggle').addEventListener('change', toggleNotifications);
+        document.getElementById('animations-toggle').addEventListener('change', toggleAnimations);
+        
+        // Cancel buttons
+        document.querySelectorAll('.modal-btn.cancel').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                toggleModal(e.target.closest('.modal'));
+            });
+        });
+        
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) toggleModal(modal);
+            });
+        });
+    }
+
+    // =============================
+    // UI Functions
+    // =============================
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabName).classList.add('active');
+        document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
+    }
+
+    function updateUI() {
+        updateStats();
+        updateBuildings();
+        updateUpgrades();
+        updateAchievements();
+        updatePrestigeButton();
+    }
+
+    function updateStats() {
+        cookiesEl.textContent = formatNumber(gameState.cookies);
+        cpsEl.textContent = formatNumber(gameState.cps);
+        heavenlyChipsEl.textContent = formatNumber(gameState.heavenlyChips);
+        
+        // Update multiplier display
+        const multiplierDisplay = document.getElementById('cookie-multiplier');
+        let multiplier = 1;
+        if (gameState.isFrenzyActive) multiplier *= CONFIG.FRENZY_MULTIPLIER;
+        multiplierDisplay.textContent = `x${multiplier}`;
+    }
+
+    function updateBuildings() {
+        buildingsEl.innerHTML = '<h3 class="tab-title">🏗️ Buildings</h3>';
+        buildings.forEach((b, i) => {
+            if (!b.unlocked && gameState.cookies >= b.baseCost * 0.5) {
+                b.unlocked = true;
+                if (gameState.notificationsEnabled) {
+                    showNotification(`Unlocked: ${b.name}!`);
+                }
+            }
+            
+            if (b.unlocked) {
+                const cost = calculateBuildingCost(b);
+                const buildingDiv = document.createElement('div');
+                buildingDiv.className = 'building-item';
+                buildingDiv.innerHTML = `
+                    <div class="building-header">
+                        <span class="building-emoji">${b.emoji}</span>
+                        <div class="building-info">
+                            <div class="building-name">${b.name} (${b.count})</div>
+                            <div class="building-desc">${b.description}</div>
+                        </div>
+                    </div>
+                    <div class="building-stats">
+                        <span>${formatNumber(getBuildingCPS(b))} CPS</span>
+                        <span>Cost: ${formatNumber(cost)}</span>
+                    </div>
+                `;
+                
+                const btn = document.createElement('button');
+                btn.textContent = `Buy ${b.name}`;
+                btn.disabled = gameState.cookies < cost;
+                btn.addEventListener('click', () => buyBuilding(i));
+                buildingDiv.appendChild(btn);
+                
+                buildingsEl.appendChild(buildingDiv);
             }
         });
     }
-    
-    calculateCPS();
-}
 
-function saveGame() {
-    try {
-        localStorage.setItem('cookieClickerSave', JSON.stringify(getSaveData()));
-        gameState.lastSave = Date.now();
-    } catch (error) {
-        console.error('Error saving game:', error);
+    function updateUpgrades() {
+        upgradesEl.innerHTML = '<h3 class="tab-title">⚡ Upgrades</h3>';
+        upgrades.forEach((u, i) => {
+            if (!u.bought && isUpgradeAvailable(u)) {
+                const upgradeDiv = document.createElement('div');
+                upgradeDiv.className = 'upgrade-item';
+                upgradeDiv.innerHTML = `
+                    <div class="upgrade-header">
+                        <span class="upgrade-emoji">${u.emoji}</span>
+                        <div class="upgrade-info">
+                            <div class="upgrade-name">${u.name}</div>
+                            <div class="upgrade-desc">${u.description}</div>
+                        </div>
+                    </div>
+                    <div class="upgrade-stats">
+                        <span>Cost: ${formatNumber(u.cost)}</span>
+                    </div>
+                `;
+                
+                const btn = document.createElement('button');
+                btn.textContent = 'Buy Upgrade';
+                btn.disabled = gameState.cookies < u.cost;
+                btn.addEventListener('click', () => buyUpgrade(i));
+                upgradeDiv.appendChild(btn);
+                
+                upgradesEl.appendChild(upgradeDiv);
+            }
+        });
     }
-}
 
-function loadGame() {
-    try {
-        const data = localStorage.getItem('cookieClickerSave');
-        if (data) {
-            const saveData = JSON.parse(data);
-            loadSaveData(saveData);
-        }
-    } catch (error) {
-        console.error('Error loading game:', error);
+    function updateAchievements() {
+        achievementsEl.innerHTML = '';
+        achievements.forEach(achievement => {
+            const achieved = achievement.check();
+            if (achieved && !achievement.unlocked) {
+                achievement.unlocked = true;
+                applyAchievementReward(achievement);
+                if (gameState.notificationsEnabled) {
+                    showNotification(`Achievement unlocked: ${achievement.name}!`);
+                }
+            }
+            
+            const achievementDiv = document.createElement('div');
+            achievementDiv.className = `achievement ${achievement.unlocked ? '' : 'locked'}`;
+            achievementDiv.innerHTML = `
+                <span class="achievement-icon">${achievement.unlocked ? '🏆' : '🔒'}</span>
+                <div class="achievement-info">
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                    <div class="achievement-status">${achievement.unlocked ? '✅ Unlocked' : '🔒 Locked'}</div>
+                </div>
+            `;
+            achievementsEl.appendChild(achievementDiv);
+        });
     }
-}
 
-// =============================
-// Game Loop
-// =============================
-function startGameLoop() {
-    // Main game interval (10 times per second)
-    setInterval(() => {
-        gameState.cookies += gameState.cps / 10;
-        gameState.totalCookiesEarned += gameState.cps / 10;
-        gameState.playTime += 0.1;
+    function updatePrestigeButton() {
+        const chips = calculateHeavenlyChips();
+        prestigeBtn.textContent = `Prestige (${formatNumber(chips)})`;
+        prestigeBtn.disabled = chips <= 0;
+    }
+
+    // =============================
+    // Game Mechanics
+    // =============================
+    function calculateCPS() {
+        let totalCPS = 0;
+        buildings.forEach(b => {
+            totalCPS += b.count * b.baseCps * b.cpsMultiplier;
+        });
         
-        // Update frenzy timer
+        // Apply prestige bonus
+        const prestigeBonus = 1 + (gameState.heavenlyChips * 0.01);
+        totalCPS *= prestigeBonus;
+        
+        // Apply frenzy multiplier
         if (gameState.isFrenzyActive) {
-            gameState.frenzyTimeLeft -= 0.1;
-            if (gameState.frenzyTimeLeft <= 0) {
-                gameState.isFrenzyActive = false;
-                cookieEl.classList.remove('frenzy-active');
-                calculateCPS();
+            totalCPS *= CONFIG.FRENZY_MULTIPLIER;
+        }
+        
+        gameState.cps = totalCPS;
+    }
+
+    function calculateBuildingCost(building) {
+        return Math.floor(building.baseCost * Math.pow(1.15, building.count));
+    }
+
+    function getBuildingCPS(building) {
+        let cps = building.count * building.baseCps * building.cpsMultiplier;
+        const prestigeBonus = 1 + (gameState.heavenlyChips * 0.01);
+        return cps * prestigeBonus;
+    }
+
+    function isUpgradeAvailable(upgrade) {
+        switch (upgrade.requirement.type) {
+            case "click":
+                return gameState.totalClicks >= upgrade.requirement.value;
+            case "building":
+                const building = getBuildingById(upgrade.requirement.buildingId);
+                return building && building.count >= upgrade.requirement.value;
+            default:
+                return true;
+        }
+    }
+
+    function buyBuilding(index) {
+        const b = buildings[index];
+        const cost = calculateBuildingCost(b);
+        if (gameState.cookies >= cost) {
+            gameState.cookies -= cost;
+            b.count++;
+            calculateCPS();
+            updateUI();
+        }
+    }
+
+    function buyUpgrade(index) {
+        const u = upgrades[index];
+        if (gameState.cookies >= u.cost && !u.bought) {
+            gameState.cookies -= u.cost;
+            u.bought = true;
+            u.effect();
+            calculateCPS();
+            updateUI();
+            
+            if (gameState.notificationsEnabled) {
+                showNotification(`Upgrade purchased: ${u.name}!`);
             }
         }
+    }
+
+    function applyAchievementReward(achievement) {
+        switch (achievement.reward.type) {
+            case "cps":
+                gameState.cps += achievement.reward.value;
+                break;
+            case "click":
+                gameState.clickPower += achievement.reward.value;
+                break;
+            case "discount":
+                // Apply discount to all buildings
+                buildings.forEach(b => {
+                    b.baseCost *= (1 - achievement.reward.value);
+                });
+                break;
+        }
+    }
+
+    // =============================
+    // Click Handling
+    // =============================
+    function handleCookieClick(e) {
+        const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
         
-        // Random golden cookie spawn
-        if (Math.random() < CONFIG.GOLDEN_COOKIE_CHANCE) {
-            spawnGoldenCookie();
+        let clickValue = gameState.clickPower;
+        if (gameState.isFrenzyActive) {
+            clickValue *= CONFIG.FRENZY_MULTIPLIER;
+        }
+        
+        gameState.cookies += clickValue;
+        gameState.totalCookiesEarned += clickValue;
+        gameState.totalClicks++;
+        
+        // Add click animation
+        if (gameState.animationsEnabled) {
+            cookieEl.classList.add('shake');
+            setTimeout(() => cookieEl.classList.remove('shake'), 500);
+            spawnFloatingText(x, y, `+${formatNumber(clickValue)}`);
         }
         
         updateUI();
-    }, 100);
-    
-    // Auto-save interval
-    setInterval(() => {
+        
+        if (e.type.includes('touch')) e.preventDefault();
+    }
+
+    // =============================
+    // Golden Cookies
+    // =============================
+    function spawnGoldenCookie() {
+        if (!gameState.animationsEnabled) return;
+        
+        const goldenCookie = document.createElement('div');
+        goldenCookie.className = 'golden-cookie';
+        goldenCookie.textContent = '🍪';
+        goldenCookie.style.left = `${Math.random() * 80 + 10}%`;
+        goldenCookie.style.top = `${Math.random() * 60 + 20}%`;
+        
+        goldenCookie.addEventListener('click', () => {
+            gameState.goldenCookiesClicked++;
+            const effect = getRandomGoldenCookieEffect();
+            effect.effect();
+            
+            if (gameState.notificationsEnabled) {
+                showNotification(`Golden Cookie: ${effect.name}!`);
+            }
+            
+            goldenCookie.remove();
+        });
+        
+        document.getElementById('golden-cookie-container').appendChild(goldenCookie);
+        
+        // Remove after 15 seconds
+        setTimeout(() => {
+            if (goldenCookie.parentNode) {
+                goldenCookie.remove();
+            }
+        }, 15000);
+    }
+
+    function getRandomGoldenCookieEffect() {
+        const rand = Math.random();
+        let cumulativeChance = 0;
+        
+        for (const effect of goldenCookieEffects) {
+            cumulativeChance += effect.chance;
+            if (rand <= cumulativeChance) {
+                return effect;
+            }
+        }
+        
+        return goldenCookieEffects[0]; // Fallback
+    }
+
+    // =============================
+    // Mini-games
+    // =============================
+    function playLottery() {
+        if (gameState.cookies >= 100) {
+            gameState.cookies -= 100;
+            const win = Math.random() < 0.3; // 30% chance to win
+            const prize = win ? Math.floor(Math.random() * 1000) + 500 : 0;
+            
+            const resultEl = document.getElementById('lottery-result');
+            if (win) {
+                gameState.cookies += prize;
+                resultEl.innerHTML = `<span style="color: #4CAF50">🎉 You won ${formatNumber(prize)} cookies!</span>`;
+                if (gameState.notificationsEnabled) {
+                    showNotification(`🎉 You won ${prize} cookies!`);
+                }
+            } else {
+                resultEl.innerHTML = '<span style="color: #ff6b6b">😢 Better luck next time!</span>';
+            }
+            
+            updateUI();
+            
+            // Clear result after 3 seconds
+            setTimeout(() => {
+                resultEl.innerHTML = '';
+            }, 3000);
+        }
+    }
+
+    // =============================
+    // Prestige System
+    // =============================
+    function calculateHeavenlyChips() {
+        return Math.max(0, Math.floor(Math.sqrt(gameState.totalCookiesEarned / CONFIG.PRESTIGE_BASE) * 10) - gameState.heavenlyChips);
+    }
+
+    function showPrestigeModal() {
+        const chipsGained = calculateHeavenlyChips();
+        if (chipsGained <= 0) return;
+        
+        document.getElementById('chips-gain').textContent = formatNumber(chipsGained);
+        document.getElementById('cps-boost').textContent = `${chipsGained}%`;
+        
+        // Update prestige rewards
+        const rewardsList = document.getElementById('prestige-rewards-list');
+        rewardsList.innerHTML = '';
+        
+        prestigeUpgrades.forEach(upgrade => {
+            const rewardDiv = document.createElement('div');
+            rewardDiv.innerHTML = `
+                <div>${upgrade.name} - ${upgrade.description}</div>
+                <small>Cost: ${upgrade.cost} chips</small>
+            `;
+            rewardsList.appendChild(rewardDiv);
+        });
+        
+        toggleModal(prestigeModal);
+    }
+
+    function doPrestige() {
+        const chipsGained = calculateHeavenlyChips();
+        gameState.heavenlyChips += chipsGained;
+        gameState.prestigeCount++;
+        
+        if (gameState.notificationsEnabled) {
+            showNotification(`Prestiged! Gained ${formatNumber(chipsGained)} Heavenly Chips!`);
+        }
+        
+        resetGameState();
+        toggleModal(prestigeModal);
+    }
+
+    function resetGameState() {
+        gameState.cookies = 0;
+        gameState.totalClicks = 0;
+        gameState.goldenCookiesClicked = 0;
+        gameState.isFrenzyActive = false;
+        gameState.frenzyTimeLeft = 0;
+        
+        // Reset buildings
+        buildings.forEach(b => {
+            b.count = 0;
+            b.unlocked = b.id === "cursor" || b.id === "grandma";
+            b.cpsMultiplier = 1;
+        });
+        
+        // Reset upgrades
+        upgrades.forEach(u => u.bought = false);
+        
+        calculateCPS();
+        saveGame();
+        updateUI();
+    }
+
+    // =============================
+    // Animation Functions
+    // =============================
+    function createMilkBubbles() {
+        const milkEffect = document.querySelector('.milk-effect');
+        if (!milkEffect || !gameState.animationsEnabled) return;
+        
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'milk-bubble';
+            
+            const size = Math.random() * 15 + 5;
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            const delay = Math.random() * 5;
+            
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.left = left + '%';
+            bubble.style.top = top + '%';
+            bubble.style.animationDelay = delay + 's';
+            
+            milkEffect.appendChild(bubble);
+        }
+    }
+
+    function spawnFloatingText(x, y, text, color = '#ffcc66') {
+        if (!gameState.animationsEnabled) return;
+        
+        const floatingText = document.createElement('div');
+        floatingText.className = 'floating-text';
+        floatingText.textContent = text;
+        floatingText.style.color = color;
+        floatingText.style.left = `${x}px`;
+        floatingText.style.top = `${y}px`;
+        
+        document.body.appendChild(floatingText);
+        
+        setTimeout(() => {
+            floatingText.remove();
+        }, 1500);
+    }
+
+    // =============================
+    // Notification System
+    // =============================
+    function showNotification(message) {
+        if (!gameState.notificationsEnabled) return;
+        
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        
+        document.getElementById('notification-container').appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, CONFIG.NOTIFICATION_DURATION);
+    }
+
+    function showSaveNotification() {
+        if (!gameState.notificationsEnabled) return;
+        
+        const saveNotification = document.getElementById('save-notification');
+        saveNotification.style.opacity = '1';
+        
+        setTimeout(() => {
+            saveNotification.style.opacity = '0';
+        }, 2000);
+    }
+
+    // =============================
+    // Modal Functions
+    // =============================
+    function toggleModal(modal) {
+        modal.classList.toggle('active');
+    }
+
+    // =============================
+    // Settings Functions
+    // =============================
+    function toggleNotifications(e) {
+        gameState.notificationsEnabled = e.target.checked;
+        saveGame();
+    }
+
+    function toggleAnimations(e) {
+        gameState.animationsEnabled = e.target.checked;
+        saveGame();
+        
+        if (!gameState.animationsEnabled) {
+            // Remove all animations
+            document.querySelectorAll('.golden-cookie, .floating-text, .milk-bubble').forEach(el => el.remove());
+        } else {
+            // Restore animations
+            createMilkBubbles();
+        }
+    }
+
+    function manualSave() {
         saveGame();
         showSaveNotification();
-    }, CONFIG.SAVE_INTERVAL);
-}
+        showNotification('Game saved successfully!');
+    }
 
-// =============================
-// Start the Game
-// =============================
-document.addEventListener('DOMContentLoaded', initGame);
-          
+    function manualLoad() {
+        loadGame();
+        showNotification('Game loaded successfully!');
+        updateUI();
+    }
+
+    function exportSave() {
+        const saveData = btoa(JSON.stringify(getSaveData()));
+        const blob = new Blob([saveData], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cookie_clicker_save_${Date.now()}.txt`;
+        a.click();
+        
+        URL.revokeObjectURL(url);
+        showNotification('Save exported successfully!');
+    }
+
+    function importSave() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.txt';
+        
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const saveData = JSON.parse(atob(event.target.result));
+                    loadSaveData(saveData);
+                    showNotification('Save imported successfully!');
+                    updateUI();
+                } catch (error) {
+                    showNotification('Error importing save file!');
+                    console.error('Import error:', error);
+                }
+            };
+            reader.readAsText(file);
+        };
+        
+        input.click();
+    }
+
+    function hardReset() {
+        if (confirm('Are you sure you want to reset all progress? This cannot be undone!')) {
+            localStorage.removeItem('cookieClickerSave');
+            window.location.reload();
+        }
+    }
+
+    // =============================
+    // Save/Load System
+    // =============================
+    function getSaveData() {
+        return {
+            cookies: gameState.cookies,
+            totalCookiesEarned: gameState.totalCookiesEarned,
+            clickPower: gameState.clickPower,
+            totalClicks: gameState.totalClicks,
+            goldenCookiesClicked: gameState.goldenCookiesClicked,
+            playTime: gameState.playTime,
+            heavenlyChips: gameState.heavenlyChips,
+            prestigeCount: gameState.prestigeCount,
+            isFrenzyActive: gameState.isFrenzyActive,
+            frenzyTimeLeft: gameState.frenzyTimeLeft,
+            notificationsEnabled: gameState.notificationsEnabled,
+            animationsEnabled: gameState.animationsEnabled,
+            version: CONFIG.VERSION,
+            buildings: buildings.map(b => ({ 
+                id: b.id, 
+                count: b.count, 
+                unlocked: b.unlocked,
+                cpsMultiplier: b.cpsMultiplier 
+            })),
+            upgrades: upgrades.map(u => ({ 
+                id: u.id, 
+                bought: u.bought 
+            })),
+            achievements: achievements.map(a => ({ 
+                id: a.id, 
+                unlocked: a.unlocked 
+            }))
+        };
+    }
+
+    function loadSaveData(saveData) {
+        // Basic game state
+        gameState.cookies = saveData.cookies || 0;
+        gameState.totalCookiesEarned = saveData.totalCookiesEarned || 0;
+        gameState.clickPower = saveData.clickPower || 1;
+        gameState.totalClicks = saveData.totalClicks || 0;
+        gameState.goldenCookiesClicked = saveData.goldenCookiesClicked || 0;
+        gameState.playTime = saveData.playTime || 0;
+        gameState.heavenlyChips = saveData.heavenlyChips || 0;
+        gameState.prestigeCount = saveData.prestigeCount || 0;
+        gameState.isFrenzyActive = saveData.isFrenzyActive || false;
+        gameState.frenzyTimeLeft = saveData.frenzyTimeLeft || 0;
+        gameState.notificationsEnabled = saveData.notificationsEnabled !== undefined ? saveData.notificationsEnabled : true;
+        gameState.animationsEnabled = saveData.animationsEnabled !== undefined ? saveData.animationsEnabled : true;
+        
+        // Buildings
+        if (saveData.buildings) {
+            saveData.buildings.forEach(savedBuilding => {
+                const building = buildings.find(b => b.id === savedBuilding.id);
+                if (building) {
+                    building.count = savedBuilding.count || 0;
+                    building.unlocked = savedBuilding.unlocked || false;
+                    building.cpsMultiplier = savedBuilding.cpsMultiplier || 1;
+                }
+            });
+        }
+        
+        // Upgrades
+        if (saveData.upgrades) {
+            saveData.upgrades.forEach(savedUpgrade => {
+                const upgrade = upgrades.find(u => u.id === savedUpgrade.id);
+                if (upgrade) {
+                    upgrade.bought = savedUpgrade.bought || false;
+                }
+            });
+        }
+        
+        // Achievements
+        if (saveData.achievements) {
+            saveData.achievements.forEach(savedAchievement => {
+                const achievement = achievements.find(a => a.id === savedAchievement.id);
+                if (achievement) {
+                    achievement.unlocked = savedAchievement.unlocked || false;
+                }
+            });
+        }
+        
+        calculateCPS();
+    }
+
+    function saveGame() {
+        try {
+            localStorage.setItem('cookieClickerSave', JSON.stringify(getSaveData()));
+            gameState.lastSave = Date.now();
+        } catch (error) {
+            console.error('Error saving game:', error);
+        }
+    }
+
+    function loadGame() {
+        try {
+            const data = localStorage.getItem('cookieClickerSave');
+            if (data) {
+                const saveData = JSON.parse(data);
+                loadSaveData(saveData);
+            }
+        } catch (error) {
+            console.error('Error loading game:', error);
+        }
+    }
+
+    // =============================
+    // Game Loop
+    // =============================
+    function startGameLoop() {
+        // Main game interval (10 times per second)
+        setInterval(() => {
+            gameState.cookies += gameState.cps / 10;
+            gameState.totalCookiesEarned += gameState.cps / 10;
+            gameState.playTime += 0.1;
+            
+            // Update frenzy timer
+            if (gameState.isFrenzyActive) {
+                gameState.frenzyTimeLeft -= 0.1;
+                if (gameState.frenzyTimeLeft <= 0) {
+                    gameState.isFrenzyActive = false;
+                    cookieEl.classList.remove('frenzy-active');
+                    calculateCPS();
+                }
+            }
+            
+            // Random golden cookie spawn
+            if (Math.random() < CONFIG.GOLDEN_COOKIE_CHANCE) {
+                spawnGoldenCookie();
+            }
+            
+            updateUI();
+        }, 100);
+        
+        // Auto-save interval
+        setInterval(() => {
+            saveGame();
+            showSaveNotification();
+        }, CONFIG.SAVE_INTERVAL);
+    }
+
+    // =============================
+    // Start the Game
+    // =============================
+    document.addEventListener('DOMContentLoaded', initGame);
+  </script>
+</body>
+</html>
