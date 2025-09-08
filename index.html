@@ -148,7 +148,78 @@ const prestigeBtn = document.getElementById('prestigeBtn');
 /* ===== ФУНКЦИИ ===== */
 function updateStats() {
   cookiesDisplay.textContent = Math.floor(cookies);
+  clicksDisplay.textContent = totalCfunction updateStats() {
+  cookiesDisplay.textContent = Math.floor(cookies);
   clicksDisplay.textContent = totalClicks;
+  cpsDisplay.textContent = (cps * prestigeMultiplier).toFixed(1);
+  prestigeDisplay.textContent = prestigePoints;
+}
+
+function calculateCPS() {
+  cps = objectsData.reduce((sum, obj) => sum + obj.cps * obj.amount, 0);
+}
+
+function initObjects() {
+  objectsContainer.innerHTML = '';
+  objectsData.forEach((obj, index) => {
+    const cost = Math.floor(obj.baseCost * Math.pow(1.15, obj.amount));
+    const div = document.createElement('div');
+    div.className = 'object';
+    div.innerHTML = `<span>${obj.emoji} ${obj.name} (x${obj.amount}) - CPS: ${obj.cps}</span>
+                     <button ${cookies >= cost ? '' : 'disabled'} id="buy-object-${index}">Купить (${cost})</button>`;
+    objectsContainer.appendChild(div);
+    document.getElementById(`buy-object-${index}`).addEventListener('click', () => buyObject(index));
+  });
+}
+
+function buyObject(index) {
+  const obj = objectsData[index];
+  const cost = Math.floor(obj.baseCost * Math.pow(1.15, obj.amount));
+  if (cookies >= cost) {
+    cookies -= cost;
+    obj.amount++;
+    calculateCPS();
+    updateStats();
+    initObjects();
+    initUpgrades();
+    flyingCookieEffect(cookieBtn);
+    saveGame();
+  }
+}
+
+function initUpgrades() {
+  upgradesContainer.innerHTML = '';
+  upgradesData.forEach((upg, index) => {
+    const btnDisabled = (upg.purchased || cookies < upg.cost) ? 'disabled' : '';
+    const div = document.createElement('div');
+    div.className = 'upgrade';
+    div.innerHTML = `<span>${upg.name} (${upg.cost})</span>
+                     <button id="buy-upgrade-${index}" ${btnDisabled}>Купить</button>`;
+    upgradesContainer.appendChild(div);
+    if (!upg.purchased) {
+      document.getElementById(`buy-upgrade-${index}`).addEventListener('click', () => buyUpgrade(index));
+    }
+  });
+}
+
+function buyUpgrade(index) {
+  const upg = upgradesData[index];
+  if (cookies >= upg.cost && !upg.purchased) {
+    cookies -= upg.cost;
+    upg.purchased = true;
+    if (upg.type === 'click') clickPower *= upg.multiplier;
+    else if (upg.type === 'object') {
+      const obj = objectsData.find(o => o.name === upg.target);
+      obj.cps *= upg.multiplier;
+      calculateCPS();
+    }
+    updateStats();
+    initObjects();
+    initUpgrades();
+    saveGame();
+  }
+}
+licks;
   cpsDisplay.textContent = (cps * prestigeMultiplier).toFixed(1);
   prestigeDisplay.textContent = prestigePoints;
 }
