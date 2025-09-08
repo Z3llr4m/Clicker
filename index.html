@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cookie Clicker Base</title>
+<title>Cookie Clicker Stable</title>
 <style>
 body {
   margin: 0;
@@ -58,109 +58,7 @@ header p { margin: 5px; font-weight: bold; }
 button { padding: 5px 10px; border-radius: 5px; border: none; background-color: #deb887; color: #fff; cursor: pointer; }
 button:disabled { background-color: #ccc; cursor: not-allowed; }
 @media (max-width: 768px) { #cookie { font-size: 120px; } }
-<style>
-/* Анимация +1 */
-.plus-one {
-  position: absolute;
-  color: gold;
-  font-weight: bold;
-  pointer-events: none;
-  animation: plus1 0.8s ease-out forwards;
-  z-index: 100;
-}
-@keyframes plus1 {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
-}
-
-/* Летящая печенька */
-.flying-cookie {
-  position: absolute;
-  font-size: 24px;
-  pointer-events: none;
-  animation: fly 1s linear forwards;
-  z-index: 100;
-}
-@keyframes fly {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
-}
 </style>
-
-<script>
-/* ===== Эффект +1 при клике ===== */
-function plusOneEffect(){
-  const span = document.createElement('span');
-  span.className = 'plus-one';
-  span.textContent = `+${clickPower}`;
-  document.body.appendChild(span);
-
-  // позиция по центру печеньки
-  const rect = cookieBtn.getBoundingClientRect();
-  span.style.left = rect.left + rect.width/2 + 'px';
-  span.style.top = rect.top + 'px';
-
-  setTimeout(() => span.remove(), 800);
-}
-
-/* ===== Летящая печенька при покупке ===== */
-function flyingCookieEffect(target){
-  const span = document.createElement('span');
-  span.className = 'flying-cookie';
-  span.textContent = '🍪';
-  document.body.appendChild(span);
-
-  const rect = target.getBoundingClientRect();
-  span.style.left = rect.left + Math.random()*50 + 'px';
-  span.style.top = rect.top + 'px';
-
-  setTimeout(() => span.remove(), 1000);
-}
-
-/* ===== Подключаем к клику по основной печеньке ===== */
-cookieBtn.addEventListener('pointerdown', () => {
-  cookies += clickPower * prestigeMultiplier;
-  totalClicks++;
-  updateStats();
-  plusOneEffect(); // добавляем анимацию +1
-  saveGame();
-});
-
-/* ===== Подключаем к покупке объектов и апгрейдов ===== */
-function buyObject(index){
-  const obj = objectsData[index];
-  if(cookies >= obj.cost){
-    cookies -= obj.cost;
-    obj.amount++;
-    obj.cost = Math.floor(obj.cost * 1.15);
-    calculateCPS();
-    updateStats();
-    initObjects();
-    flyingCookieEffect(cookieBtn); // летящая печенька
-    saveGame();
-  }
-}
-
-function buyUpgrade(index){
-  const upg = upgradesData[index];
-  if(cookies >= upg.cost && !upg.purchased){
-    cookies -= upg.cost;
-    upg.purchased = true;
-    if(upg.type === 'click') clickPower *= upg.multiplier;
-    else if(upg.type === 'object'){
-      const obj = objectsData.find(o=>o.name===upg.target);
-      obj.cps *= upg.multiplier;
-      calculateCPS();
-    }
-    updateStats();
-    initObjects();
-    initUpgrades();
-    flyingCookieEffect(cookieBtn); // летящая печенька
-    saveGame();
-  }
-}
-</script>
-
 </head>
 <body>
 
@@ -282,8 +180,8 @@ function buyUpgrade(index){
   }
 }
 
-cookieBtn.addEventListener('pointerdown',()=>{
-  cookies += clickPower*prestigeMultiplier;
+cookieBtn.addEventListener('pointerdown', () => {
+  cookies += clickPower * prestigeMultiplier;
   totalClicks++;
   updateStats();
   saveGame();
