@@ -35,3 +35,122 @@
 
 </body>
 </html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cookie Clicker</title>
+  <style>
+    body {
+      margin: 0;
+      background: #1a1a1a url('https://i.imgur.com/7sT6bFZ.png') repeat; /* темный фон + молочные разводы */
+      color: #fff;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    #cookie {
+      display: block;
+      margin: 20px auto;
+      width: 200px;
+      height: 200px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    #cookie:active {
+      transform: scale(1.1);
+    }
+
+    .floating-cookie {
+      position: fixed;
+      pointer-events: none;
+      font-weight: bold;
+      font-size: 18px;
+      color: #ffcc00;
+      animation: floatUp 1s ease forwards;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-50px); }
+    }
+
+    .flying-cookie {
+      position: fixed;
+      font-size: 20px;
+      animation: flyUp 4s linear forwards;
+    }
+
+    @keyframes flyUp {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-100vh); opacity: 0; }
+    }
+
+    #stats {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    #buildings, #upgrades {
+      display: flex;
+      flex-direction: column;
+      margin: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .building, .upgrade {
+      margin: 5px 0;
+      padding: 5px 10px;
+      background: #333;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: left;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .building.available, .upgrade.available {
+      background: #444;
+    }
+
+    .building:not(.available), .upgrade:not(.available) {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .upgrade-anim {
+      animation: upgradeFlash 0.5s;
+    }
+
+    @keyframes upgradeFlash {
+      0% { background-color: #ff0; }
+      100% { background-color: #444; }
+    }
+
+    #prestigeButton {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: gold;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    #prestigeButton:active {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+
