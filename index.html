@@ -17,37 +17,6 @@
         text-align: center;
         overflow-x: hidden;
     }
-/* ===================== */
-/* ✨ ЛЕТЯЩИЕ ПЕЧЕНЬКИ НА ФОНЕ */
-/* ===================== */
-.flying-cookie {
-    position: absolute;
-    font-size: 18px;
-    color: #ffd700;
-    animation: flyUp 4s linear forwards;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.8;
-}
-
-@keyframes flyUp {
-    0% {transform: translateY(0) scale(1);}
-    50% {transform: translateY(-150px) scale(1.2);}
-    100% {transform: translateY(-300px) scale(0.5); opacity: 0;}
-}
-
-/* ===================== */
-/* ✨ АНИМАЦИИ ДЛЯ АПГРЕЙДОВ */
-/* ===================== */
-.upgrade-anim {
-    animation: upgradeFlash 0.5s;
-}
-
-@keyframes upgradeFlash {
-    0% {background-color: #2ecc71;}
-    50% {background-color: #f1c40f;}
-    100% {background-color: #2ecc71;}
-}
 
     /* ===================== */
     /* 🍪 ПЕЧЕНЬКА */
@@ -58,6 +27,7 @@
         margin: 20px auto;
         cursor: pointer;
         transition: transform 0.1s;
+        z-index: 10;
     }
     #cookie:active {
         transform: scale(0.95);
@@ -78,6 +48,7 @@
         padding: 10px;
         box-sizing: border-box;
         z-index: 100;
+        text-align: left;
     }
 
     /* ===================== */
@@ -140,6 +111,38 @@
         0% {opacity: 1; transform: translateY(0);}
         100% {opacity: 0; transform: translateY(-50px);}
     }
+
+    /* ===================== */
+    /* ✨ ЛЕТЯЩИЕ ПЕЧЕНЬКИ НА ФОНЕ */
+    /* ===================== */
+    .flying-cookie {
+        position: absolute;
+        font-size: 18px;
+        color: #ffd700;
+        animation: flyUp 4s linear forwards;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.8;
+    }
+
+    @keyframes flyUp {
+        0% {transform: translateY(0) scale(1);}
+        50% {transform: translateY(-150px) scale(1.2);}
+        100% {transform: translateY(-300px) scale(0.5); opacity: 0;}
+    }
+
+    /* ===================== */
+    /* ✨ АНИМАЦИИ ДЛЯ АПГРЕЙДОВ */
+    /* ===================== */
+    .upgrade-anim {
+        animation: upgradeFlash 0.5s;
+    }
+
+    @keyframes upgradeFlash {
+        0% {background-color: #2ecc71;}
+        50% {background-color: #f1c40f;}
+        100% {background-color: #2ecc71;}
+    }
 </style>
 </head>
 <body>
@@ -179,118 +182,133 @@
 <script src="game.js"></script>
 </body>
 </html>
-
-// ==================================================
-// 🍪 COOKIE CLICKER — JAVASCRIPT ЛОГИКА
-// ==================================================
-
-// -----------------------------
-// 🎮 ОСНОВНЫЕ ПЕРЕМЕННЫЕ
-// -----------------------------
+// =====================
+// 🍪 ПЕРЕМЕННЫЕ И НАСТРОЙКИ
+// =====================
 let cookies = 0;
-let cookiesPerClick = 1;
-let totalCPS = 0;
-let goldenCookies = 0;
-
-// Статистика
-let totalClicks = 0;
 let totalCookiesEarned = 0;
-let totalPrestiges = 0;
-let totalTime = 0;
+let cps = 0;
+let clicks = 0;
+let goldenCookies = 0;
+let prestigeCount = 0;
+let startTime = Date.now();
 
-// -----------------------------
-// 🏠 ЗДАНИЯ
-// -----------------------------
-let buildings = [
-    { name: "🍪 Курсор", baseCost: 15, cps: 0.1, count: 0, emoji: "🖱️" },
-    { name: "👵 Бабушка", baseCost: 100, cps: 1, count: 0, emoji: "🧶" },
-    { name: "🌾 Ферма", baseCost: 1100, cps: 8, count: 0, emoji: "🌱" },
-    { name: "⛏️ Шахта", baseCost: 12000, cps: 47, count: 0, emoji: "⚒️" },
-    { name: "🏭 Фабрика", baseCost: 130000, cps: 260, count: 0, emoji: "🏗️" },
-    { name: "🔮 Алхимия", baseCost: 1400000, cps: 1400, count: 0, emoji: "⚗️" },
-    { name: "🛰️ Портал", baseCost: 20000000, cps: 7800, count: 0, emoji: "🌌" },
-    { name: "🚀 Корабль", baseCost: 330000000, cps: 44000, count: 0, emoji: "🛸" },
-    { name: "🌌 Вселенная", baseCost: 5100000000, cps: 260000, count: 0, emoji: "🪐" },
-    { name: "👑 Престол", baseCost: 75000000000, cps: 1600000, count: 0, emoji: "💎" }
+const buildings = [
+    {name:"Курсор", emoji:"🖱️", baseCost:15, cps:0.1, count:0},
+    {name:"Бабушка", emoji:"👵", baseCost:100, cps:1, count:0},
+    {name:"Ферма", emoji:"🌾", baseCost:1100, cps:8, count:0},
+    {name:"Шахта", emoji:"⛏️", baseCost:12000, cps:47, count:0},
+    {name:"Фабрика", emoji:"🏭", baseCost:130000, cps:260, count:0},
+    {name:"Банк", emoji:"🏦", baseCost:1400000, cps:1400, count:0},
+    {name:"Храм", emoji:"⛪", baseCost:20000000, cps:7800, count:0},
+    {name:"Шахта-Гигант", emoji:"🗻", baseCost:330000000, cps:44000, count:0},
+    {name:"Фабрика-Мегатон", emoji:"🏢", baseCost:5100000000, cps:260000, count:0},
+    {name:"Пространственный Резонатор", emoji:"🛸", baseCost:75000000000, cps:1600000, count:0},
+    {name:"Многофабрика", emoji:"🏗️", baseCost:1000000000000, cps:10000000, count:0},
+    {name:"Трансгалактическая корпорация", emoji:"🚀", baseCost:14000000000000, cps:65000000, count:0},
+    {name:"Мегакосмос", emoji:"🌌", baseCost:170000000000000, cps:430000000, count:0},
+    {name:"Вселенский завод", emoji:"🏰", baseCost:2100000000000000, cps:3000000000, count:0},
+    {name:"Божественный генератор", emoji:"👑", baseCost:26000000000000000, cps:21000000000, count:0},
 ];
 
-// -----------------------------
-// 🔼 АПГРЕЙДЫ
-// -----------------------------
-let upgrades = [];
+let upgrades = []; // {buildingIndex, level, cost}
 
-// -----------------------------
-// 🔧 ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-// -----------------------------
-function formatNumber(num) {
-    if (num >= 1e12) return (num / 1e12).toFixed(2) + " T";
-    if (num >= 1e9) return (num / 1e9).toFixed(2) + " B";
-    if (num >= 1e6) return (num / 1e6).toFixed(2) + " M";
-    if (num >= 1e3) return (num / 1e3).toFixed(2) + " K";
-    return Math.floor(num);
+// =====================
+// 💾 СОХРАНЕНИЕ И ЗАГРУЗКА
+// =====================
+function saveGame() {
+    localStorage.setItem("cookieClickerSave", JSON.stringify({
+        cookies, totalCookiesEarned, cps, clicks, goldenCookies,
+        prestigeCount, buildings, upgrades, startTime
+    }));
 }
 
-function formatTime(sec) {
-    let h = Math.floor(sec / 3600);
-    let m = Math.floor((sec % 3600) / 60);
-    let s = sec % 60;
-    return h.toString().padStart(2,"0")+":"+m.toString().padStart(2,"0")+":"+s.toString().padStart(2,"0");
+function loadGame() {
+    let save = JSON.parse(localStorage.getItem("cookieClickerSave"));
+    if(save) {
+        cookies = save.cookies;
+        totalCookiesEarned = save.totalCookiesEarned;
+        cps = save.cps;
+        clicks = save.clicks;
+        goldenCookies = save.goldenCookies;
+        prestigeCount = save.prestigeCount;
+        startTime = save.startTime || Date.now();
+        save.buildings.forEach((b,i)=> buildings[i].count = b.count);
+        upgrades = save.upgrades || [];
+        updateCookies();
+        updateCPS();
+        renderBuildings();
+        renderUpgrades();
+    }
 }
 
-// -----------------------------
-// 📊 ОБНОВЛЕНИЕ СТАТОВ
-// -----------------------------
-function updateCPS() {
-    totalCPS = 0;
-    buildings.forEach(b => {
-        totalCPS += b.cps * b.count;
-    });
-    totalCPS *= 1 + goldenCookies * 0.001; // бонус престижа
-    document.getElementById("cps").innerText = "CPS: " + formatNumber(totalCPS);
-}
-
+// =====================
+// 🔼 ФУНКЦИИ ОБНОВЛЕНИЯ
+// =====================
 function updateCookies() {
-    document.getElementById("cookies").innerText = formatNumber(cookies) + " 🍪";
-    document.getElementById("golden").innerText = "Золотые печеньки: " + goldenCookies;
-    updateStats();
+    document.getElementById("totalCookies").innerText = "Всего печенек: " + Math.floor(cookies);
 }
 
-function updateStats() {
-    document.getElementById("totalTime").innerText = "Время в игре: " + formatTime(totalTime);
-    document.getElementById("totalCookies").innerText = "Всего печенек: " + formatNumber(totalCookiesEarned);
-    document.getElementById("golden").innerText = "Золотые печеньки: " + goldenCookies;
-    document.getElementById("prestiges").innerText = "Престижей сделано: " + totalPrestiges;
-    document.getElementById("clicks").innerText = "Всего кликов: " + totalClicks;
+function updateCPS() {
+    cps = buildings.reduce((acc,b)=> acc + b.count*b.cps,0);
+    cps += goldenCookies * 0.001; // Престиж бонус
+    document.getElementById("cps").innerText = "CPS: " + cps.toFixed(2);
 }
 
-// -----------------------------
-// 👆 КЛИК ПО ПЕЧЕНЬКЕ
-// -----------------------------
-function clickCookie() {
-    cookies += cookiesPerClick;
-    totalClicks++;
-    totalCookiesEarned += cookiesPerClick;
+function updateTime() {
+    let elapsed = Date.now() - startTime;
+    let h = Math.floor(elapsed/3600000);
+    let m = Math.floor((elapsed%3600000)/60000);
+    let s = Math.floor((elapsed%60000)/1000);
+    document.getElementById("totalTime").innerText = `Время в игре: ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+
+// =====================
+// 🍪 КЛИК ПО ПЕЧЕНЬКЕ
+// =====================
+document.getElementById("cookie").onclick = () => {
+    clicks++;
+    cookies += 1;
+    totalCookiesEarned += 1;
     updateCookies();
-
-    // Анимация клика
-    let floating = document.createElement("div");
-    floating.className = "floating-cookie";
-    floating.innerText = "+" + cookiesPerClick;
-    document.body.appendChild(floating);
-
-    floating.style.left = (window.innerWidth / 2 - 20 + (Math.random() * 40 - 20)) + "px";
-    floating.style.top = (window.innerHeight / 2 - 50) + "px";
-
-    setTimeout(() => floating.remove(), 1000);
+    spawnFloatingCookie();
 }
 
-// -----------------------------
-// 🏠 ПОКУПКА ЗДАНИЙ
-// -----------------------------
+// =====================
+// ✨ ВСПЛЫВАЮЩИЕ ПЕЧЕНЬКИ
+// =====================
+function spawnFloatingCookie() {
+    let f = document.createElement("div");
+    f.className = "floating-cookie";
+    f.innerText = "+1";
+    f.style.left = (window.innerWidth/2 + (Math.random()*40-20)) + "px";
+    f.style.top = (window.innerHeight/2 + (Math.random()*40-20)) + "px";
+    document.body.appendChild(f);
+    setTimeout(()=> f.remove(), 1000);
+}
+
+// =====================
+// 🏠 РЕНДЕР ЗДАНИЙ
+// =====================
+function renderBuildings() {
+    let container = document.getElementById("buildings");
+    container.innerHTML = "";
+    buildings.forEach((b,i)=>{
+        let btn = document.createElement("button");
+        btn.className = "building" + (cookies>=b.baseCost ? " available":"");
+        btn.innerText = `${b.emoji} ${b.name} (x${b.count}) - CPS: ${(b.cps*b.count).toFixed(2)} - ${b.baseCost} 🍪`;
+        btn.onclick = () => buyBuilding(i);
+        container.appendChild(btn);
+    });
+}
+
+// =====================
+// 🏠 ПОКУПКА ЗДАНИЯ
+// =====================
 function buyBuilding(index) {
     let b = buildings[index];
-    let cost = Math.floor(b.baseCost * Math.pow(1.15, b.count));
-    if (cookies >= cost) {
+    let cost = b.baseCost * Math.pow(1.15,b.count);
+    if(cookies >= cost) {
         cookies -= cost;
         b.count++;
         totalCookiesEarned += cost;
@@ -299,156 +317,161 @@ function buyBuilding(index) {
         renderBuildings();
         renderUpgrades();
 
-        // ✨ Анимация покупки здания
+        // Анимация кнопки
         let bBtn = document.getElementsByClassName("building")[index];
         bBtn.classList.add("upgrade-anim");
-        setTimeout(() => bBtn.classList.remove("upgrade-anim"), 500);
+        setTimeout(()=>bBtn.classList.remove("upgrade-anim"),500);
+
+        // Всплывающее CPS
+        let rect = bBtn.getBoundingClientRect();
+        spawnCPSPopup(rect.left + rect.width/2, rect.top, b.cps);
     }
 }
 
-
-// -----------------------------
-// 🔼 ПОКУПКА АПГРЕЙДОВ
-// -----------------------------
+// =====================
+// 🔼 РЕНДЕР АПГРЕЙДОВ
+// =====================
 function renderUpgrades() {
     let container = document.getElementById("upgrades");
     container.innerHTML = "";
-
-    buildings.forEach((b, i) => {
-        let level = upgrades.filter(u => u.buildingIndex === i).length + 1;
-        let cost = Math.floor((b.baseCost * 10) * Math.pow(1.7, level - 1));
-
+    buildings.forEach((b,i)=>{
+        let level = upgrades[i] ? upgrades[i].level : 0;
+        let cost = Math.floor(b.baseCost*10 + level*10 + Math.random()*0.5*(b.baseCost*10));
         let btn = document.createElement("button");
-        btn.className = "upgrade";
-        btn.innerText = `${b.emoji} ${b.name} Upgrade x${level + 1} — ${formatNumber(cost)} 🍪`;
-
-        if (cookies >= cost) btn.classList.add("available");
-
+        btn.className = "upgrade" + (cookies>=cost ? " available":"");
+        btn.innerText = `${b.emoji} ${b.name} x${level+2} - ${Math.floor(cost)} 🍪`;
         btn.onclick = () => {
-            if (cookies >= cost) {
+            if(cookies >= cost) {
                 cookies -= cost;
-                b.cps *= (level + 1);
-                upgrades.push({ buildingIndex: i, level: level + 1 });
-                totalCookiesEarned += cost;
+                b.cps *= (level+2)/(level+1);
+                upgrades[i] = {buildingIndex:i, level:level+1, cost:cost};
                 updateCookies();
                 updateCPS();
                 renderBuildings();
                 renderUpgrades();
+                btn.classList.add("upgrade-anim");
+                setTimeout(()=>btn.classList.remove("upgrade-anim"),500);
+
+                // Всплывающее CPS
+                let rect = btn.getBoundingClientRect();
+                spawnCPSPopup(rect.left + rect.width/2, rect.top, b.cps*(upgrades[i].level));
             }
         };
         container.appendChild(btn);
     });
 }
 
-// -----------------------------
+// =====================
 // 🌟 ПРЕСТИЖ
-// -----------------------------
-function prestige() {
-    if (cookies >= 1e12) {
-        let earned = Math.floor(cookies / 1e12);
-        goldenCookies += earned;
-        totalPrestiges++;
-
-        // сброс прогресса
-        cookies = 0;
-        cookiesPerClick = 1;
-        buildings.forEach(b => b.count = 0);
-        upgrades = [];
-
-        updateCookies();
-        updateCPS();
-        renderBuildings();
-        renderUpgrades();
-
-        alert(`Вы сделали престиж! Получено ${earned} золотых печенек!`);
+// =====================
+document.getElementById("prestigeButton").onclick = () => {
+    if(cookies >= 1e12) {
+        if(confirm("Сделать престиж?\nВы получите 0.1% бонус к CPS за каждую золотую печеньку.")) {
+            cookies = 0;
+            buildings.forEach(b=>b.count=0);
+            upgrades = [];
+            goldenCookies += 1;
+            prestigeCount++;
+            updateCookies();
+            updateCPS();
+            renderBuildings();
+            renderUpgrades();
+        }
     } else {
-        alert("Нужно минимум 1 трлн печенек для престижа!");
+        alert("Для престижа нужно накопить 1 трлн печенек!");
     }
 }
 
-// -----------------------------
-// 🖥️ РЕНДЕР ЗДАНИЙ
-// -----------------------------
-function renderBuildings() {
-    let container = document.getElementById("buildings");
-    container.innerHTML = "";
+// =====================
+// ✨ ЛЕТЯЩИЕ ПЕЧЕНЬКИ НА ФОНЕ
+// =====================
+function spawnFlyingCookie() {
+    let flying = document.createElement("div");
+    flying.className = "flying-cookie";
+    flying.innerText = "🍪";
+    flying.style.left = Math.random() * window.innerWidth + "px";
+    flying.style.top = window.innerHeight + "px";
+    document.body.appendChild(flying);
+    setTimeout(()=> flying.remove(),4000);
+}
+setInterval(spawnFlyingCookie,1000);
 
-    buildings.forEach((b, i) => {
-        let cost = Math.floor(b.baseCost * Math.pow(1.15, b.count));
-        let btn = document.createElement("button");
-        btn.className = "building";
-        btn.innerText = `${b.name} (${b.count}) — ${formatNumber(cost)} 🍪 | +${b.cps} CPS`;
-
-        if (cookies >= cost) btn.classList.add("available");
-
-        btn.onclick = () => buyBuilding(i);
-        container.appendChild(btn);
-    });
+// =====================
+// 💥 ВСПЛЫВАЮЩИЙ CPS
+// =====================
+function spawnCPSPopup(x, y, amount) {
+    let f = document.createElement("div");
+    f.className = "floating-cookie";
+    f.innerText = `+${amount.toFixed(1)} CPS`;
+    f.style.left = x + "px";
+    f.style.top = y + "px";
+    f.style.color = "#00ffff";
+    f.style.fontWeight = "bold";
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 1200);
 }
 
-// -----------------------------
-// ⏳ ДОХОД И СОХРАНЕНИЕ
-// -----------------------------
-setInterval(() => {
-    cookies += totalCPS;
-    totalCookiesEarned += totalCPS;
-    updateCookies();
-}, 1000);
-
-setInterval(() => { totalTime++; updateStats(); }, 1000);
-
-function saveGame() {
-    let save = { cookies, cookiesPerClick, buildings, upgrades, goldenCookies, totalClicks, totalCookiesEarned, totalPrestiges, totalTime };
-    localStorage.setItem("cookieSave", JSON.stringify(save));
-}
-
-function loadGame() {
-    let save = JSON.parse(localStorage.getItem("cookieSave"));
-    if (save) {
-        cookies = save.cookies;
-        cookiesPerClick = save.cookiesPerClick;
-        buildings = save.buildings;
-        upgrades = save.upgrades;
-        goldenCookies = save.goldenCookies || 0;
-        totalClicks = save.totalClicks || 0;
-        totalCookiesEarned = save.totalCookiesEarned || 0;
-        totalPrestiges = save.totalPrestiges || 0;
-        totalTime = save.totalTime || 0;
+// =====================
+// ✨ ВЕЛИКИЕ СУММЫ - ЭФФЕКТ
+// =====================
+function checkBigNumbers() {
+    if(cookies >= 1e9 && !document.getElementById("bigEffect")) {
+        let effect = document.createElement("div");
+        effect.id = "bigEffect";
+        effect.style.position = "fixed";
+        effect.style.top = "0";
+        effect.style.left = "0";
+        effect.style.width = "100%";
+        effect.style.height = "100%";
+        effect.style.pointerEvents = "none";
+        effect.style.backgroundImage = "url('https://i.imgur.com/4O1fS7x.png')";
+        effect.style.backgroundSize = "contain";
+        effect.style.backgroundRepeat = "no-repeat";
+        effect.style.backgroundPosition = "center";
+        effect.style.opacity = "0.7";
+        document.body.appendChild(effect);
+        setTimeout(()=> effect.remove(), 3000);
     }
-    updateCookies();
-    updateCPS();
-    renderBuildings();
-    renderUpgrades();
 }
 
-setInterval(saveGame, 30000);
-
-// -----------------------------
-// 🚀 СТАРТ
-// -----------------------------
-window.onload = () => {
-    loadGame();
-    renderBuildings();
-    renderUpgrades();
+// =====================
+// 🔁 ОБНОВЛЕНИЕ CPS И ВРЕМЕНИ
+// =====================
+setInterval(()=>{
+    cookies += cps/10; 
     updateCookies();
     updateCPS();
+    updateTime();
+    checkBigNumbers();
+},100);
 
-    document.getElementById("cookie").onclick = clickCookie;
-    document.getElementById("prestigeButton").onclick = prestige;
-};
-btn.onclick = () => {
-    if (cookies >= cost) {
-        cookies -= cost;
-        b.cps *= (level + 1);
-        upgrades.push({ buildingIndex: i, level: level + 1 });
-        totalCookiesEarned += cost;
-        updateCookies();
-        updateCPS();
-        renderBuildings();
-        renderUpgrades();
+// =====================
+// 💾 ЗАГРУЗКА
+// =====================
+loadGame();
 
-        // Анимация кнопки апгрейда
-        btn.classList.add("upgrade-anim");
-        setTimeout(() => btn.classList.remove("upgrade-anim"), 500);
-    }
-};
+// =====================
+// 💾 АВТОСЕЙВ
+// =====================
+setInterval(saveGame,5000);
+
+// =====================
+// 📦 ЭКСПОРТ / ИМПОРТ
+// =====================
+function exportSave() {
+    let saveStr = localStorage.getItem("cookieClickerSave");
+    let blob = new Blob([saveStr], {type:"text/plain"});
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "cookiesave.txt";
+    a.click();
+}
+
+function importSave(file) {
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        localStorage.setItem("cookieClickerSave", e.target.result);
+        loadGame();
+    };
+    reader.readAsText(file);
+}
