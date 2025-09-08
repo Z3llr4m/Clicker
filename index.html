@@ -3,21 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cookie Clicker Clone Mobile+PC</title>
+<title>Cookie Clicker Extended</title>
 <style>
 body {
-  font-family: Arial;
-  text-align: center;
+  font-family: Arial, sans-serif;
+  margin: 0; padding: 0;
   background: linear-gradient(to bottom, #87ceeb, #f5f5dc);
-  margin: 0; padding: 20px;
-  overflow: hidden;
+  overflow-x: hidden;
 }
-h1 { margin-bottom: 10px; }
-
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: #fff8dc;
+  padding: 10px;
+  border-bottom: 2px solid #deb887;
+  z-index: 10;
+}
+header p { margin: 5px 0; }
+#main { margin-top: 150px; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
 #cookie {
   font-size: 120px;
   cursor: pointer;
-  display: inline-block;
+  display: block;
   transition: transform 0.1s;
   user-select: none;
 }
@@ -27,14 +34,13 @@ h1 { margin-bottom: 10px; }
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 10px;
-  margin: 10px auto;
-  max-width: 500px;
-  background-color: #fff8dc;
+  background: #fff8dc;
+  max-height: 400px;
+  overflow-y: auto;
+  width: 300px;
 }
 .object, .upgrade {
-  display: flex;
-  justify-content: space-between;
-  margin: 5px 0;
+  display: flex; justify-content: space-between; margin: 5px 0;
 }
 button {
   padding: 5px 10px;
@@ -86,36 +92,32 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
 </head>
 <body>
 
-<h1>Cookie Clicker Clone</h1>
-<div id="cookie">🍪</div>
-
-<div id="stats">
+<header>
   <p>Печеньки: <span id="cookies">0</span></p>
   <p>Печеньки в секунду: <span id="cps">0</span></p>
   <p>Общее количество кликов: <span id="clicks">0</span></p>
   <p>Очки престижа: <span id="prestige">0</span></p>
-</div>
+  <button id="prestigeBtn">Престиж (10000+)</button>
+</header>
 
-<div class="section" id="objects-section">
-  <h2>Объекты</h2>
-  <div id="objects"></div>
+<div id="main">
+  <div>
+    <div id="cookie">🍪</div>
+  </div>
+  <div class="section">
+    <h2>Объекты</h2>
+    <div id="objects"></div>
+  </div>
+  <div class="section">
+    <h2>Апгрейды</h2>
+    <div id="upgrades"></div>
+  </div>
 </div>
-
-<div class="section" id="upgrades-section">
-  <h2>Апгрейды</h2>
-  <div id="upgrades"></div>
-</div>
-
-<button id="prestigeBtn">Престиж</button>
 
 <script>
 /* ===== ДАННЫЕ ===== */
-let cookies = 0;
-let totalClicks = 0;
-let clickPower = 1;
-let cps = 0;
-let prestigePoints = 0;
-let prestigeMultiplier = 1;
+let cookies = 0, totalClicks = 0, clickPower = 1, cps = 0;
+let prestigePoints = 0, prestigeMultiplier = 1;
 
 const objectsData = [
   { name: 'Cursor', emoji: '🖱️', baseCost: 15, cps: 0.1, amount: 0 },
@@ -123,16 +125,19 @@ const objectsData = [
   { name: 'Farm', emoji: '🌾', baseCost: 500, cps: 8, amount: 0 },
   { name: 'Factory', emoji: '🏭', baseCost: 3000, cps: 47, amount: 0 },
   { name: 'Mine', emoji: '⛏️', baseCost: 10000, cps: 260, amount: 0 },
-  { name: 'Shipment', emoji: '🚢', baseCost: 40000, cps: 1400, amount: 0 },
-  { name: 'Alchemy Lab', emoji: '⚗️', baseCost: 200000, cps: 7800, amount: 0 },
-  { name: 'Portal', emoji: '🌀', baseCost: 1666666, cps: 44000, amount: 0 },
-  { name: 'Time Machine', emoji: '🕰️', baseCost: 12345678, cps: 260000, amount: 0 }
+  { name: 'Bank', emoji: '🏦', baseCost: 40000, cps: 1400, amount: 0 },
+  { name: 'Temple', emoji: '⛩️', baseCost: 200000, cps: 7800, amount: 0 },
+  { name: 'Wizard Tower', emoji: '🧙‍♂️', baseCost: 1666666, cps: 44000, amount: 0 },
+  { name: 'Portal', emoji: '🌀', baseCost: 12345678, cps: 260000, amount: 0 },
+  { name: 'Time Machine', emoji: '🕰️', baseCost: 39999999, cps: 1600000, amount: 0 }
 ];
 
 const upgradesData = [
   { name: 'Stronger Click', cost: 100, type: 'click', multiplier: 2, purchased: false },
   { name: 'Grandma Efficiency', cost: 500, type: 'object', target: 'Grandma', multiplier: 2, purchased: false },
-  { name: 'Farm Efficiency', cost: 1000, type: 'object', target: 'Farm', multiplier: 2, purchased: false }
+  { name: 'Farm Efficiency', cost: 1000, type: 'object', target: 'Farm', multiplier: 2, purchased: false },
+  { name: 'Factory Upgrade', cost: 5000, type: 'object', target: 'Factory', multiplier: 2, purchased: false },
+  { name: 'Mine Upgrade', cost: 20000, type: 'object', target: 'Mine', multiplier: 2, purchased: false }
 ];
 
 /* ===== ЭЛЕМЕНТЫ ===== */
