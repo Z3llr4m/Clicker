@@ -115,8 +115,7 @@
 </html>
 
 
-<script>
-// =============================
+<script>// =============================
 // Cookie Clicker Mobile JS
 // =============================
 
@@ -124,30 +123,43 @@ let cookies = 0;
 let cps = 0;
 let clickPower = 1;
 
+// =============================
 // Здания
+// =============================
 const buildings = [
   { name: "Cursor", baseCost: 15, count: 0, cps: 0.1 },
   { name: "Grandma", baseCost: 100, count: 0, cps: 1 },
   { name: "Farm", baseCost: 1100, count: 0, cps: 8 },
-  { name: "Factory", baseCost: 12000, count: 0, cps: 47 },
-  { name: "Mine", baseCost: 130000, count: 0, cps: 260 },
-  { name: "Bank", baseCost: 1400000, count: 0, cps: 1400 }
+  { name: "Factory", baseCost: 13000, count: 0, cps: 47 },
+  { name: "Mine", baseCost: 120000, count: 0, cps: 260 },
+  { name: "Bank", baseCost: 1400000, count: 0, cps: 1400 },
+  { name: "Temple", baseCost: 20000000, count: 0, cps: 7800 }
 ];
 
+// =============================
 // Апгрейды
+// require: "click" или индекс здания
+// =============================
 const upgrades = [
-  { name: "Double Clicks", cost: 100, bought: false, effect: () => { clickPower *= 2; } },
-  { name: "Grandma Efficiency", cost: 500, bought: false, effect: () => { buildings[1].cps *= 2; } }
+  { name: "Reinforced index finger", cost: 50, bought: false, require: "click", effect: () => { clickPower += 1; } },
+  { name: "Carpal tunnel prevention cream", cost: 500, bought: false, require: "click", effect: () => { clickPower += 1; } },
+  { name: "Forwards from grandma", cost: 1000, bought: false, require: 1, effect: () => { buildings[1].cps *= 2; } },
+  { name: "Cheap fertilizer", cost: 11000, bought: false, require: 2, effect: () => { buildings[2].cps *= 2; } },
+  { name: "Steel-plated factories", cost: 130000, bought: false, require: 3, effect: () => { buildings[3].cps *= 2; } }
 ];
 
-// DOM
+// =============================
+// DOM элементы
+// =============================
 const cookieEl = document.getElementById("cookie");
 const cookiesEl = document.getElementById("cookies");
 const cpsEl = document.getElementById("cps");
 const buildingsEl = document.getElementById("buildings");
 const upgradesEl = document.getElementById("upgrades");
 
-// UI
+// =============================
+// Обновление UI
+// =============================
 function updateUI() {
   cookiesEl.textContent = `Cookies: ${Math.floor(cookies)}`;
   cpsEl.textContent = `CPS: ${cps.toFixed(1)}`;
@@ -167,23 +179,34 @@ function updateUI() {
   upgradesEl.innerHTML = "";
   upgrades.forEach((u, i) => {
     if (!u.bought) {
-      const btn = document.createElement("button");
-      btn.textContent = `${u.name} - ${u.cost} 🍪`;
-      btn.disabled = cookies < u.cost;
-      btn.onclick = () => buyUpgrade(i);
-      upgradesEl.appendChild(btn);
+      let available = false;
+
+      if (u.require === "click") {
+        available = true;
+      } else if (typeof u.require === "number" && buildings[u.require].count > 0) {
+        available = true;
+      }
+
+      if (available) {
+        const btn = document.createElement("button");
+        btn.textContent = `${u.name} - ${u.cost} 🍪`;
+        btn.disabled = cookies < u.cost;
+        btn.onclick = () => buyUpgrade(i);
+        upgradesEl.appendChild(btn);
+      }
     }
   });
 }
 
-// Клик по печеньке
+// =============================
+// События
+// =============================
 cookieEl.addEventListener("click", (e) => {
   cookies += clickPower;
   spawnFloatingText(e.clientX, e.clientY, `+${clickPower}`);
   updateUI();
 });
 
-// Покупка здания
 function buyBuilding(i) {
   const b = buildings[i];
   const cost = Math.floor(b.baseCost * Math.pow(1.15, b.count));
@@ -195,7 +218,6 @@ function buyBuilding(i) {
   }
 }
 
-// Покупка апгрейда
 function buyUpgrade(i) {
   const u = upgrades[i];
   if (cookies >= u.cost && !u.bought) {
@@ -207,7 +229,9 @@ function buyUpgrade(i) {
   }
 }
 
+// =============================
 // Подсчёт CPS
+// =============================
 function calculateCPS() {
   cps = 0;
   buildings.forEach(b => {
@@ -215,14 +239,16 @@ function calculateCPS() {
   });
 }
 
-// Автодобавление печенек
+// =============================
+// Автодобавление cookies
+// =============================
 setInterval(() => {
   cookies += cps / 10;
   updateUI();
 }, 100);
 
 // =============================
-// Анимация "вылетающих чисел"
+// Анимация чисел
 // =============================
 function spawnFloatingText(x, y, text) {
   const span = document.createElement("span");
@@ -241,7 +267,7 @@ function spawnFloatingText(x, y, text) {
 }
 
 // =============================
-// Сохранение
+// Сохранение и загрузка
 // =============================
 function saveGame() {
   const saveData = {
@@ -272,7 +298,7 @@ function loadGame() {
   }
 }
 
-// Автосейв
+// Автосейв каждые 5 секунд
 setInterval(saveGame, 5000);
 
 // =============================
